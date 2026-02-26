@@ -6,12 +6,14 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "generate-vapid": "node -e \"const webpush = require('web-push'); const keys = webpush.generateVAPIDKeys(); console.log('VAPID_PUBLIC_KEY=' + keys.publicKey); console.log('VAPID_PRIVATE_KEY=' + keys.privateKey);\""
+    "generate-vapid": "node -e \"const webpush = require('web-push'); const keys = webpush.generateVAPIDKeys(); console.log('VAPID_PUBLIC_KEY=' + keys.publicKey); console.log('VAPID_PRIVATE_KEY=' + keys.privateKey);\"",
+    "generate-icons": "node scripts/generate-icons.js"
   },
   "dependencies": {
     "dotenv": "^16.4.0",
     "express": "^4.18.0",
     "node-cron": "^3.0.0",
+    "pngjs": "^7.0.0",
     "web-push": "^3.6.7"
   }
 }

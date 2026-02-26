@@ -4,6 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Market Pulse — Daily Notifications</title>
+
+  <!-- PWA manifest (required for iOS Home Screen installation) -->
+  <link rel="manifest" href="/manifest.json" />
+
+  <!-- iOS / Safari -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Market Pulse" />
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+
+  <!-- Generic mobile web app -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#6366f1" />
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -48,6 +62,45 @@
       <h1 class="text-3xl font-bold tracking-tight">Market Pulse</h1>
       <p class="text-gray-400 text-sm">Real-time data · Daily push notifications · Major global indices</p>
     </header>
+
+    <!-- iOS install banner — shown only when on iOS but NOT in standalone mode -->
+    <section id="ios-install-banner" class="hidden glass rounded-2xl p-6 fade-in border border-indigo-500/40 space-y-4">
+      <div class="flex items-start gap-3">
+        <span class="text-2xl flex-shrink-0">📱</span>
+        <div>
+          <h2 class="font-semibold text-lg text-indigo-300">Install to enable iPhone notifications</h2>
+          <p class="text-gray-400 text-sm mt-1">
+            iOS requires Market Pulse to be added to your Home Screen before push notifications can be enabled.
+          </p>
+        </div>
+      </div>
+
+      <ol class="space-y-3 text-sm text-gray-300">
+        <li class="flex items-center gap-3">
+          <span class="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-700 text-xs flex items-center justify-center font-bold">1</span>
+          <span>In Safari, tap the <strong class="text-white">Share</strong> button
+            <svg class="w-4 h-4 text-indigo-400 inline mb-0.5 ml-0.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15M12 3v12.75m0-12.75-3 3m3-3 3 3"/>
+            </svg>
+            in the toolbar
+          </span>
+        </li>
+        <li class="flex items-center gap-3">
+          <span class="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-700 text-xs flex items-center justify-center font-bold">2</span>
+          <span>Scroll down and tap <strong class="text-white">Add to Home Screen</strong></span>
+        </li>
+        <li class="flex items-center gap-3">
+          <span class="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-700 text-xs flex items-center justify-center font-bold">3</span>
+          <span>Open the <strong class="text-white">Market Pulse</strong> icon from your Home Screen</span>
+        </li>
+        <li class="flex items-center gap-3">
+          <span class="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-700 text-xs flex items-center justify-center font-bold">4</span>
+          <span>Come back here and tap <strong class="text-white">Subscribe</strong></span>
+        </li>
+      </ol>
+
+      <p class="text-xs text-gray-500">Requires iOS 16.4 or later · Works in Safari, Chrome, and Edge on iPhone.</p>
+    </section>
 
     <!-- Notification card -->
     <section id="notification-card" class="glass rounded-2xl p-6 fade-in space-y-4">
@@ -229,10 +282,30 @@
     let swRegistration = null;
 
     async function initNotifications() {
-      const btnSub = document.getElementById('btn-subscribe');
+      const btnSub    = document.getElementById('btn-subscribe');
+      const iosBanner = document.getElementById('ios-install-banner');
 
+      // ── iOS detection ──────────────────────────────────────────────────────
+      const isIOS        = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      const isStandalone = window.navigator.standalone === true;
+
+      if (isIOS && !isStandalone) {
+        // Running in Safari browser, not installed as a Home Screen app.
+        // Show step-by-step install instructions and disable the subscribe button.
+        iosBanner.classList.remove('hidden');
+        updateBadge(false);
+        btnSub.textContent = 'Add to Home Screen first';
+        btnSub.disabled = true;
+        return;
+      }
+
+      // ── Standard Web Push availability check ───────────────────────────────
       if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-        showMsg('Push notifications are not supported in this browser.', 'text-red-400');
+        if (isIOS) {
+          showMsg('Push notifications require iOS 16.4 or later.', 'text-yellow-400');
+        } else {
+          showMsg('Push notifications are not supported in this browser.', 'text-red-400');
+        }
         updateBadge(false);
         return;
       }
