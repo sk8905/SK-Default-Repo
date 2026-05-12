@@ -68,23 +68,33 @@ export async function fetchFeed(url: string, timeoutMs = 15000): Promise<FeedIte
 }
 
 export function parseFeed(xml: string): FeedItem[] {
-  const tree = parser.parse(xml);
+  // Strip BOM and any leading whitespace before the XML declaration —
+  // some servers prepend these and they break fast-xml-parser.
+  let clean = xml;
+  if (clean.charCodeAt(0) === 0xfeff) clean = clean.slice(1);
+  clean = clean.replace(/^\s+/, "");
+
+  let tree: any;
+  try {
+    tree = parser.parse(clean);
+  } catch {
+    return [];
+  }
+
   // RSS 2.0
   if (tree?.rss?.channel) {
     const channel = tree.rss.channel;
     const items = Array.isArray(channel.item) ? channel.item : channel.item ? [channel.item] : [];
-    return items.map((it: any) => {
-      const description = stripHtml(asText(it.description));
-      const content = stripHtml(asText(it["content:encoded"]) || description);
-      return {
-        title: stripHtml(asText(it.title)),
-        url: asText(it.link) || asText(it.guid) || "",
-        publishedAt: parseDate(asText(it.pubDate) || asText(it["dc:date"]) || ""),
-        description,
-        content,
-      };
-    });
+    return items.map(rssItemToFeedItem);
   }
+
+  // RSS 1.0 / RDF
+  const rdf = tree?.["rdf:RDF"] ?? tree?.RDF;
+  if (rdf) {
+    const items = Array.isArray(rdf.item) ? rdf.item : rdf.item ? [rdf.item] : [];
+    return items.map(rssItemToFeedItem);
+  }
+
   // Atom
   if (tree?.feed) {
     const entries = Array.isArray(tree.feed.entry) ? tree.feed.entry : tree.feed.entry ? [tree.feed.entry] : [];
@@ -103,4 +113,16 @@ export function parseFeed(xml: string): FeedItem[] {
     });
   }
   return [];
+}
+
+function rssItemToFeedItem(it: any): FeedItem {
+  const description = stripHtml(asText(it.description));
+  const content = stripHtml(asText(it["content:encoded"]) || description);
+  return {
+    title: stripHtml(asText(it.title)),
+    url: asText(it.link) || asText(it.guid) || "",
+    publishedAt: parseDate(asText(it.pubDate) || asText(it["dc:date"]) || asText(it.date) || ""),
+    description,
+    content,
+  };
 }
