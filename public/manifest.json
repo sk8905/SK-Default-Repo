@@ -1,0 +1,15 @@
+{
+  "name": "Legal Updates",
+  "short_name": "Legal Updates",
+  "description": "Material developments in English law: banking, R&I, corporate, funds reg and fund tax.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fafaf7",
+  "theme_color": "#0b1220",
+  "icons": [
+    { "src": "/icons/icon-192.svg", "type": "image/svg+xml", "sizes": "192x192", "purpose": "any" },
+    { "src": "/icons/icon-512.svg", "type": "image/svg+xml", "sizes": "512x512", "purpose": "any maskable" }
+  ]
+}
