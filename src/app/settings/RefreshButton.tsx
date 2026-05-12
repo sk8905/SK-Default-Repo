@@ -1,7 +1,9 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export function RefreshButton() {
+  const router = useRouter();
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [msg, setMsg] = useState<string>("");
 
@@ -14,6 +16,7 @@ export function RefreshButton() {
       if (!res.ok) throw new Error(data.error || "Failed");
       setState("done");
       setMsg(`Added ${data.itemsAdded}, skipped ${data.itemsSkipped}, errors ${data.errors?.length ?? 0}.`);
+      router.refresh();
     } catch (e) {
       setState("error");
       setMsg((e as Error).message);

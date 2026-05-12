@@ -4,10 +4,14 @@ import { ItemCard } from "@/components/ItemCard";
 import { BottomNav } from "@/components/BottomNav";
 import { TopBar } from "@/components/TopBar";
 import Link from "next/link";
+import { unstable_noStore as noStore } from "next/cache";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
 export default async function HomePage() {
+  noStore();
   const items = await db.select().from(schema.developments).orderBy(desc(schema.developments.publishedAt)).limit(50);
   return (
     <main className="min-h-screen bottom-nav-pad top-bar-pad">

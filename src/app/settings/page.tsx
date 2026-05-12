@@ -4,14 +4,18 @@ import { BottomNav } from "@/components/BottomNav";
 import { TopBar } from "@/components/TopBar";
 import { FEEDS } from "@/lib/sources";
 import { RefreshButton } from "./RefreshButton";
+import { unstable_noStore as noStore } from "next/cache";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
 function fmtDateTime(d: Date): string {
   return new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short" }).format(d);
 }
 
 export default async function SettingsPage() {
+  noStore();
   const lastRun = await db.select().from(schema.ingestRuns).orderBy(desc(schema.ingestRuns.startedAt)).limit(1);
   const run = lastRun[0];
   return (

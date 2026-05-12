@@ -5,10 +5,14 @@ import { BottomNav } from "@/components/BottomNav";
 import { TopBar } from "@/components/TopBar";
 import { AREAS, isAreaSlug } from "@/lib/areas";
 import { notFound } from "next/navigation";
+import { unstable_noStore as noStore } from "next/cache";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
 export default async function AreaPage({ params }: { params: { slug: string } }) {
+  noStore();
   if (!isAreaSlug(params.slug)) notFound();
   const area = AREAS[params.slug];
   const items = await db
