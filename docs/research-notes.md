@@ -150,6 +150,20 @@ LPs added (second pass):
 
 Researched but NOT added (thin/defunct/out-of-scope): AP1 (dissolved 31 Dec 2025), AP3/AP4 (private debt buried in fixed income, no breakout), AP6 (PE-only), WSIB (emerging programme, no European credit commitments yet), GIC (no clear Euro-specific credit in public sources).
 
+## Third-pass additions — special-situations / opportunistic managers (incorporated)
+
+All verified via public sources; AUM figures are estimates (firm sites blocked direct fetch; aggregators excluded).
+- Signal Capital Partners — London, 2015 (Elad Shraga); Signal Alpha III (final close by 2025, terms undisclosed; Alpha II €900m 2021); Harmonic CLOs; Armen minority stake Oct 2024. ~€3.5bn.
+- Corinthia Global Management — London, 2024 (Nomura-backed, ex-Barings team); debut EU + US direct lending funds in market, first close ~late 2025; ~$5bn committed.
+- One Investment Management (OneIM) — Abu Dhabi/London, 2022 (Rajeev Misra); ~$8bn; OHA–OneIM up-to-$5bn European private credit JV (Jul 2024).
+- FitzWalter Capital — London, 2020 (ex-Macquarie); FWCP II ~$1.4bn final close Sep 2024 (Jersey).
+- Fidera — London, 2022 (York spin-out); Fidera Vecta Fund (Lux SCSp), terms undisclosed.
+- Attestor — London, 2012 (Jan-Christoph Peters); Attestor Value Master Fund (Cayman, evergreen), terms undisclosed; ~$8.5bn est.
+- Sona Asset Management — London, 2016 (John Aylward); Sona Capital Solutions II $800m final close Jun 2024; European CLOs; ~$16–18bn est.
+- Farallon Capital Management — San Francisco, 1986; ~$42bn firm-wide; European Private Credit fund data is DATED (~$300m, circa 2014); no recent Euro vintage found.
+
+**"Airini Capital" — NOT FOUND.** No public asset manager by that exact name exists. Near-certain intended firm is **Arini** (Arini Capital Management) — London, founded 2022 by Hamza Lemssouguer (ex-Credit Suisse), Squarepoint-seeded, European opportunistic credit + CLOs (Arini Credit Opportunities Fund). NOT added pending user confirmation of the spelling/intent.
+
 ## LP / Allocator profiles — sovereign & global (sourced)
 
 ### CPP Investments — Toronto, Canada (Euro HQ London); public pension manager
