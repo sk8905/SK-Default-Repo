@@ -85,6 +85,12 @@ h3 { font-size: 1rem; margin: 0; }
 .it-mandate{ background:#fae8ff; color:#86198f; }
 .it-personnel{ background:#ffedd5; color:#9a3412; }
 .it-strategy{ background:#e0f2fe; color:#075985; }
+.chip.est { background:#fff7ed; color:#9a3412; border-color:#fed7aa; }
+
+/* ---------- source citations ---------- */
+.sources { margin: .4rem 0 .25rem; line-height: 1.6; }
+.sources .src-label { font-weight: 600; }
+.sources a { word-break: break-word; }
 
 /* ---------- filters ---------- */
 .filters { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 1rem; align-items: flex-end; }

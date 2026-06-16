@@ -37,6 +37,19 @@ function progressBar(raised, target) {
 function chip(text, cls = "") { return `<span class="chip ${cls}">${esc(text)}</span>`; }
 function link(href, text, cls = "") { return `<a href="${href}" class="${cls}">${esc(text)}</a>`; }
 
+// "Est." badge for figures that are labelled estimates rather than disclosed facts.
+const estBadge = (on) => on ? '<span class="chip est" title="Estimated / not precisely disclosed publicly">Est.</span>' : "";
+
+// Renders a record's source citations + as-of date, when present. No-ops otherwise.
+function sources(rec) {
+  if (!rec || !rec.sources || !rec.sources.length) return "";
+  const links = rec.sources.map((s, i) =>
+    `<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.label || "source " + (i + 1))}</a>`
+  ).join(" · ");
+  const asOf = rec.asOf ? ` · <span>as of ${esc(rec.asOf)}</span>` : "";
+  return `<div class="sources muted small"><span class="src-label">Sources:</span> ${links}${asOf}</div>`;
+}
+
 // --------------------------- simple filter state ---------------------------
 // Persists per-view filter selections across re-renders within a session.
 const filterState = {
@@ -163,6 +176,7 @@ function viewFund(id) {
       </div>
     </div>
     <p class="lead">${esc(x.description)}</p>
+    ${sources(x)}
     <div class="grid-2">
       <section class="card">
         <h2>Fundraising</h2>
@@ -245,6 +259,7 @@ function viewManager(id) {
       <div>${m.strategies.map((s) => chip(s)).join(" ")}</div>
     </div></div>
     <p class="lead">${esc(m.description)}</p>
+    ${sources(m)}
     <div class="kpi-grid">
       <div class="kpi-card"><div class="kpi-value">€${m.aum}bn</div><div class="kpi-label">Assets under management</div></div>
       <div class="kpi-card"><div class="kpi-value">${fs.length}</div><div class="kpi-label">Funds tracked</div></div>
@@ -313,7 +328,7 @@ function viewLp(id) {
     </div></div>
     <div class="kpi-grid">
       <div class="kpi-card"><div class="kpi-value">€${l.aum}bn</div><div class="kpi-label">Total AUM</div></div>
-      <div class="kpi-card"><div class="kpi-value">${pct(l.pcAllocationPct)}</div><div class="kpi-label">Private credit target</div></div>
+      <div class="kpi-card"><div class="kpi-value">${pct(l.pcAllocationPct)} ${estBadge(l.pcEstimated)}</div><div class="kpi-label">Private credit allocation</div></div>
       <div class="kpi-card"><div class="kpi-value">€${pcAum.toFixed(1)}bn</div><div class="kpi-label">Implied PC allocation</div></div>
       <div class="kpi-card"><div class="kpi-value">${eur(l.typicalTicket)}</div><div class="kpi-label">Typical ticket</div></div>
     </div>
@@ -348,7 +363,7 @@ function intelRow(i) {
   const head = ftarget ? link(ftarget, i.headline, "intel-head") : `<span class="intel-head">${esc(i.headline)}</span>`;
   return `<div class="intel-row">
     <div class="intel-meta"><span class="chip ${intelTypeClass(i.type)}">${esc(i.type)}</span><span class="muted small">${fmtDate(i.date)}</span></div>
-    <div class="intel-body">${head}<p class="muted small">${esc(i.summary)}</p><div>${tag}</div></div>
+    <div class="intel-body">${head}<p class="muted small">${esc(i.summary)}</p><div>${tag}${i.sourceUrl ? ` · <a href="${esc(i.sourceUrl)}" target="_blank" rel="noopener noreferrer" class="muted small">source ↗</a>` : ""}</div></div>
   </div>`;
 }
 
