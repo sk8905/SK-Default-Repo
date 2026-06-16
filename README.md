@@ -8,7 +8,7 @@ debt, structured credit, NAV/fund finance) across Europe.
 
 > ℹ️ **The dataset is now real**, compiled **16 June 2026 from public sources
 > only** (manager & investor press releases, regulatory/results disclosures and
-> trade press) — covering ~28 managers, ~37 funds, ~15 LP allocators and ~35
+> trade press) — covering ~40 managers, ~50 funds, ~23 LP allocators and ~48
 > fundraising-news items. It is **not affiliated with, and contains no data
 > from, any subscription database** (With Intelligence, Preqin, PitchBook,
 > Debtwire). Figures are shown in € for consistency (several originally in
@@ -19,18 +19,21 @@ debt, structured credit, NAV/fund finance) across Europe.
 
 ## What it does
 
-Five cross-linked modules:
+Eight cross-linked modules:
 
 | Module | What you get |
 | --- | --- |
-| **Dashboard** | KPIs (capital being sought, funds in market, closes) plus charts: capital raised by strategy, funds by status, capital by geography, and fundraising momentum over time. |
+| **Dashboard** | KPIs (funds in market, capital raised, closes) plus charts: capital raised by strategy, funds by status, capital by geography, and fundraising momentum by quarter. |
 | **Funds** | Searchable / filterable directory of funds in market (strategy, status, geography) with raise-progress bars; click through to a full fund profile. |
-| **Managers** | Directory of GPs with AUM, fund counts and strategies; manager profile shows all their funds and related intelligence. |
-| **Investors** | LP / allocator profiles — type, AUM, private-credit allocation, ticket size, mandate status and strategy interests, with matching live funds. |
-| **Intelligence** | A fundraising news feed (launches, first/final closes, mandates, personnel, strategy) tagged to managers and funds. |
+| **Managers** | Directory of GPs with AUM, fund counts and strategies; manager profile shows all their funds, known investors and related intelligence. |
+| **Investors** | LP / allocator profiles — type, AUM, private-credit allocation, ticket size, mandate status and strategy interests, with known commitments and matching live funds. |
+| **Intelligence** | A fundraising news feed (launches, first/final closes, mandates, personnel, strategy) tagged to managers and funds, sorted newest-first. |
+| **Mandates** | Live LP mandates / RFPs and new-fund launches, plus a "who backs whom" LP → manager commitments map. |
+| **League Tables** | Rankings: top managers by capital raised, largest fund closes, biggest investors by AUM, most active managers. |
+| **Watchlist** | Follow any manager / fund / investor (saved locally in your browser) to build a personalised intelligence feed. |
 
-Everything is interlinked: funds → managers → their other funds → interested
-LPs → matching funds → related intelligence.
+Everything is interlinked: funds → managers → their other funds → known/interested
+LPs → their commitments → matching funds → related intelligence.
 
 ## Tech
 

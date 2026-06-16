@@ -5,7 +5,7 @@
 
 import {
   STRATEGIES, FUND_STATUS, GEOS, LP_TYPES,
-  managers, funds, lps, intel,
+  managers, funds, lps, intel, commitments,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund,
 } from "./data.js";
@@ -63,6 +63,27 @@ function sources(rec) {
   const asOf = rec.asOf ? ` · <span>as of ${esc(rec.asOf)}</span>` : "";
   return `<div class="sources muted small"><span class="src-label">Sources:</span> ${links}${asOf}</div>`;
 }
+
+// --------------------------- watchlist (localStorage) ----------------------
+const FOLLOW_KEY = "meridian.follows";
+function loadFollows() { try { return JSON.parse(localStorage.getItem(FOLLOW_KEY)) || {}; } catch { return {}; } }
+const follows = loadFollows();
+function followList(type) { return follows[type] || (follows[type] = []); }
+function isFollowed(type, id) { return followList(type).includes(id); }
+function toggleFollow(type, id) {
+  const a = followList(type); const i = a.indexOf(id);
+  if (i >= 0) a.splice(i, 1); else a.push(id);
+  try { localStorage.setItem(FOLLOW_KEY, JSON.stringify(follows)); } catch { /* ignore */ }
+}
+function followCount() { return ["manager", "fund", "lp"].reduce((n, t) => n + followList(t).length, 0); }
+function followBtn(type, id) {
+  const on = isFollowed(type, id);
+  return `<button type="button" class="follow-btn ${on ? "on" : ""}" data-follow="${type}:${id}" title="${on ? "Following — click to remove from watchlist" : "Add to your watchlist"}" aria-label="Follow">${on ? "★" : "☆"}</button>`;
+}
+
+// ----------------------- relationship lookups ------------------------------
+function commitmentsForLp(lpId) { return commitments.filter((c) => c.lpId === lpId); }
+function commitmentsForManager(managerId) { return commitments.filter((c) => c.managerId === managerId); }
 
 // --------------------------- simple filter state ---------------------------
 // Persists per-view filter selections across re-renders within a session.
@@ -163,7 +184,7 @@ function viewFunds() {
       <thead><tr><th>Fund</th><th>Manager</th><th>Strategy</th><th>Geography</th><th>Status</th><th>Target</th><th class="prog-col">Progress</th></tr></thead>
       <tbody>
         ${rows.map((x) => `<tr class="clickable" data-href="#/fund/${x.id}">
-          <td><strong>${esc(x.name)}</strong><div class="muted small">${x.vintage} · ${esc(x.domicile)}</div></td>
+          <td>${followBtn("fund", x.id)} <strong>${esc(x.name)}</strong><div class="muted small">${x.vintage} · ${esc(x.domicile)}</div></td>
           <td>${esc(managerById[x.managerId].name)}</td>
           <td>${chip(x.strategy)}</td>
           <td>${esc(x.geoFocus)}</td>
@@ -189,7 +210,7 @@ function viewFund(id) {
     ${breadcrumb([["#/funds", "Funds"], [null, x.name]])}
     <div class="detail-head">
       <div>
-        <h1>${esc(x.name)}</h1>
+        <h1>${followBtn("fund", x.id)} ${esc(x.name)}</h1>
         <p class="muted">${link(`#/manager/${m.id}`, m.name)} · ${esc(x.domicile)} · Vintage ${x.vintage}</p>
         <div>${chip(x.strategy)} ${chip(x.status, statusClass(x.status))} ${chip(x.geoFocus)}</div>
       </div>
@@ -248,10 +269,10 @@ function viewManagers() {
         const fs = fundsByManager(m.id);
         const live = fs.filter((x) => x.status !== "Final Close").length;
         return `<div class="manager-card clickable" data-href="#/manager/${m.id}">
-          <div class="manager-card-head"><h3>${esc(m.name)}</h3><span class="muted small">${esc(m.hq)}</span></div>
+          <div class="manager-card-head"><h3>${followBtn("manager", m.id)} ${esc(m.name)}</h3><span class="muted small">${esc(m.hq)}</span></div>
           <p class="muted small">${esc(m.description)}</p>
           <div class="manager-stats">
-            <div><strong>€${m.aum}bn</strong><span class="muted small">AUM</span></div>
+            <div><strong class="card-aum">${m.aumText ? esc(m.aumText) : "€" + m.aum + "bn"}</strong><span class="muted small">AUM</span></div>
             <div><strong>${fs.length}</strong><span class="muted small">funds</span></div>
             <div><strong>${live}</strong><span class="muted small">in market</span></div>
           </div>
@@ -273,7 +294,7 @@ function viewManager(id) {
   app.innerHTML = `
     ${breadcrumb([["#/managers", "Managers"], [null, m.name]])}
     <div class="detail-head"><div>
-      <h1>${esc(m.name)}</h1>
+      <h1>${followBtn("manager", m.id)} ${esc(m.name)}</h1>
       <p class="muted">${esc(m.hq)} · Founded ${m.founded}</p>
       <div>${m.strategies.map((s) => chip(s)).join(" ")}</div>
     </div></div>
@@ -296,6 +317,7 @@ function viewManager(id) {
         </tr>`).join("")}</tbody>
       </table></div>
     </section>
+    ${commitmentsForManager(m.id).length ? `<section class="card"><h2>Known investors <span class="muted">(${commitmentsForManager(m.id).length})</span></h2><ul class="link-list">${commitmentsForManager(m.id).map((c) => `<li>${link(`#/lp/${c.lpId}`, lpById[c.lpId].name)} <span class="muted small">${esc(c.note)}</span></li>`).join("")}</ul></section>` : ""}
     <section class="card">
       <h2>Intelligence</h2>
       ${news.length ? news.map(intelRow).join("") : '<p class="muted">No intelligence items for this manager yet.</p>'}
@@ -322,7 +344,7 @@ function viewLps() {
       <thead><tr><th>Investor</th><th>Type</th><th>HQ</th><th>AUM</th><th>PC alloc.</th><th>Typical ticket</th><th>Mandate</th></tr></thead>
       <tbody>
         ${rows.map((l) => `<tr class="clickable" data-href="#/lp/${l.id}">
-          <td><strong>${esc(l.name)}</strong></td><td>${esc(l.type)}</td><td>${esc(l.hq)}</td>
+          <td>${followBtn("lp", l.id)} <strong>${esc(l.name)}</strong></td><td>${esc(l.type)}</td><td>${esc(l.hq)}</td>
           <td>€${l.aum}bn</td><td>${pct(l.pcAllocationPct)}</td><td>${eur(l.typicalTicket)}</td>
           <td>${chip(l.mandateStatus, mandateClass(l.mandateStatus))}</td>
         </tr>`).join("")}
@@ -341,7 +363,7 @@ function viewLp(id) {
   app.innerHTML = `
     ${breadcrumb([["#/lps", "Investors"], [null, l.name]])}
     <div class="detail-head"><div>
-      <h1>${esc(l.name)}</h1>
+      <h1>${followBtn("lp", l.id)} ${esc(l.name)}</h1>
       <p class="muted">${esc(l.type)} · ${esc(l.hq)}</p>
       <div>${chip(l.mandateStatus, mandateClass(l.mandateStatus))} ${l.strategies.map((s) => chip(s)).join(" ")}</div>
     </div></div>
@@ -359,6 +381,7 @@ function viewLp(id) {
         <div><dt>Strategies of interest</dt><dd>${l.strategies.map((s) => chip(s)).join(" ")}</dd></div>
       </dl>
     </section>
+    ${commitmentsForLp(l.id).length ? `<section class="card"><h2>Known commitments <span class="muted">(${commitmentsForLp(l.id).length})</span></h2><ul class="link-list">${commitmentsForLp(l.id).map((c) => `<li>${link(`#/manager/${c.managerId}`, managerById[c.managerId].name)}${c.fundId ? ` · ${link(`#/fund/${c.fundId}`, fundById[c.fundId].name, "muted small")}` : ""} <span class="muted small">${esc(c.note)}</span></li>`).join("")}</ul></section>` : ""}
     <section class="card">
       <h2>Matching funds in market <span class="muted">(${matches.length})</span></h2>
       <p class="muted small">Live funds whose strategy aligns with this investor's stated interests.</p>
@@ -405,6 +428,72 @@ function viewIntel() {
   wireFilters("intel");
 }
 
+// =============================== MANDATES ==================================
+function viewMandates() {
+  const board = intel.filter((i) => i.type === "Mandate" || i.type === "Launch");
+  app.innerHTML = `
+    <div class="page-head"><h1>Mandates &amp; Searches</h1><p class="muted">Live LP mandates, RFPs and new-fund launches · ${board.length} items</p></div>
+    <section class="card">
+      <h2>Recent mandates &amp; launches</h2>
+      ${board.length ? board.map(intelRow).join("") : '<p class="muted">No mandate items.</p>'}
+    </section>
+    <section class="card">
+      <h2>Known LP → manager commitments <span class="muted">(${commitments.length})</span></h2>
+      <p class="muted small">Publicly reported relationships powering the coverage map — click either side to explore.</p>
+      <div class="table-wrap"><table class="data-table">
+        <thead><tr><th>Investor</th><th>Manager</th><th>Detail</th></tr></thead>
+        <tbody>${commitments.map((c) => `<tr>
+          <td><strong>${link(`#/lp/${c.lpId}`, lpById[c.lpId].name)}</strong><div class="muted small">${esc(lpById[c.lpId].type)}</div></td>
+          <td>${link(`#/manager/${c.managerId}`, managerById[c.managerId].name)}${c.fundId ? `<div class="muted small">${link(`#/fund/${c.fundId}`, fundById[c.fundId].name)}</div>` : ""}</td>
+          <td class="muted small">${esc(c.note)}</td>
+        </tr>`).join("")}</tbody>
+      </table></div>
+    </section>`;
+}
+
+// ============================= LEAGUE TABLES ===============================
+function viewLeague() {
+  const mgrRaised = managers.map((m) => ({ m, total: fundsByManager(m.id).reduce((s, f) => s + (f.raised || 0), 0) }))
+    .filter((x) => x.total > 0).sort((a, b) => b.total - a.total).slice(0, 12);
+  const closes = funds.filter((f) => f.raised != null && f.status === "Final Close").sort((a, b) => b.raised - a.raised).slice(0, 12);
+  const topLps = [...lps].sort((a, b) => b.aum - a.aum).slice(0, 12);
+  const mgrActive = managers.map((m) => ({ m, n: fundsByManager(m.id).length })).filter((x) => x.n > 0).sort((a, b) => b.n - a.n).slice(0, 10);
+  const rank = (rows, cells) => `<div class="table-wrap"><table class="data-table league"><tbody>${rows.map((r, i) => `<tr><td class="rank">${i + 1}</td>${cells(r)}</tr>`).join("")}</tbody></table></div>`;
+  app.innerHTML = `
+    <div class="page-head"><h1>League Tables</h1><p class="muted">Rankings computed from tracked data · figures approximate (see methodology)</p></div>
+    <div class="grid-2">
+      <section class="card"><h2>Top managers by capital raised</h2>${rank(mgrRaised, (r) => `<td>${link(`#/manager/${r.m.id}`, r.m.name)}</td><td class="num">${eur(r.total)}</td>`)}</section>
+      <section class="card"><h2>Largest fund closes</h2>${rank(closes, (f) => `<td>${link(`#/fund/${f.id}`, f.name)}<div class="muted small">${esc(managerById[f.managerId].name)}</div></td><td class="num">${eur(f.raised)}</td>`)}</section>
+      <section class="card"><h2>Largest investors by AUM</h2>${rank(topLps, (l) => `<td>${link(`#/lp/${l.id}`, l.name)}<div class="muted small">${esc(l.type)} · ${esc(l.hq)}</div></td><td class="num">€${l.aum}bn</td>`)}</section>
+      <section class="card"><h2>Most active managers <span class="muted">(funds tracked)</span></h2>${rank(mgrActive, (r) => `<td>${link(`#/manager/${r.m.id}`, r.m.name)}</td><td class="num">${r.n}</td>`)}</section>
+    </div>`;
+}
+
+// =============================== WATCHLIST =================================
+function viewWatchlist() {
+  const fm = followList("manager").map((id) => managerById[id]).filter(Boolean);
+  const ff = followList("fund").map((id) => fundById[id]).filter(Boolean);
+  const fl = followList("lp").map((id) => lpById[id]).filter(Boolean);
+  const mIds = new Set(fm.map((m) => m.id)), fIds = new Set(ff.map((f) => f.id));
+  const feed = intel.filter((i) => (i.managerId && mIds.has(i.managerId)) || (i.fundId && fIds.has(i.fundId)));
+
+  if (fm.length + ff.length + fl.length === 0) {
+    app.innerHTML = `<div class="page-head"><h1>My Watchlist</h1></div>
+      <section class="card"><p class="muted">You're not following anything yet. Click the ☆ star on any manager, fund or investor to add it here — your watchlist builds a personalised intelligence feed. (Saved locally in your browser.)</p></section>`;
+    return;
+  }
+  const listCard = (title, items, type, render) =>
+    `<section class="card"><h2>${title} <span class="muted">(${items.length})</span></h2>${items.length
+      ? `<ul class="link-list">${items.map((x) => `<li>${followBtn(type, x.id)} ${render(x)}</li>`).join("")}</ul>`
+      : '<p class="muted small">None followed.</p>'}</section>`;
+  app.innerHTML = `
+    <div class="page-head"><h1>My Watchlist</h1><p class="muted">${fm.length + ff.length + fl.length} followed · saved locally in your browser</p></div>
+    <section class="card"><h2>Your intelligence feed <span class="muted">(${feed.length})</span></h2>${feed.length ? feed.map(intelRow).join("") : '<p class="muted small">No intelligence yet for the managers/funds you follow.</p>'}</section>
+    ${listCard("Managers", fm, "manager", (m) => link(`#/manager/${m.id}`, m.name))}
+    ${listCard("Funds", ff, "fund", (f) => `${link(`#/fund/${f.id}`, f.name)} <span class="muted small">${esc(managerById[f.managerId].name)}</span>`)}
+    ${listCard("Investors", fl, "lp", (l) => `${link(`#/lp/${l.id}`, l.name)} <span class="muted small">${esc(l.type)}</span>`)}`;
+}
+
 // ============================== shared bits ================================
 function breadcrumb(parts) {
   return `<nav class="breadcrumb">${parts.map(([href, label], i) =>
@@ -434,8 +523,16 @@ function wireFilters(view) {
   });
 }
 
-// Row click delegation
+// Click delegation: watchlist stars first, then row navigation.
 app.addEventListener("click", (e) => {
+  const fb = e.target.closest("[data-follow]");
+  if (fb) {
+    e.stopPropagation();
+    const [type, id] = fb.getAttribute("data-follow").split(":");
+    toggleFollow(type, id);
+    router();
+    return;
+  }
   const row = e.target.closest("[data-href]");
   if (row && !e.target.closest("a")) location.hash = row.getAttribute("data-href");
 });
@@ -447,6 +544,8 @@ function router() {
   document.querySelectorAll(".nav-link").forEach((a) => {
     a.classList.toggle("active", a.getAttribute("href") === `#/${route}` || (route === "" && a.getAttribute("href") === "#/"));
   });
+  const wl = document.getElementById("wl-count");
+  if (wl) { const n = followCount(); wl.textContent = n ? n : ""; wl.style.display = n ? "" : "none"; }
   window.scrollTo(0, 0);
   switch (route) {
     case "": case undefined: return viewDashboard();
@@ -457,6 +556,9 @@ function router() {
     case "lps": return viewLps();
     case "lp": return viewLp(arg);
     case "intel": return viewIntel();
+    case "mandates": return viewMandates();
+    case "league": return viewLeague();
+    case "watchlist": return viewWatchlist();
     default: return notFound();
   }
 }

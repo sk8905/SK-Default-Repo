@@ -88,6 +88,25 @@ h3 { font-size: 1rem; margin: 0; }
 .it-strategy{ background:#e0f2fe; color:#075985; }
 .chip.est { background:#fff7ed; color:#9a3412; border-color:#fed7aa; }
 
+/* ---------- watchlist / follow stars ---------- */
+.follow-btn {
+  background: none; border: none; cursor: pointer; padding: 0 .15rem;
+  font-size: 1rem; line-height: 1; color: #cbd5e1; vertical-align: baseline;
+}
+.follow-btn:hover { color: #f59e0b; }
+.follow-btn.on { color: #f59e0b; }
+.nav-badge {
+  display: inline-block; min-width: 16px; padding: 0 5px; margin-left: .15rem;
+  background: var(--accent); color: #fff; border-radius: 999px;
+  font-size: .68rem; font-weight: 700; line-height: 16px; text-align: center;
+}
+
+/* ---------- league tables ---------- */
+.data-table.league td { padding: .5rem .6rem; }
+.data-table .rank { width: 2rem; color: var(--muted); font-weight: 700; text-align: center; }
+.data-table .num { text-align: right; font-weight: 700; color: var(--primary-ink); white-space: nowrap; }
+.card-aum { font-size: .98rem; }
+
 /* ---------- source citations ---------- */
 .sources { margin: .4rem 0 .25rem; line-height: 1.6; }
 .sources .src-label { font-weight: 600; }
