@@ -218,6 +218,9 @@ export const intel = [
   { id: "i39", date: "2024-07-09", type: "Mandate", headline: "CalSTRS seeds Kennedy Lewis with $200m for US & European senior lending", managerId: null, fundId: null, summary: "CalSTRS committed a $200m seed to Kennedy Lewis Investment Management for non-sponsored senior lending across the US and Western Europe, as it builds out its private-credit platform.", sourceUrl: "https://www.businesswire.com/news/home/20240709219263/en/" },
 ];
 
+// Keep the intelligence feed strictly newest-first regardless of insertion order.
+intel.sort((a, b) => b.date.localeCompare(a.date));
+
 // ---------------------------------------------------------------------------
 // Lookup helpers
 // ---------------------------------------------------------------------------
