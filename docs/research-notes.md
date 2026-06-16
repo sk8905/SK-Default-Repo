@@ -134,7 +134,21 @@ from search snippets of those same sources).
 ### Legal & General (L&G) — UK insurer (largest UK life/PRT)
 - Annuity portfolio £92bn (~$122.5bn, FY2024); group AUM ~$1.4tn. Committed up to 10% of new annuity flows to (mostly US) IG private credit via Blackstone (Jul 2025). Euro exposure via UK/EU RE & infra debt. Status: Actively allocating (new money tilting US IG). Src: blackstone.com; group.legalandgeneral.com.
 
-> Coverage note: dedicated infra-debt pure-plays (AXA IM, Allianz GI, Macquarie) and some DL names (Ares, Arcmont, Pemberton, CVC, Kartesia) were not delivered by the (rate-limited) agents; infra/RE debt are covered via Aviva Investors & LGIM with sources. These can be added later from public sources.
+## Second-pass additions (incorporated)
+
+Managers added: Ares (ACE VI €17.1bn), CVC (EUDL IV €10.4bn), Pemberton (Strategic Capital IV €3.4bn), Sixth Street (SLE III €3.75bn), Eurazeo (EPD VII €3.9bn), Kartesia (KCO VI €1.3bn), Apera (PDF III €2.9bn), Crescent (CESL III ~€3bn), CAPZA (PD7 €1.4bn first close), Arcmont (DLF V >€12bn, Nuveen-owned), Hayfin (DLF V €8–10bn, Arctos MBO 2025), HPS/BlackRock (HLEND-E + Citi €15bn EMEA programme). Sources in each data.js record.
+
+LPs added (second pass):
+- CalPERS — $556bn; Private Debt ~$33bn commitments/$13bn NAV; 16% of PD commitments to Europe (board-disclosed). Src: calpers.ca.gov.
+- CalSTRS — $368bn; ~2% PC target; $200m Kennedy Lewis (US & W.Europe). Src: businesswire.
+- NYSCRF — $273bn; ~8.8% credit/opportunistic sleeve (proxy); Bridgepoint Europe €200m, Francisco Partners $200m. Src: osc.ny.gov.
+- TRS Texas — ~$225bn; Texas Debt Capital w/ CIFC up to $2bn US+Europe loans/CLO. Src: businesswire.
+- USS — £77bn; £7.8bn private credit & alt income (~10%); acquired Venn Partners. Src: pionline.
+- Border to Coast — LGPS pool; named European DL commitments: Ares Capital Europe V ($115m), Barings European Private Loan Fund III (£95m). Src: ipe.com.
+- AP2 — SEK459bn; explicit ~2% private-debt target; US+Europe senior DL. Src: hedgenordic.
+- Keva — €71.5bn; PC 'a natural part of portfolio' but unsized/undisclosed. Src: europeanpensions.net.
+
+Researched but NOT added (thin/defunct/out-of-scope): AP1 (dissolved 31 Dec 2025), AP3/AP4 (private debt buried in fixed income, no breakout), AP6 (PE-only), WSIB (emerging programme, no European credit commitments yet), GIC (no clear Euro-specific credit in public sources).
 
 ## LP / Allocator profiles — sovereign & global (sourced)
 
