@@ -66,6 +66,7 @@ h3 { font-size: 1rem; margin: 0; }
 .kpi-card { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--primary);
   border-radius: var(--radius); padding: 1rem 1.1rem; box-shadow: var(--shadow); }
 .kpi-value { font-size: 1.7rem; font-weight: 700; color: var(--primary-ink); line-height: 1.1; }
+.kpi-value.kpi-aum { font-size: 1.15rem; }
 .kpi-label { font-size: .82rem; color: #334155; margin-top: .2rem; }
 .kpi-sub { font-size: .72rem; }
 

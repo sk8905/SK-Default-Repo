@@ -14,9 +14,9 @@ import { barChart, donutChart, lineChart } from "./charts.js";
 const app = document.getElementById("app");
 
 // ----------------------------- formatting utils ----------------------------
-const eur = (m) => "€" + (m >= 1000 ? (m / 1000).toFixed(m % 1000 === 0 ? 0 : 1) + "bn" : m + "m");
+const eur = (m) => (m == null ? "Undisclosed" : "€" + (m >= 1000 ? (m / 1000).toFixed(m % 1000 === 0 ? 0 : 1) + "bn" : m + "m"));
 const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-const pct = (n) => Math.round(n) + "%";
+const pct = (n) => (n == null ? "Undisclosed" : Math.round(n) + "%");
 const fmtDate = (d) => new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 
 const statusClass = (s) => ({
@@ -27,11 +27,25 @@ const mandateClass = (s) => ({
 }[s] || "");
 
 function progressBar(raised, target) {
-  const p = Math.min(100, Math.round((raised / target) * 100));
+  const actual = Math.round((raised / target) * 100);
+  const w = Math.min(100, actual);
   return `<div class="progress" title="${eur(raised)} of ${eur(target)} target">
-    <div class="progress-fill" style="width:${p}%"></div>
-    <span class="progress-label">${eur(raised)} / ${eur(target)} · ${p}%</span>
+    <div class="progress-fill" style="width:${w}%"></div>
+    <span class="progress-label">${eur(raised)} / ${eur(target)} · ${actual}%</span>
   </div>`;
+}
+
+// Decides how to display a fund's fundraising state given real-world gaps:
+// evergreen (no target), undisclosed target/raised, or a normal progress bar.
+function raiseDisplay(x) {
+  if (x.evergreen) {
+    return `<span class="chip st-open">Evergreen</span>` +
+      (x.raised != null ? ` <span class="muted small">~${eur(x.raised)} AUM/NAV</span>` : "");
+  }
+  if (x.raised != null && x.targetSize != null) return progressBar(x.raised, x.targetSize);
+  if (x.raised != null) return `<span class="muted small">${eur(x.raised)} raised · target undisclosed</span>`;
+  if (x.status === "Pre-marketing") return `<span class="muted small">Pre-marketing</span>`;
+  return `<span class="muted small">Undisclosed</span>`;
 }
 
 function chip(text, cls = "") { return `<span class="chip ${cls}">${esc(text)}</span>`; }
@@ -62,50 +76,55 @@ const filterState = {
 // ================================ DASHBOARD =================================
 function viewDashboard() {
   const open = funds.filter((f) => f.status === "Open" || f.status === "First Close");
-  const totalSeeking = funds.filter((f) => f.status !== "Final Close").reduce((s, f) => s + (f.targetSize - f.raised), 0);
-  const totalRaised = funds.reduce((s, f) => s + f.raised, 0);
+  const totalRaised = funds.reduce((s, f) => s + (f.raised || 0), 0);
   const finalClosesYTD = funds.filter((f) => f.status === "Final Close" && f.vintage >= 2025).length;
+  const trackedRaise = intel.filter((i) => i.type === "Final Close" || i.type === "First Close").length;
 
-  // capital raised by strategy
+  // helper: capital raised in approximate €bn (one decimal) for chart readability
+  const bnRaised = (list) => Math.round(list.reduce((a, f) => a + (f.raised || 0), 0) / 100) / 10;
+
+  // capital raised by strategy (€bn)
   const byStrategy = STRATEGIES.map((s) => ({
-    label: s, value: funds.filter((f) => f.strategy === s).reduce((a, f) => a + f.raised, 0),
+    label: s, value: bnRaised(funds.filter((f) => f.strategy === s)),
   })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
 
   // funds by status
   const byStatus = FUND_STATUS.map((s) => ({ label: s, value: funds.filter((f) => f.status === s).length })).filter((d) => d.value > 0);
 
-  // capital by geography
+  // capital by geography (€bn)
   const byGeo = GEOS.map((g) => ({
-    label: g, value: funds.filter((f) => f.geoFocus === g).reduce((a, f) => a + f.raised, 0),
+    label: g, value: bnRaised(funds.filter((f) => f.geoFocus === g)),
   })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
 
-  // fundraising momentum — count of closes (first+final) by month from intel feed
-  const months = ["2026-02", "2026-03", "2026-04", "2026-05", "2026-06"];
-  const trend = months.map((m) => ({
-    label: new Date(m + "-01").toLocaleDateString("en-GB", { month: "short" }),
-    value: intel.filter((i) => i.date.startsWith(m) && (i.type === "First Close" || i.type === "Final Close")).length,
+  // fundraising momentum — closes (first+final) per quarter, last 6 quarters
+  const qKey = (d) => { const dt = new Date(d); return `${dt.getFullYear()}-Q${Math.floor(dt.getMonth() / 3) + 1}`; };
+  const qCounts = {};
+  intel.filter((i) => i.type === "First Close" || i.type === "Final Close")
+    .forEach((i) => { const k = qKey(i.date); qCounts[k] = (qCounts[k] || 0) + 1; });
+  const trend = Object.keys(qCounts).sort().slice(-6).map((k) => ({
+    label: "'" + k.slice(2), value: qCounts[k],
   }));
 
   const kpis = [
-    { label: "Capital still being sought", value: eur(totalSeeking), sub: "across live funds" },
+    { label: "Tracked funds", value: funds.length, sub: `${managers.length} managers` },
     { label: "Funds in market", value: open.length, sub: "open or at first close" },
-    { label: "Total raised (tracked)", value: eur(totalRaised), sub: `${funds.length} funds` },
-    { label: "Final closes (2025–26)", value: finalClosesYTD, sub: "vintage 2025+" },
+    { label: "Capital raised (tracked)", value: eur(totalRaised), sub: "across tracked funds" },
+    { label: "Final closes (2025–26)", value: finalClosesYTD, sub: `${trackedRaise} close events` },
   ];
 
   app.innerHTML = `
     <div class="page-head">
       <h1>Market Dashboard</h1>
-      <p class="muted">European private credit fundraising at a glance · sample data</p>
+      <p class="muted">European private credit fundraising at a glance · real data compiled from public sources (mid-2026)</p>
     </div>
     <div class="kpi-grid">
       ${kpis.map((k) => `<div class="kpi-card"><div class="kpi-value">${k.value}</div><div class="kpi-label">${k.label}</div><div class="kpi-sub muted">${k.sub}</div></div>`).join("")}
     </div>
     <div class="grid-2">
-      <section class="card"><h2>Capital raised by strategy <span class="muted">(€m)</span></h2>${barChart(byStrategy, { unit: "€", width: 540 })}</section>
+      <section class="card"><h2>Capital raised by strategy <span class="muted">(€bn)</span></h2>${barChart(byStrategy, { unit: "€", width: 540 })}</section>
       <section class="card"><h2>Funds by status</h2>${donutChart(byStatus)}</section>
-      <section class="card"><h2>Capital raised by geography <span class="muted">(€m)</span></h2>${barChart(byGeo, { unit: "€", width: 540 })}</section>
-      <section class="card"><h2>Fundraising momentum <span class="muted">(closes / month)</span></h2>${lineChart(trend)}</section>
+      <section class="card"><h2>Capital raised by geography <span class="muted">(€bn)</span></h2>${barChart(byGeo, { unit: "€", width: 540 })}</section>
+      <section class="card"><h2>Fundraising momentum <span class="muted">(closes / quarter)</span></h2>${lineChart(trend)}</section>
     </div>
     <section class="card">
       <h2>Latest intelligence</h2>
@@ -130,7 +149,7 @@ function viewFunds() {
     (!f.strategy || x.strategy === f.strategy) &&
     (!f.status || x.status === f.status) &&
     (!f.geo || x.geoFocus === f.geo)
-  ).sort((a, b) => b.raised - a.raised);
+  ).sort((a, b) => (b.raised || 0) - (a.raised || 0));
 
   app.innerHTML = `
     <div class="page-head"><h1>Funds in Market</h1><p class="muted">${rows.length} of ${funds.length} funds</p></div>
@@ -149,8 +168,8 @@ function viewFunds() {
           <td>${chip(x.strategy)}</td>
           <td>${esc(x.geoFocus)}</td>
           <td>${chip(x.status, statusClass(x.status))}</td>
-          <td>${eur(x.targetSize)}</td>
-          <td class="prog-col">${x.status === "Pre-marketing" ? '<span class="muted small">—</span>' : progressBar(x.raised, x.targetSize)}</td>
+          <td>${x.evergreen ? "—" : eur(x.targetSize)}</td>
+          <td class="prog-col">${raiseDisplay(x)}</td>
         </tr>`).join("")}
         ${rows.length === 0 ? '<tr><td colspan="7" class="empty">No funds match these filters.</td></tr>' : ""}
       </tbody>
@@ -180,11 +199,11 @@ function viewFund(id) {
     <div class="grid-2">
       <section class="card">
         <h2>Fundraising</h2>
-        ${x.status === "Pre-marketing" ? '<p class="muted">Pre-marketing — no capital raised yet.</p>' : progressBar(x.raised, x.targetSize)}
+        ${raiseDisplay(x)}
         <dl class="facts">
-          <div><dt>Target size</dt><dd>${eur(x.targetSize)}</dd></div>
+          <div><dt>Target size</dt><dd>${x.evergreen ? "Evergreen (open-ended)" : eur(x.targetSize)}</dd></div>
           <div><dt>Hard cap</dt><dd>${eur(x.hardCap)}</dd></div>
-          <div><dt>Raised to date</dt><dd>${eur(x.raised)}</dd></div>
+          <div><dt>${x.evergreen ? "Current AUM/NAV" : "Raised to date"}</dt><dd>${eur(x.raised)}</dd></div>
           <div><dt>Status</dt><dd>${chip(x.status, statusClass(x.status))}</dd></div>
           <div><dt>Sector focus</dt><dd>${esc(x.sectorFocus)}</dd></div>
           <div><dt>Domicile</dt><dd>${esc(x.domicile)}</dd></div>
@@ -194,7 +213,7 @@ function viewFund(id) {
         <h2>Potential investor fit <span class="muted">(${interestedLps.length})</span></h2>
         <p class="muted small">LPs whose stated interests include ${esc(x.strategy)}.</p>
         <ul class="link-list">
-          ${interestedLps.slice(0, 6).map((l) => `<li>${link(`#/lp/${l.id}`, l.name)} <span class="muted small">${esc(l.type)} · ${eur(l.typicalTicket)} typical ticket</span></li>`).join("") || '<li class="muted">No active LPs flagged.</li>'}
+          ${interestedLps.slice(0, 6).map((l) => `<li>${link(`#/lp/${l.id}`, l.name)} <span class="muted small">${esc(l.type)} · ${l.typicalTicket != null ? eur(l.typicalTicket) + " typical ticket" : "ticket undisclosed"}</span></li>`).join("") || '<li class="muted">No active LPs flagged.</li>'}
         </ul>
       </section>
     </div>
@@ -249,21 +268,21 @@ function viewManager(id) {
   if (!m) return notFound();
   const fs = fundsByManager(id).sort((a, b) => b.vintage - a.vintage);
   const news = intelForManager(id);
-  const raising = fs.filter((x) => x.status !== "Final Close").reduce((s, x) => s + x.targetSize, 0);
+  const liveFunds = fs.filter((x) => x.status !== "Final Close").length;
 
   app.innerHTML = `
     ${breadcrumb([["#/managers", "Managers"], [null, m.name]])}
     <div class="detail-head"><div>
       <h1>${esc(m.name)}</h1>
-      <p class="muted">${esc(m.hq)} · Founded ${m.founded} · ${m.employees} employees</p>
+      <p class="muted">${esc(m.hq)} · Founded ${m.founded}</p>
       <div>${m.strategies.map((s) => chip(s)).join(" ")}</div>
     </div></div>
     <p class="lead">${esc(m.description)}</p>
     ${sources(m)}
     <div class="kpi-grid">
-      <div class="kpi-card"><div class="kpi-value">€${m.aum}bn</div><div class="kpi-label">Assets under management</div></div>
+      <div class="kpi-card"><div class="kpi-value kpi-aum">${m.aumText ? esc(m.aumText) : "€" + m.aum + "bn"}</div><div class="kpi-label">Assets under management</div></div>
       <div class="kpi-card"><div class="kpi-value">${fs.length}</div><div class="kpi-label">Funds tracked</div></div>
-      <div class="kpi-card"><div class="kpi-value">${eur(raising)}</div><div class="kpi-label">Currently targeting</div></div>
+      <div class="kpi-card"><div class="kpi-value">${liveFunds}</div><div class="kpi-label">In market now</div></div>
       <div class="kpi-card"><div class="kpi-value">${m.founded}</div><div class="kpi-label">Founded</div></div>
     </div>
     <section class="card">
@@ -272,8 +291,8 @@ function viewManager(id) {
         <thead><tr><th>Fund</th><th>Strategy</th><th>Vintage</th><th>Status</th><th>Target</th><th class="prog-col">Progress</th></tr></thead>
         <tbody>${fs.map((x) => `<tr class="clickable" data-href="#/fund/${x.id}">
           <td><strong>${esc(x.name)}</strong></td><td>${chip(x.strategy)}</td><td>${x.vintage}</td>
-          <td>${chip(x.status, statusClass(x.status))}</td><td>${eur(x.targetSize)}</td>
-          <td class="prog-col">${x.status === "Pre-marketing" ? '<span class="muted small">—</span>' : progressBar(x.raised, x.targetSize)}</td>
+          <td>${chip(x.status, statusClass(x.status))}</td><td>${x.evergreen ? "—" : eur(x.targetSize)}</td>
+          <td class="prog-col">${raiseDisplay(x)}</td>
         </tr>`).join("")}</tbody>
       </table></div>
     </section>
@@ -316,7 +335,7 @@ function viewLps() {
 function viewLp(id) {
   const l = lpById[id];
   if (!l) return notFound();
-  const pcAum = (l.aum * l.pcAllocationPct / 100);
+  const pcAum = l.pcAllocationPct != null ? (l.aum * l.pcAllocationPct / 100) : null;
   const matches = funds.filter((x) => l.strategies.includes(x.strategy) && (x.status === "Open" || x.status === "First Close" || x.status === "Pre-marketing"));
 
   app.innerHTML = `
@@ -328,8 +347,8 @@ function viewLp(id) {
     </div></div>
     <div class="kpi-grid">
       <div class="kpi-card"><div class="kpi-value">€${l.aum}bn</div><div class="kpi-label">Total AUM</div></div>
-      <div class="kpi-card"><div class="kpi-value">${pct(l.pcAllocationPct)} ${estBadge(l.pcEstimated)}</div><div class="kpi-label">Private credit allocation</div></div>
-      <div class="kpi-card"><div class="kpi-value">€${pcAum.toFixed(1)}bn</div><div class="kpi-label">Implied PC allocation</div></div>
+      <div class="kpi-card"><div class="kpi-value">${pct(l.pcAllocationPct)} ${l.pcAllocationPct != null ? estBadge(l.pcEstimated) : ""}</div><div class="kpi-label">Private credit allocation</div></div>
+      <div class="kpi-card"><div class="kpi-value">${pcAum != null ? "€" + pcAum.toFixed(1) + "bn" : "Undisclosed"}</div><div class="kpi-label">Implied PC allocation</div></div>
       <div class="kpi-card"><div class="kpi-value">${eur(l.typicalTicket)}</div><div class="kpi-label">Typical ticket</div></div>
     </div>
     <section class="card">
