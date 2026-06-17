@@ -155,7 +155,7 @@ function viewDashboard() {
 
   const kpis = [
     { label: "Tracked funds", value: funds.length, sub: `${managers.length} managers`, jump: 'data-jump="funds"' },
-    { label: "Funds in market", value: open.length, sub: "open or at first close", jump: 'data-jump="funds" data-status="Open"' },
+    { label: "Funds in market", value: open.length, sub: "open or at first close", jump: 'data-jump="funds" data-status="in-market"' },
     { label: "Capital raised (tracked)", value: eur(totalRaised), sub: "across tracked funds", jump: 'data-jump="league"' },
     { label: "Final closes (2025–26)", value: finalClosesYTD, sub: `${trackedRaise} close events`, jump: 'data-jump="funds" data-status="Final Close"' },
   ];
@@ -219,7 +219,7 @@ function viewFunds() {
   const rows = funds.filter((x) =>
     (!f.q || (x.name + managerById[x.managerId].name).toLowerCase().includes(f.q.toLowerCase())) &&
     (!f.strategy || x.strategy === f.strategy) &&
-    (!f.status || x.status === f.status) &&
+    (!f.status || (f.status === "in-market" ? (x.status === "Open" || x.status === "First Close") : x.status === f.status)) &&
     (!f.geo || x.geoFocus === f.geo)
   ).sort((a, b) => (b.raised || 0) - (a.raised || 0));
 
@@ -240,7 +240,13 @@ function viewFunds() {
     <div class="filters">
       <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Fund or manager…" value="${esc(f.q)}"></label>
       ${selectFilter("strategy", "Strategy", STRATEGIES, f.strategy)}
-      ${selectFilter("status", "Status", FUND_STATUS, f.status)}
+      <label class="filter"><span>Status</span>
+        <select data-filter="status">
+          <option value="">All</option>
+          <option value="in-market" ${f.status === "in-market" ? "selected" : ""}>In market (Open + First Close)</option>
+          ${FUND_STATUS.map((o) => `<option value="${esc(o)}" ${o === f.status ? "selected" : ""}>${esc(o)}</option>`).join("")}
+        </select>
+      </label>
       ${selectFilter("geo", "Geography", GEOS, f.geo)}
     </div>
     ${body}`;
