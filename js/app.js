@@ -197,24 +197,8 @@ function selectFilter(id, label, options, current) {
     </select></label>`;
 }
 
-function viewFunds() {
-  const f = filterState.funds;
-  const rows = funds.filter((x) =>
-    (!f.q || (x.name + managerById[x.managerId].name).toLowerCase().includes(f.q.toLowerCase())) &&
-    (!f.strategy || x.strategy === f.strategy) &&
-    (!f.status || x.status === f.status) &&
-    (!f.geo || x.geoFocus === f.geo)
-  ).sort((a, b) => (b.raised || 0) - (a.raised || 0));
-
-  app.innerHTML = `
-    <div class="page-head"><h1>Funds in Market</h1><p class="muted">${rows.length} of ${funds.length} funds</p></div>
-    <div class="filters">
-      <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Fund or manager…" value="${esc(f.q)}"></label>
-      ${selectFilter("strategy", "Strategy", STRATEGIES, f.strategy)}
-      ${selectFilter("status", "Status", FUND_STATUS, f.status)}
-      ${selectFilter("geo", "Geography", GEOS, f.geo)}
-    </div>
-    <div class="table-wrap"><table class="data-table">
+function fundTable(rows) {
+  return `<div class="table-wrap"><table class="data-table">
       <thead><tr><th>Fund</th><th>Manager</th><th>Strategy</th><th>Geography</th><th>Status</th><th>Target</th><th class="prog-col">Progress</th></tr></thead>
       <tbody>
         ${rows.map((x) => `<tr class="clickable" data-href="#/fund/${x.id}">
@@ -226,9 +210,40 @@ function viewFunds() {
           <td>${x.evergreen ? "—" : eur(x.targetSize)}</td>
           <td class="prog-col">${raiseDisplay(x)}</td>
         </tr>`).join("")}
-        ${rows.length === 0 ? '<tr><td colspan="7" class="empty">No funds match these filters.</td></tr>' : ""}
       </tbody>
     </table></div>`;
+}
+
+function viewFunds() {
+  const f = filterState.funds;
+  const rows = funds.filter((x) =>
+    (!f.q || (x.name + managerById[x.managerId].name).toLowerCase().includes(f.q.toLowerCase())) &&
+    (!f.strategy || x.strategy === f.strategy) &&
+    (!f.status || x.status === f.status) &&
+    (!f.geo || x.geoFocus === f.geo)
+  ).sort((a, b) => (b.raised || 0) - (a.raised || 0));
+
+  // Group into Open / First Close / Final Close (plus Pre-marketing if present).
+  const sectionOrder = ["Open", "First Close", "Final Close", "Pre-marketing"];
+  const sections = sectionOrder
+    .map((st) => ({ st, items: rows.filter((x) => x.status === st) }))
+    .filter((s) => s.items.length);
+  const body = sections.length
+    ? sections.map((s) => `<section class="fund-section">
+        <h2 class="section-head">${esc(s.st)} <span class="chip ${statusClass(s.st)}">${s.items.length}</span></h2>
+        ${fundTable(s.items)}
+      </section>`).join("")
+    : '<p class="empty">No funds match these filters.</p>';
+
+  app.innerHTML = `
+    <div class="page-head"><h1>Funds in Market</h1><p class="muted">${rows.length} of ${funds.length} funds</p></div>
+    <div class="filters">
+      <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Fund or manager…" value="${esc(f.q)}"></label>
+      ${selectFilter("strategy", "Strategy", STRATEGIES, f.strategy)}
+      ${selectFilter("status", "Status", FUND_STATUS, f.status)}
+      ${selectFilter("geo", "Geography", GEOS, f.geo)}
+    </div>
+    ${body}`;
   wireFilters("funds");
 }
 

@@ -97,6 +97,11 @@ h3 { font-size: 1rem; margin: 0; }
 .dt-acq{ background:#f3e8ff; color:#6b21a8; }
 .dt-npl{ background:#ffe4e6; color:#9f1239; }
 
+/* ---------- fund status sections ---------- */
+.fund-section { margin-bottom: 1.4rem; }
+.section-head { font-size: 1.05rem; margin: 1.1rem 0 .6rem; display: flex; align-items: center; gap: .5rem; }
+.section-head .chip { font-size: .72rem; }
+
 /* ---------- watchlist / follow stars ---------- */
 .follow-btn {
   background: none; border: none; cursor: pointer; padding: 0 .15rem;
