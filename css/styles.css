@@ -105,6 +105,9 @@ h3.sub:first-of-type { margin-top: .2rem; }
 /* ---------- fund status sections ---------- */
 .lifecycle-note { background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:.6rem .8rem; margin:.6rem 0 1rem; }
 .lifecycle-note p { margin:.3rem 0 0; }
+.active-filter { display:flex; align-items:center; gap:.5rem; background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; border-radius:8px; padding:.45rem .7rem; margin:.4rem 0 .8rem; font-size:.85rem; }
+.active-filter button.chip { cursor:pointer; background:#dbeafe; border-color:#bfdbfe; color:#1e40af; }
+.active-filter button.chip:hover { background:#bfdbfe; }
 .fund-section { margin-bottom: 1.4rem; }
 .section-head { font-size: 1.05rem; margin: 1.1rem 0 .6rem; display: flex; align-items: center; gap: .5rem; }
 .section-head .chip { font-size: .72rem; }
@@ -204,6 +207,9 @@ a.intel-head:hover { color: var(--primary); }
 .chart { width: 100%; height: auto; }
 .chart g.bar-row.clickable { cursor: pointer; }
 .chart g.bar-row.clickable:hover { opacity: .82; }
+.chart g.line-pt.clickable { cursor: pointer; }
+.chart g.line-pt.clickable:hover rect { fill: rgba(37,99,235,0.07); }
+.chart g.line-pt.clickable:hover circle { r: 6; }
 .donut path.clickable { cursor: pointer; }
 .donut path.clickable:hover { opacity: .82; }
 .legend-item.clickable { cursor: pointer; }

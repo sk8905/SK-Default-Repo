@@ -83,12 +83,20 @@ export function lineChart(data, { unit = "", width = 560, height = 220 } = {}) {
   });
   const path = pts.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(" ");
   const area = `${path} L ${pts[pts.length - 1].x} ${top + plotH} L ${pts[0].x} ${top + plotH} Z`;
-  const dots = pts.map((p) =>
-    `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4" fill="#2563eb"><title>${esc(p.d.label)}: ${unit}${p.d.value.toLocaleString()}</title></circle>`
-  ).join("");
-  const xlabels = pts.map((p) =>
-    `<text x="${p.x.toFixed(1)}" y="${height - 8}" text-anchor="middle" class="chart-axis">${esc(p.d.label)}</text>`
-  ).join("");
+  // Each point can carry a `nav` object → it becomes a clickable column
+  // (transparent full-height hit area + dot + x-label) for drill-down.
+  const hitW = stepX > 0 ? stepX : plotW;
+  const dots = pts.map((p) => {
+    const dot = `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4" fill="#2563eb"></circle>`;
+    const lbl = `<text x="${p.x.toFixed(1)}" y="${height - 8}" text-anchor="middle" class="chart-axis">${esc(p.d.label)}</text>`;
+    const tip = `<title>${esc(p.d.label)}: ${unit}${p.d.value.toLocaleString()}</title>`;
+    if (!p.d.nav) return `<g>${dot}${lbl}${tip}</g>`;
+    const hx = Math.max(0, p.x - hitW / 2);
+    return `<g class="line-pt clickable" ${navAttrs(p.d.nav)}>${tip}` +
+      `<rect x="${hx.toFixed(1)}" y="${top}" width="${hitW.toFixed(1)}" height="${plotH}" fill="transparent"/>` +
+      `${dot}${lbl}</g>`;
+  }).join("");
+  const xlabels = "";
   const gridY = [0, 0.5, 1].map((f) => {
     const y = top + plotH - f * plotH;
     return `<line x1="${left}" y1="${y}" x2="${width - right}" y2="${y}" class="chart-grid"/>

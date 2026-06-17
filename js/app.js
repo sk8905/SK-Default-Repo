@@ -18,6 +18,13 @@ const eur = (m) => (m == null ? "Undisclosed" : "€" + (m >= 1000 ? (m / 1000).
 const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const pct = (n) => (n == null ? "Undisclosed" : Math.round(n) + "%");
 const fmtDate = (d) => new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+// Calendar quarter (e.g. "2025-Q2") from a fund's close/as-of date; null if only
+// the year is known (we don't invent a quarter).
+const fundQuarter = (f) => {
+  const m = /^(\d{4})-(\d{2})/.exec(f.asOf || "");
+  return m ? `${m[1]}-Q${Math.floor((+m[2] - 1) / 3) + 1}` : null;
+};
+const isClose = (f) => f.status === "Final Close" || f.status === "First Close";
 
 const statusClass = (s) => ({
   "Pre-marketing": "st-pre", "Open": "st-open", "First Close": "st-first", "Final Close": "st-final",
@@ -168,7 +175,7 @@ function investorsForFund(f) {
 // --------------------------- simple filter state ---------------------------
 // Persists per-view filter selections across re-renders within a session.
 const filterState = {
-  funds: { q: "", strategy: "", status: "", geo: "" },
+  funds: { q: "", strategy: "", status: "", geo: "", period: "" },
   managers: { q: "", strategy: "" },
   lps: { q: "", type: "", strategy: "" },
   intel: { q: "", type: "" },
@@ -207,13 +214,16 @@ function viewDashboard() {
     label: g, value: bnRaised(funds.filter((f) => f.geoFocus === g)), nav: { jump: "funds", geo: g },
   })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
 
-  // fundraising momentum — closes (first+final) per quarter, last 6 quarters
-  const qKey = (d) => { const dt = new Date(d); return `${dt.getFullYear()}-Q${Math.floor(dt.getMonth() / 3) + 1}`; };
+  // fundraising momentum — fund closes (first + final) per quarter over the past
+  // 5 years (20 quarters). Each quarter is clickable → Funds closing that quarter.
   const qCounts = {};
-  intel.filter((i) => i.type === "First Close" || i.type === "Final Close")
-    .forEach((i) => { const k = qKey(i.date); qCounts[k] = (qCounts[k] || 0) + 1; });
-  const trend = Object.keys(qCounts).sort().slice(-6).map((k) => ({
-    label: "'" + k.slice(2), value: qCounts[k],
+  funds.filter(isClose).forEach((f) => { const q = fundQuarter(f); if (q) qCounts[q] = (qCounts[q] || 0) + 1; });
+  const nowD = new Date();
+  let cy = nowD.getFullYear(), cq = Math.floor(nowD.getMonth() / 3) + 1;
+  const quarters = [];
+  for (let i = 0; i < 20; i++) { quarters.unshift(`${cy}-Q${cq}`); cq--; if (cq < 1) { cq = 4; cy--; } }
+  const trend = quarters.map((q) => ({
+    label: "'" + q.slice(2), value: qCounts[q] || 0, nav: { jump: "funds", period: q },
   }));
 
   const kpis = [
@@ -236,8 +246,12 @@ function viewDashboard() {
       <section class="card"><h2>Capital sought by strategy <span class="muted">(€bn · disclosed targets, funds in market)</span></h2>${bySought.length ? barChart(bySought, { unit: "€", width: 540 }) : '<p class="muted small">No disclosed target sizes for funds currently in market.</p>'}</section>
       <section class="card"><h2>Funds by status</h2>${donutChart(byStatus)}</section>
       <section class="card"><h2>Capital raised by geography <span class="muted">(€bn)</span></h2>${barChart(byGeo, { unit: "€", width: 540 })}</section>
-      <section class="card"><h2>Fundraising momentum <span class="muted">(closes / quarter)</span></h2><div class="chart-link clickable" data-jump="intel" title="View the intelligence feed">${lineChart(trend)}</div></section>
     </div>
+    <section class="card">
+      <h2>Fundraising momentum <span class="muted">(fund closes / quarter · past 5 years)</span></h2>
+      <p class="muted small">Click any quarter to see the funds that reached a first or final close in it.</p>
+      ${lineChart(trend, { width: 1120, height: 240 })}
+    </section>
     <div class="grid-2">
       <section class="card">
         <h2>Latest intelligence</h2>
@@ -285,7 +299,8 @@ function viewFunds() {
     (!f.q || (x.name + managerById[x.managerId].name).toLowerCase().includes(f.q.toLowerCase())) &&
     (!f.strategy || x.strategy === f.strategy) &&
     (!f.status || (f.status === "in-market" ? inMarket(x) : fundCategory(x) === f.status)) &&
-    (!f.geo || x.geoFocus === f.geo)
+    (!f.geo || x.geoFocus === f.geo) &&
+    (!f.period || (isClose(x) && fundQuarter(x) === f.period))
   ).sort((a, b) => (b.raised || 0) - (a.raised || 0));
 
   // Group by category: Open / First Close / Final Close / Evergreen / Pre-marketing.
@@ -300,8 +315,13 @@ function viewFunds() {
       </section>`).join("")
     : '<p class="empty">No funds match these filters.</p>';
 
+  const periodBanner = f.period
+    ? `<div class="active-filter">Showing funds that reached a first/final close in <strong>${esc(f.period)}</strong> <button type="button" class="chip" data-clearfilter="period" title="Clear quarter filter">✕ clear</button></div>`
+    : "";
+
   app.innerHTML = `
-    <div class="page-head"><h1>Funds in Market</h1><p class="muted">${rows.length} of ${funds.length} funds</p></div>
+    <div class="page-head"><h1>Funds in Market</h1><p class="muted">${rows.length} of ${funds.length} funds${f.period ? ` · closing ${esc(f.period)}` : ""}</p></div>
+    ${periodBanner}
     <div class="filters">
       <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Fund or manager…" value="${esc(f.q)}"></label>
       ${selectFilter("strategy", "Strategy", STRATEGIES, f.strategy)}
@@ -758,6 +778,14 @@ app.addEventListener("click", (e) => {
     router();
     return;
   }
+  const clear = e.target.closest("[data-clearfilter]");
+  if (clear) {
+    e.stopPropagation();
+    const key = clear.getAttribute("data-clearfilter");
+    if (filterState.funds && key in filterState.funds) filterState.funds[key] = "";
+    router();
+    return;
+  }
   const jump = e.target.closest("[data-jump]");
   if (jump) {
     const route = jump.getAttribute("data-jump");
@@ -767,6 +795,7 @@ app.addEventListener("click", (e) => {
         strategy: jump.getAttribute("data-strategy") || "",
         status: jump.getAttribute("data-status") || "",
         geo: jump.getAttribute("data-geo") || "",
+        period: jump.getAttribute("data-period") || "",
       };
     }
     location.hash = "#/" + route;
