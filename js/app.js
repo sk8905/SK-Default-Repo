@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260617-32";
+} from "./data.js?v=20260617-33";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260617-32";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260617-33";
 
 const app = document.getElementById("app");
 
@@ -1048,9 +1048,10 @@ function viewLeague() {
 
 // =============================== WATCHLIST =================================
 function viewWatchlist() {
-  const fm = followList("manager").map((id) => managerById[id]).filter(Boolean);
-  const ff = followList("fund").map((id) => fundById[id]).filter(Boolean);
-  const fl = followList("lp").map((id) => lpById[id]).filter(Boolean);
+  const byName = (a, b) => a.name.localeCompare(b.name);
+  const fm = followList("manager").map((id) => managerById[id]).filter(Boolean).sort(byName);
+  const ff = followList("fund").map((id) => fundById[id]).filter(Boolean).sort(byName);
+  const fl = followList("lp").map((id) => lpById[id]).filter(Boolean).sort(byName);
   const mIds = new Set(fm.map((m) => m.id)), fIds = new Set(ff.map((f) => f.id));
   const feed = intel.filter((i) => (i.managerId && mIds.has(i.managerId)) || (i.fundId && fIds.has(i.fundId)));
 
