@@ -359,7 +359,7 @@ function fundTable(rows) {
       <thead><tr>${sortTh("funds", "name", "Fund")}${sortTh("funds", "manager", "Manager")}${sortTh("funds", "strategy", "Strategy")}${sortTh("funds", "geo", "Geography")}${sortTh("funds", "status", "Status")}${sortTh("funds", "target", "Target")}${sortTh("funds", "progress", "Progress", "prog-col")}</tr></thead>
       <tbody>
         ${rows.map((x) => `<tr class="clickable" data-href="#/fund/${x.id}">
-          <td>${followBtn("fund", x.id)} <strong>${esc(x.name)}</strong><div class="muted small">${x.vintage} · ${esc(x.domicile)}</div></td>
+          <td>${followBtn("fund", x.id)} <strong>${esc(x.name)}</strong><div class="muted small fund-sub">${x.vintage} · ${esc(x.domicile)} · ${completenessPill(x)}</div></td>
           <td>${link(`#/manager/${x.managerId}`, managerById[x.managerId].name)}</td>
           <td>${chip(x.strategy)}</td>
           <td>${esc(x.geoFocus)}</td>
@@ -463,6 +463,71 @@ function returnsCard(x) {
     <h3 class="sub">Actual performance</h3>${perf}</section>`;
 }
 
+// ---- Data provenance & completeness -----------------------------------------
+// Honest, at-a-glance view of WHICH data points are disclosed for a fund, which
+// are estimates/indicative, and which are simply not public — so gaps are
+// explicit rather than hidden. States: yes (disclosed) · est (estimate) ·
+// indicative (strategy proxy, not this fund's figure) · no (gap) · na (n/a).
+function dataDimensions(x) {
+  const inv = investorsForFund(x);
+  const notable = (x.notableInvestments || []).length;
+  return [
+    { key: "Fundraising target",
+      state: x.evergreen ? "na" : (x.targetSize != null ? "yes" : "no"),
+      detail: x.evergreen ? "evergreen — no fixed target" : (x.targetSize != null ? eur(x.targetSize) + " target" : "target not disclosed") },
+    { key: x.evergreen ? "Current AUM/NAV" : "Amount raised",
+      state: x.raised != null ? "yes" : "no",
+      detail: x.raised != null ? eur(x.raised) : "not disclosed" },
+    { key: "Deployment",
+      state: x.evergreen ? "na" : (x.deployedPct != null ? (x.deployedEstimated ? "est" : "yes") : "no"),
+      detail: x.evergreen ? "rolling (evergreen)" : (x.deployedPct != null ? `${x.deployedPct}% invested${x.deployedEstimated ? " (est.)" : ""}${x.deployedAsOf ? ` · as of ${x.deployedAsOf}` : ""}` : "not separately disclosed") },
+    { key: "Target IRR",
+      state: x.targetIRR ? "yes" : "indicative",
+      detail: x.targetIRR ? `${x.targetIRR.range}${x.targetIRR.basis ? " " + x.targetIRR.basis : ""} — disclosed` : `${STRATEGY_IRR[x.strategy] || "—"} — indicative strategy range, not this fund's figure` },
+    { key: "Actual performance",
+      state: x.performance ? "yes" : "no",
+      detail: x.performance ? "net IRR / multiples disclosed" : "not publicly disclosed" },
+    { key: "Named investors",
+      state: inv.length ? "yes" : "no",
+      detail: inv.length ? `${inv.length} disclosed` : "none publicly disclosed" },
+    { key: "Notable investments",
+      state: notable ? "yes" : "no",
+      detail: notable ? `${notable} compiled` : "none compiled / disclosed" },
+  ];
+}
+// Disclosed = hard facts (yes) + flagged estimates (est). Indicative/no/na are not
+// counted as disclosed; na is excluded from the denominator (not applicable).
+function completeness(x) {
+  const dims = dataDimensions(x);
+  const applicable = dims.filter((d) => d.state !== "na");
+  const disclosed = applicable.filter((d) => d.state === "yes" || d.state === "est");
+  return { disclosed: disclosed.length, total: applicable.length, gaps: applicable.filter((d) => d.state === "no" || d.state === "indicative").map((d) => d.key) };
+}
+// Compact inline meter for tables/headers; tooltip spells out the gaps.
+function completenessPill(x) {
+  const c = completeness(x);
+  const lvl = c.disclosed / c.total;
+  const cls = lvl >= 0.66 ? "dm-hi" : lvl >= 0.34 ? "dm-mid" : "dm-lo";
+  const title = c.gaps.length ? `Not disclosed: ${c.gaps.join(", ")}` : "All tracked data points disclosed";
+  return `<span class="data-meter ${cls}" title="${esc(title)}"><span class="dm-bar"><span class="dm-fill" style="width:${Math.round(lvl * 100)}%"></span></span>${c.disclosed}/${c.total} data</span>`;
+}
+const STATE_ICON = { yes: "✓", est: "~", indicative: "~", no: "—", na: "·" };
+const STATE_LABEL = { yes: "Disclosed", est: "Estimate", indicative: "Indicative", no: "Not disclosed", na: "N/A" };
+// Full breakdown card: as-of date + per-dimension disclosure status.
+function dataProvenanceCard(x) {
+  const c = completeness(x);
+  const rows = dataDimensions(x).map((d) =>
+    `<li class="dim dim-${d.state}"><span class="dim-icon" title="${esc(STATE_LABEL[d.state])}">${STATE_ICON[d.state]}</span>
+      <span class="dim-key">${esc(d.key)}</span>
+      <span class="dim-detail muted small">${esc(d.detail)}</span></li>`).join("");
+  return `<section class="card provenance">
+    <h2>Data completeness &amp; provenance</h2>
+    <p class="muted small">Record compiled <strong>as of ${esc(x.asOf || "—")}</strong> from public sources. <strong>${c.disclosed} of ${c.total}</strong> tracked data points are publicly disclosed${c.gaps.length ? `; the rest are not public (or shown as an indicative proxy) and are marked below.` : "."}</p>
+    <ul class="dim-list">${rows}</ul>
+    <p class="muted small">“Indicative” = a market-typical range for the strategy, not this fund’s own figure. “Estimate” = a figure we have approximated and flagged. Everything else links to its source above.</p>
+  </section>`;
+}
+
 function viewFund(id) {
   const x = fundById[id];
   if (!x) return notFound();
@@ -484,6 +549,7 @@ function viewFund(id) {
         <h1>${followBtn("fund", x.id)} ${esc(x.name)}</h1>
         <p class="muted">${link(`#/manager/${m.id}`, m.name)} · ${esc(x.domicile)} · Vintage ${x.vintage}</p>
         <div>${chip(x.strategy)} ${fundStatusChip(x)} ${lifecycleBadge(x)} ${equityBadge(x)} ${chip(x.geoFocus)}</div>
+        <p class="muted small data-asof">Data as of ${esc(x.asOf || "—")} · ${completenessPill(x)}</p>
       </div>
     </div>
     <p class="lead">${esc(x.description)}</p>
@@ -507,6 +573,7 @@ function viewFund(id) {
     </div>
     ${extraInvestorCard}
     ${returnsCard(x)}
+    ${dataProvenanceCard(x)}
     <section class="card">
       <h2>Related intelligence</h2>
       ${related.length ? related.map(intelRow).join("") : '<p class="muted">No intelligence items linked to this fund yet.</p>'}
