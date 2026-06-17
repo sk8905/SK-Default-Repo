@@ -215,7 +215,7 @@ const SORT_COLUMNS = {
 
 // Sort rows per the view's current { key, dir }; missing/empty values sort last.
 function applySort(rows, view) {
-  const s = filterState[view].sort;
+  const s = filterState[view].sort || (filterState[view].sort = { key: "name", dir: "asc" });
   const col = SORT_COLUMNS[view] && SORT_COLUMNS[view][s.key];
   if (!col) return rows;
   const mult = s.dir === "asc" ? 1 : -1;
@@ -866,6 +866,7 @@ app.addEventListener("click", (e) => {
         status: jump.getAttribute("data-status") || "",
         geo: jump.getAttribute("data-geo") || "",
         period: jump.getAttribute("data-period") || "",
+        sort: filterState.funds.sort || { key: "name", dir: "asc" },
       };
     }
     location.hash = "#/" + route;
