@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260617-28";
+} from "./data.js?v=20260617-29";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260617-28";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260617-29";
 
 const app = document.getElementById("app");
 
@@ -154,18 +154,58 @@ function sources(rec) {
   return `<div class="sources muted small"><span class="src-label">Sources:</span> ${links}${asOf}</div>`;
 }
 
-// --------------------------- watchlist (localStorage) ----------------------
+// --------------------------- watchlist (cloud sync + localStorage) ---------
+// Watchlist persists to a per-user Cloudflare KV store (via the /api/watchlist
+// Pages Function) when the site is served behind Cloudflare Access, so it syncs
+// across devices. localStorage is kept as an instant cache / offline fallback,
+// so the app still works if the API isn't reachable (e.g. plain static hosting).
 const FOLLOW_KEY = "meridian.follows";
+const WATCHLIST_API = "/api/watchlist";
+const FOLLOW_TYPES = ["manager", "fund", "lp"];
 function loadFollows() { try { return JSON.parse(localStorage.getItem(FOLLOW_KEY)) || {}; } catch { return {}; } }
 const follows = loadFollows();
+let account = null;          // signed-in identity (email) when behind Access
+let cloudSync = false;       // true once the watchlist API responds
+let pushTimer = null;
 function followList(type) { return follows[type] || (follows[type] = []); }
 function isFollowed(type, id) { return followList(type).includes(id); }
+function persistLocal() { try { localStorage.setItem(FOLLOW_KEY, JSON.stringify(follows)); } catch { /* ignore */ } }
+// Debounced save to the cloud (no-op when not signed in / not on Cloudflare).
+function pushRemote() {
+  if (!cloudSync) return;
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(() => {
+    const body = {}; FOLLOW_TYPES.forEach((t) => (body[t] = followList(t)));
+    fetch(WATCHLIST_API, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }).catch(() => {});
+  }, 400);
+}
+function saveFollows() { persistLocal(); pushRemote(); }
 function toggleFollow(type, id) {
   const a = followList(type); const i = a.indexOf(id);
   if (i >= 0) a.splice(i, 1); else a.push(id);
-  try { localStorage.setItem(FOLLOW_KEY, JSON.stringify(follows)); } catch { /* ignore */ }
+  saveFollows();
 }
-function followCount() { return ["manager", "fund", "lp"].reduce((n, t) => n + followList(t).length, 0); }
+function followCount() { return FOLLOW_TYPES.reduce((n, t) => n + followList(t).length, 0); }
+// Pull the cloud watchlist on startup. Server is the source of truth across
+// devices; if the server is empty but this device has items, migrate them up.
+async function initWatchlistSync() {
+  let r;
+  try { r = await fetch(WATCHLIST_API, { headers: { accept: "application/json" } }); }
+  catch { return; }            // offline / not on Cloudflare → localStorage only
+  if (!r || !r.ok) return;     // 404 on static hosting, 401 if not authed
+  let d; try { d = await r.json(); } catch { return; }
+  cloudSync = true;
+  account = d.email || null;
+  const sv = d.watchlist || {};
+  const svCount = FOLLOW_TYPES.reduce((n, t) => n + ((sv[t] || []).length), 0);
+  if (svCount > 0) {
+    FOLLOW_TYPES.forEach((t) => (follows[t] = Array.isArray(sv[t]) ? sv[t] : []));
+    persistLocal();
+  } else if (followCount() > 0) {
+    pushRemote();              // first-time migration of this device's list
+  }
+  router();                    // re-render with synced data + account chip
+}
 function followBtn(type, id) {
   const on = isFollowed(type, id);
   return `<button type="button" class="follow-btn ${on ? "on" : ""}" data-follow="${type}:${id}" title="${on ? "Following — click to remove from watchlist" : "Add to your watchlist"}" aria-label="Follow">${on ? "★" : "☆"}</button>`;
@@ -986,9 +1026,15 @@ function viewWatchlist() {
   const mIds = new Set(fm.map((m) => m.id)), fIds = new Set(ff.map((f) => f.id));
   const feed = intel.filter((i) => (i.managerId && mIds.has(i.managerId)) || (i.fundId && fIds.has(i.fundId)));
 
+  const syncNote = cloudSync
+    ? `☁ Synced to your account across devices${account ? ` · signed in as <strong>${esc(account)}</strong>` : ""} · <a href="/cdn-cgi/access/logout">Sign out</a>`
+    : "Saved on this device only";
+  const accountBar = `<div class="account-bar muted small">${syncNote}</div>`;
+
   if (fm.length + ff.length + fl.length === 0) {
     app.innerHTML = `<div class="page-head"><h1>My Watchlist</h1></div>
-      <section class="card"><p class="muted">You're not following anything yet. Click the ☆ star on any manager, fund or investor to add it here — your watchlist builds a personalised intelligence feed. (Saved locally in your browser.)</p></section>`;
+      ${accountBar}
+      <section class="card"><p class="muted">You're not following anything yet. Click the ☆ star on any manager, fund or investor to add it here — your watchlist builds a personalised intelligence feed${cloudSync ? " and syncs across your devices" : ""}.</p></section>`;
     return;
   }
   const listCard = (title, items, type, render) =>
@@ -996,7 +1042,8 @@ function viewWatchlist() {
       ? `<ul class="link-list">${items.map((x) => `<li>${followBtn(type, x.id)} ${render(x)}</li>`).join("")}</ul>`
       : '<p class="muted small">None followed.</p>'}</section>`;
   app.innerHTML = `
-    <div class="page-head"><h1>My Watchlist</h1><p class="muted">${fm.length + ff.length + fl.length} followed · saved locally in your browser</p></div>
+    <div class="page-head"><h1>My Watchlist</h1><p class="muted">${fm.length + ff.length + fl.length} followed · ${cloudSync ? "synced across devices" : "saved on this device"}</p></div>
+    ${accountBar}
     <section class="card"><h2>Your intelligence feed <span class="muted">(${feed.length})</span></h2>${feed.length ? feed.map(intelRow).join("") : '<p class="muted small">No intelligence yet for the managers/funds you follow.</p>'}</section>
     ${listCard("Managers", fm, "manager", (m) => link(`#/manager/${m.id}`, m.name))}
     ${listCard("Funds", ff, "fund", (f) => `${link(`#/fund/${f.id}`, f.name)} <span class="muted small">${esc(managerById[f.managerId].name)}</span>`)}
@@ -1123,3 +1170,4 @@ function router() {
 window.addEventListener("hashchange", router);
 window.addEventListener("DOMContentLoaded", router);
 router();
+initWatchlistSync();

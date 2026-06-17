@@ -273,6 +273,9 @@ a.intel-head:hover { color: var(--primary); }
 .chart-legend { display: flex; gap: 1.4rem; justify-content: center; margin: 0 0 .4rem; font-size: .8rem; color: var(--muted); }
 /* Secondary heading stacked inside a card (e.g. a second chart below the first). */
 .card-subhead { margin-top: 1.4rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+/* Watchlist account / sync status bar. */
+.account-bar { background: #f0f9ff; border: 1px solid #bae6fd; color: #075985; border-radius: 8px; padding: .5rem .8rem; margin: 0 0 1rem; }
+.account-bar a { color: #0369a1; font-weight: 600; }
 /* Quarterly-trend dual-handle range slider (one track, two thumbs). */
 .trend-controls { display: flex; flex-direction: column; gap: .5rem; margin: .35rem 0 1rem; }
 .range-readout { font-size: .85rem; color: var(--muted); }
