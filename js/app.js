@@ -145,6 +145,26 @@ function followBtn(type, id) {
 function commitmentsForLp(lpId) { return commitments.filter((c) => c.lpId === lpId); }
 function commitmentsForManager(managerId) { return commitments.filter((c) => c.managerId === managerId); }
 
+// Actual, publicly-disclosed investors in a specific fund: combines the fund's
+// own `investors` list with any fund-level entries in the commitments table.
+// Deduped by name; LP-universe entries link through to the investor profile.
+function investorsForFund(f) {
+  const out = [];
+  const seen = new Set();
+  const push = (name, lpId, note, url) => {
+    const key = (name || "").toLowerCase();
+    if (!name || seen.has(key)) return;
+    seen.add(key);
+    out.push({ name, lpId: lpId || null, note: note || "", url: url || null });
+  };
+  (f.investors || []).forEach((i) => push(i.name, i.lpId, i.note, i.url));
+  commitments.filter((c) => c.fundId === f.id).forEach((c) => {
+    const lp = lpById[c.lpId];
+    push(lp ? lp.name : c.lpId, c.lpId, c.note, c.sourceUrl);
+  });
+  return out;
+}
+
 // --------------------------- simple filter state ---------------------------
 // Persists per-view filter selections across re-renders within a session.
 const filterState = {
@@ -168,6 +188,14 @@ function viewDashboard() {
   // capital raised by strategy (€bn) — bars link to Funds filtered by strategy
   const byStrategy = STRATEGIES.map((s) => ({
     label: s, value: bnRaised(funds.filter((f) => f.strategy === s)), nav: { jump: "funds", strategy: s },
+  })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
+
+  // capital SOUGHT by strategy (€bn) — disclosed target sizes of funds actively
+  // raising (Open / First Close / Pre-marketing; evergreen has no fixed target).
+  const seekingCapital = (f) => !f.evergreen && !f.lifecycle && (f.status === "Open" || f.status === "First Close" || f.status === "Pre-marketing");
+  const bnTarget = (list) => Math.round(list.reduce((a, f) => a + (f.targetSize || 0), 0) / 100) / 10;
+  const bySought = STRATEGIES.map((s) => ({
+    label: s, value: bnTarget(funds.filter((f) => seekingCapital(f) && f.strategy === s)), nav: { jump: "funds", strategy: s, status: "in-market" },
   })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
 
   // funds by category — segments/legend link to Funds filtered by category
@@ -205,6 +233,7 @@ function viewDashboard() {
     </div>
     <div class="grid-2">
       <section class="card"><h2>Capital raised by strategy <span class="muted">(€bn)</span></h2>${barChart(byStrategy, { unit: "€", width: 540 })}</section>
+      <section class="card"><h2>Capital sought by strategy <span class="muted">(€bn · disclosed targets, funds in market)</span></h2>${bySought.length ? barChart(bySought, { unit: "€", width: 540 }) : '<p class="muted small">No disclosed target sizes for funds currently in market.</p>'}</section>
       <section class="card"><h2>Funds by status</h2>${donutChart(byStatus)}</section>
       <section class="card"><h2>Capital raised by geography <span class="muted">(€bn)</span></h2>${barChart(byGeo, { unit: "€", width: 540 })}</section>
       <section class="card"><h2>Fundraising momentum <span class="muted">(closes / quarter)</span></h2><div class="chart-link clickable" data-jump="intel" title="View the intelligence feed">${lineChart(trend)}</div></section>
@@ -289,13 +318,41 @@ function viewFunds() {
   wireFilters("funds");
 }
 
+// Indicative LP fit — shown while a fund is raising (open / first close / evergreen).
+// Explicitly NOT confirmed commitments.
+function potentialFitCard(x) {
+  const interestedLps = lps.filter((l) => l.strategies.includes(x.strategy) && l.mandateStatus !== "Not currently active");
+  return `<section class="card">
+    <h2>Potential investor fit <span class="muted">(${interestedLps.length})</span></h2>
+    <p class="muted small">LPs whose stated interests include ${esc(x.strategy)} — indicative fit while the fund is open, not confirmed commitments.</p>
+    <ul class="link-list">
+      ${interestedLps.slice(0, 6).map((l) => `<li>${link(`#/lp/${l.id}`, l.name)} <span class="muted small">${esc(l.type)} · ${l.typicalTicket != null ? eur(l.typicalTicket) + " typical ticket" : "ticket undisclosed"}</span></li>`).join("") || '<li class="muted">No active LPs flagged.</li>'}
+    </ul>
+  </section>`;
+}
+
+// Actual, publicly-disclosed investors — shown for funds that have reached final
+// close (and evergreen funds). Honest empty-state when no LPs are public.
+function actualInvestorsCard(x) {
+  const inv = investorsForFund(x);
+  const body = inv.length
+    ? `<ul class="link-list">${inv.map((i) => `<li>${i.lpId ? link(`#/lp/${i.lpId}`, i.name) : `<strong>${esc(i.name)}</strong>`}${i.note ? ` <span class="muted small">— ${esc(i.note)}</span>` : ""}${i.url ? ` · <a href="${esc(i.url)}" target="_blank" rel="noopener noreferrer" class="muted small">source</a>` : ""}</li>`).join("")}</ul>`
+    : `<p class="muted small">No specific LP commitments to this fund have been disclosed publicly. (Most private funds do not name investors; where cornerstone/anchor LPs are announced — e.g. public pensions, the EIF / British Business Bank, sovereign wealth funds — they are listed here with sources.)</p>`;
+  return `<section class="card"><h2>Investors <span class="muted">(${inv.length})</span></h2>
+    <p class="muted small">Limited partners publicly disclosed as having committed to this fund.</p>${body}</section>`;
+}
+
 function viewFund(id) {
   const x = fundById[id];
   if (!x) return notFound();
   const m = managerById[x.managerId];
   const related = intelForFund(id);
   const peers = funds.filter((p) => p.strategy === x.strategy && p.id !== id).slice(0, 5);
-  const interestedLps = lps.filter((l) => l.strategies.includes(x.strategy) && l.mandateStatus !== "Not currently active");
+  // While raising (open/first close/pre-marketing) or evergreen → indicative fit.
+  // At final close (and for evergreen) → actual disclosed investor list.
+  const showPotential = x.evergreen || x.status === "Open" || x.status === "First Close" || x.status === "Pre-marketing";
+  const investorCard = showPotential ? potentialFitCard(x) : actualInvestorsCard(x);
+  const extraInvestorCard = (x.evergreen && (x.status === "Final Close" || x.evergreen)) ? actualInvestorsCard(x) : "";
 
   app.innerHTML = `
     ${breadcrumb([["#/funds", "Funds"], [null, x.name]])}
@@ -323,14 +380,9 @@ function viewFund(id) {
         </dl>
         ${deploymentBlock(x)}
       </section>
-      <section class="card">
-        <h2>Potential investor fit <span class="muted">(${interestedLps.length})</span></h2>
-        <p class="muted small">LPs whose stated interests include ${esc(x.strategy)}.</p>
-        <ul class="link-list">
-          ${interestedLps.slice(0, 6).map((l) => `<li>${link(`#/lp/${l.id}`, l.name)} <span class="muted small">${esc(l.type)} · ${l.typicalTicket != null ? eur(l.typicalTicket) + " typical ticket" : "ticket undisclosed"}</span></li>`).join("") || '<li class="muted">No active LPs flagged.</li>'}
-        </ul>
-      </section>
+      ${investorCard}
     </div>
+    ${extraInvestorCard}
     <section class="card">
       <h2>Related intelligence</h2>
       ${related.length ? related.map(intelRow).join("") : '<p class="muted">No intelligence items linked to this fund yet.</p>'}
