@@ -364,15 +364,16 @@ function viewManager(id) {
       <div class="kpi-card"><div class="kpi-value">${m.founded}</div><div class="kpi-label">Founded</div></div>
     </div>
     <section class="card">
-      <h2>Funds</h2>
-      <div class="table-wrap"><table class="data-table">
-        <thead><tr><th>Fund</th><th>Strategy</th><th>Vintage</th><th>Status</th><th>Target</th><th class="prog-col">Progress</th></tr></thead>
+      <h2>Funds <span class="muted">(${fs.length})</span></h2>
+      ${fs.length ? `<div class="table-wrap"><table class="data-table">
+        <thead><tr><th>Fund</th><th>Strategy</th><th>Geography</th><th>Vintage</th><th>Status</th><th>Target</th><th class="prog-col">Progress</th></tr></thead>
         <tbody>${fs.map((x) => `<tr class="clickable" data-href="#/fund/${x.id}">
-          <td><strong>${esc(x.name)}</strong></td><td>${chip(x.strategy)}</td><td>${x.vintage}</td>
+          <td>${followBtn("fund", x.id)} <strong>${esc(x.name)}</strong></td><td>${chip(x.strategy)}</td><td>${esc(x.geoFocus)}</td><td>${x.vintage}</td>
           <td>${chip(x.status, statusClass(x.status))}</td><td>${x.evergreen ? "—" : eur(x.targetSize)}</td>
           <td class="prog-col">${raiseDisplay(x)}</td>
         </tr>`).join("")}</tbody>
-      </table></div>
+      </table></div>`
+      : `<p class="muted">${esc(m.fundsNote || "No fund tracked for this manager — see the profile note above (e.g. it is a bank/balance-sheet lender, has no dedicated credit arm, or runs only US/global vehicles).")}</p>`}
     </section>
     ${dealsForManager(m.id).length ? `<section class="card"><h2>Deal activity <span class="muted">(${dealsForManager(m.id).length})</span></h2>${dealsForManager(m.id).map(dealRow).join("")}</section>` : ""}
     ${commitmentsForManager(m.id).length ? `<section class="card"><h2>Known investors <span class="muted">(${commitmentsForManager(m.id).length})</span></h2><ul class="link-list">${commitmentsForManager(m.id).map((c) => `<li>${link(`#/lp/${c.lpId}`, lpById[c.lpId].name)} <span class="muted small">${esc(c.note)}</span></li>`).join("")}</ul></section>` : ""}
