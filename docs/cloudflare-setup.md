@@ -90,3 +90,23 @@ Then add that same hostname to the Access application (step 3.2) so it's gated t
   GitHub Pages copy), it silently falls back to a **device-local** watchlist and
   shows "Saved on this device only" — it won't error.
 - Everything above is within Cloudflare's free tier for a single user.
+
+---
+
+## Workers-only accounts (no classic Pages)
+
+Newer Cloudflare accounts only offer "Create a Worker" (no Pages). In that case
+the repo is deployed as a **Worker with static assets** instead of Pages
+Functions — the config is already in the repo:
+
+- `wrangler.jsonc` — names the Worker `meridian`, serves the repo as static
+  assets (ASSETS binding) and binds the `WATCHLIST` KV namespace by id.
+- `src/index.js` — the Worker entry: serves `/api/watchlist` and otherwise
+  hands off to the static assets.
+
+Setup: create the KV namespace, put its **id** in `wrangler.jsonc`
+(`kv_namespaces[0].id`), and make sure the Worker's **Deploy command** is
+`npx wrangler deploy` (Worker → Settings → Build). Push to `main` and Cloudflare
+redeploys the same Worker/URL, so the existing Cloudflare Access app keeps
+gating it unchanged. `functions/api/watchlist.js` is the Pages-Functions
+equivalent and is unused on the Worker path.

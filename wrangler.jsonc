@@ -1,0 +1,12 @@
+{
+  "name": "meridian",
+  "main": "src/index.js",
+  "compatibility_date": "2025-05-01",
+  "assets": {
+    "directory": "./",
+    "binding": "ASSETS"
+  },
+  "kv_namespaces": [
+    { "binding": "WATCHLIST", "id": "ab67312994a84d2cbe4ec33b850ced01" }
+  ]
+}
