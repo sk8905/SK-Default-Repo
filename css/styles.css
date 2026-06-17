@@ -195,6 +195,16 @@ a.intel-head:hover { color: var(--primary); }
 
 /* ---------- charts ---------- */
 .chart { width: 100%; height: auto; }
+.chart g.bar-row.clickable { cursor: pointer; }
+.chart g.bar-row.clickable:hover { opacity: .82; }
+.donut path.clickable { cursor: pointer; }
+.donut path.clickable:hover { opacity: .82; }
+.legend-item.clickable { cursor: pointer; }
+.legend-item.clickable:hover { text-decoration: underline; }
+.chart-link.clickable { cursor: pointer; display: block; }
+.chart-link.clickable:hover { opacity: .85; }
+.kpi-card.clickable { cursor: pointer; transition: border-color .15s, transform .1s, box-shadow .15s; }
+.kpi-card.clickable:hover { border-left-color: var(--accent); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(15,23,42,.08); }
 .chart-label { font-size: 11px; fill: #334155; }
 .chart-value { font-size: 11px; fill: #0f172a; font-weight: 600; }
 .chart-axis { font-size: 10px; fill: var(--muted); }

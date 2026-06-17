@@ -131,17 +131,17 @@ function viewDashboard() {
   // helper: capital raised in approximate €bn (one decimal) for chart readability
   const bnRaised = (list) => Math.round(list.reduce((a, f) => a + (f.raised || 0), 0) / 100) / 10;
 
-  // capital raised by strategy (€bn)
+  // capital raised by strategy (€bn) — bars link to Funds filtered by strategy
   const byStrategy = STRATEGIES.map((s) => ({
-    label: s, value: bnRaised(funds.filter((f) => f.strategy === s)),
+    label: s, value: bnRaised(funds.filter((f) => f.strategy === s)), nav: { jump: "funds", strategy: s },
   })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
 
-  // funds by status
-  const byStatus = FUND_STATUS.map((s) => ({ label: s, value: funds.filter((f) => f.status === s).length })).filter((d) => d.value > 0);
+  // funds by status — segments/legend link to Funds filtered by status
+  const byStatus = FUND_STATUS.map((s) => ({ label: s, value: funds.filter((f) => f.status === s).length, nav: { jump: "funds", status: s } })).filter((d) => d.value > 0);
 
-  // capital by geography (€bn)
+  // capital by geography (€bn) — bars link to Funds filtered by geography
   const byGeo = GEOS.map((g) => ({
-    label: g, value: bnRaised(funds.filter((f) => f.geoFocus === g)),
+    label: g, value: bnRaised(funds.filter((f) => f.geoFocus === g)), nav: { jump: "funds", geo: g },
   })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
 
   // fundraising momentum — closes (first+final) per quarter, last 6 quarters
@@ -154,10 +154,10 @@ function viewDashboard() {
   }));
 
   const kpis = [
-    { label: "Tracked funds", value: funds.length, sub: `${managers.length} managers` },
-    { label: "Funds in market", value: open.length, sub: "open or at first close" },
-    { label: "Capital raised (tracked)", value: eur(totalRaised), sub: "across tracked funds" },
-    { label: "Final closes (2025–26)", value: finalClosesYTD, sub: `${trackedRaise} close events` },
+    { label: "Tracked funds", value: funds.length, sub: `${managers.length} managers`, jump: 'data-jump="funds"' },
+    { label: "Funds in market", value: open.length, sub: "open or at first close", jump: 'data-jump="funds" data-status="Open"' },
+    { label: "Capital raised (tracked)", value: eur(totalRaised), sub: "across tracked funds", jump: 'data-jump="league"' },
+    { label: "Final closes (2025–26)", value: finalClosesYTD, sub: `${trackedRaise} close events`, jump: 'data-jump="funds" data-status="Final Close"' },
   ];
 
   app.innerHTML = `
@@ -166,13 +166,13 @@ function viewDashboard() {
       <p class="muted">European private credit fundraising at a glance · real data compiled from public sources (mid-2026)</p>
     </div>
     <div class="kpi-grid">
-      ${kpis.map((k) => `<div class="kpi-card"><div class="kpi-value">${k.value}</div><div class="kpi-label">${k.label}</div><div class="kpi-sub muted">${k.sub}</div></div>`).join("")}
+      ${kpis.map((k) => `<div class="kpi-card clickable" ${k.jump}><div class="kpi-value">${k.value}</div><div class="kpi-label">${k.label}</div><div class="kpi-sub muted">${k.sub}</div></div>`).join("")}
     </div>
     <div class="grid-2">
       <section class="card"><h2>Capital raised by strategy <span class="muted">(€bn)</span></h2>${barChart(byStrategy, { unit: "€", width: 540 })}</section>
       <section class="card"><h2>Funds by status</h2>${donutChart(byStatus)}</section>
       <section class="card"><h2>Capital raised by geography <span class="muted">(€bn)</span></h2>${barChart(byGeo, { unit: "€", width: 540 })}</section>
-      <section class="card"><h2>Fundraising momentum <span class="muted">(closes / quarter)</span></h2>${lineChart(trend)}</section>
+      <section class="card"><h2>Fundraising momentum <span class="muted">(closes / quarter)</span></h2><div class="chart-link clickable" data-jump="intel" title="View the intelligence feed">${lineChart(trend)}</div></section>
     </div>
     <div class="grid-2">
       <section class="card">
@@ -619,6 +619,20 @@ app.addEventListener("click", (e) => {
     const [type, id] = fb.getAttribute("data-follow").split(":");
     toggleFollow(type, id);
     router();
+    return;
+  }
+  const jump = e.target.closest("[data-jump]");
+  if (jump) {
+    const route = jump.getAttribute("data-jump");
+    if (route === "funds") {
+      filterState.funds = {
+        q: "",
+        strategy: jump.getAttribute("data-strategy") || "",
+        status: jump.getAttribute("data-status") || "",
+        geo: jump.getAttribute("data-geo") || "",
+      };
+    }
+    location.hash = "#/" + route;
     return;
   }
   const row = e.target.closest("[data-href]");

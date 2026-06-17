@@ -13,7 +13,14 @@ function esc(s) {
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-// Horizontal bar chart. data: [{label, value}]
+// Turn a datum's optional `nav` object ({jump:"funds", strategy:"…"}) into
+// data-* attributes consumed by the app's click delegation.
+function navAttrs(nav) {
+  if (!nav) return "";
+  return Object.entries(nav).map(([k, v]) => `data-${k}="${esc(v)}"`).join(" ");
+}
+
+// Horizontal bar chart. data: [{label, value, nav?}]
 export function barChart(data, { unit = "", width = 520 } = {}) {
   const rowH = 30, gap = 10, left = 200, right = 70;
   const max = Math.max(1, ...data.map((d) => d.value));
@@ -23,15 +30,17 @@ export function barChart(data, { unit = "", width = 520 } = {}) {
     const y = gap + i * (rowH + gap);
     const w = Math.max(2, (d.value / max) * barW);
     const color = PALETTE[i % PALETTE.length];
-    return `
+    const inner = `
+      <rect x="0" y="${y}" width="${width}" height="${rowH}" fill="transparent"/>
       <text x="${left - 10}" y="${y + rowH / 2 + 4}" text-anchor="end" class="chart-label">${esc(d.label)}</text>
       <rect x="${left}" y="${y}" width="${w}" height="${rowH}" rx="4" fill="${color}"><title>${esc(d.label)}: ${unit}${d.value.toLocaleString()}</title></rect>
       <text x="${left + w + 8}" y="${y + rowH / 2 + 4}" class="chart-value">${unit}${d.value.toLocaleString()}</text>`;
+    return d.nav ? `<g class="bar-row clickable" ${navAttrs(d.nav)}>${inner}</g>` : `<g>${inner}</g>`;
   }).join("");
   return `<svg viewBox="0 0 ${width} ${height}" class="chart" role="img">${rows}</svg>`;
 }
 
-// Donut chart. data: [{label, value}]
+// Donut chart. data: [{label, value, nav?}]
 export function donutChart(data, { size = 220 } = {}) {
   const total = data.reduce((s, d) => s + d.value, 0) || 1;
   const cx = size / 2, cy = size / 2, r = size / 2 - 8, inner = r * 0.6;
@@ -46,10 +55,11 @@ export function donutChart(data, { size = 220 } = {}) {
     const xi1 = cx + inner * Math.cos(a1), yi1 = cy + inner * Math.sin(a1);
     const xi0 = cx + inner * Math.cos(a0), yi0 = cy + inner * Math.sin(a0);
     const color = PALETTE[i % PALETTE.length];
-    return `<path d="M ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1} L ${xi1} ${yi1} A ${inner} ${inner} 0 ${large} 0 ${xi0} ${yi0} Z" fill="${color}"><title>${esc(d.label)}: ${d.value} (${Math.round(frac * 100)}%)</title></path>`;
+    const cls = d.nav ? ' class="clickable"' : "";
+    return `<path${cls} ${navAttrs(d.nav)} d="M ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1} L ${xi1} ${yi1} A ${inner} ${inner} 0 ${large} 0 ${xi0} ${yi0} Z" fill="${color}"><title>${esc(d.label)}: ${d.value} (${Math.round(frac * 100)}%)</title></path>`;
   }).join("");
   const legend = data.map((d, i) =>
-    `<div class="legend-item"><span class="legend-swatch" style="background:${PALETTE[i % PALETTE.length]}"></span>${esc(d.label)} <strong>${d.value}</strong></div>`
+    `<div class="legend-item ${d.nav ? "clickable" : ""}" ${navAttrs(d.nav)}><span class="legend-swatch" style="background:${PALETTE[i % PALETTE.length]}"></span>${esc(d.label)} <strong>${d.value}</strong></div>`
   ).join("");
   return `<div class="donut-wrap">
     <svg viewBox="0 0 ${size} ${size}" class="donut" role="img">${arcs}
