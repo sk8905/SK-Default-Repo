@@ -298,3 +298,24 @@ earliest verifiable ones date to 2024 — so all genuine credit CVs fall in
 2024-2026 (no fabricated older ones). Dropped a BlackRock CV that could only be
 attributed to BlackRock's equity (not credit) entity in our universe.
 The Deals tab has no date cutoff, so it displays the full available history.
+
+## Target IRR, fund performance, and 10-year deals backfill (2026-06-17)
+
+- **Target IRR (every fund):** fund pages now show a target IRR. Where the fund's
+  own target is publicly disclosed it is shown with a source (7 funds found, e.g.
+  Arcmont DLF V 8-14% net, Fasanara 10-20% net, Alcentra EDL III 7-9% net, Aviva
+  MSPD SONIA+4.5%, Venn VeCREF II mid/high single digits, Eiffel IDL >10% gross,
+  DK LTDO V mid-teens). Otherwise an indicative NET range typical for the strategy
+  is shown, explicitly flagged "indicative" (not a fund disclosure).
+- **Actual performance (where disclosed):** 7 funds carry verifiable performance
+  from public sources — public-pension reports, listed BDCs/vehicles and manager
+  results: Apollo AEPC 9.63% ITD net (theesk), Highbridge CDF 12.8% net / 1.17x
+  (Florida SBA), Arrow ACO II 19% deal IRR / 2.1x (Arrow Q3'25), Schroders JULIE
+  III >8% gross (IPE), Highbridge Tactical 7.82% ann. net (HTCF report), Overland
+  Advantage 6.64% NAV total return (10-K). Each with as-of date, source and a note
+  clarifying the metric basis (IRR vs total-return vs deal-level). Most private
+  funds disclose neither — honest empty-state otherwise.
+- **Deals backfill to 10 years:** added 57 transactions dated 2016-2022 (Deals now
+  span 2016-09 -> 2026-06; 167 total), from newswires/manager & law-firm releases,
+  deduped, type-validated, attributed to verified managers. Dropped fund-close
+  items (those belong in fundraising/intel) and PitchBook/Tracxn-only items.
