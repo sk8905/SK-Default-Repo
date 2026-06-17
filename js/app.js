@@ -175,12 +175,68 @@ function investorsForFund(f) {
 // --------------------------- simple filter state ---------------------------
 // Persists per-view filter selections across re-renders within a session.
 const filterState = {
-  funds: { q: "", strategy: "", status: "", geo: "", period: "" },
-  managers: { q: "", strategy: "" },
-  lps: { q: "", type: "", strategy: "" },
+  funds: { q: "", strategy: "", status: "", geo: "", period: "", sort: { key: "name", dir: "asc" } },
+  managers: { q: "", strategy: "", sort: { key: "name", dir: "asc" } },
+  lps: { q: "", type: "", strategy: "", sort: { key: "name", dir: "asc" } },
   intel: { q: "", type: "" },
   deals: { q: "", type: "" },
 };
+
+// --------------------------- column-header sorting -------------------------
+// Per-view accessor maps: column key -> { type, get(row) }. `type:"num"` sorts
+// numerically (nulls last), otherwise alphabetical via localeCompare.
+const SORT_COLUMNS = {
+  funds: {
+    name: { type: "txt", get: (x) => x.name },
+    manager: { type: "txt", get: (x) => managerById[x.managerId].name },
+    strategy: { type: "txt", get: (x) => x.strategy },
+    geo: { type: "txt", get: (x) => x.geoFocus },
+    status: { type: "txt", get: (x) => fundCategory(x) },
+    target: { type: "num", get: (x) => (x.evergreen ? null : x.targetSize) },
+    progress: { type: "num", get: (x) => x.raised },
+  },
+  managers: {
+    name: { type: "txt", get: (m) => m.name },
+    hq: { type: "txt", get: (m) => m.hq },
+    aum: { type: "num", get: (m) => m.aum },
+    funds: { type: "num", get: (m) => fundsByManager(m.id).length },
+    live: { type: "num", get: (m) => fundsByManager(m.id).filter((x) => !x.evergreen && !x.lifecycle && x.status !== "Final Close").length },
+  },
+  lps: {
+    name: { type: "txt", get: (l) => l.name },
+    type: { type: "txt", get: (l) => l.type },
+    hq: { type: "txt", get: (l) => l.hq },
+    aum: { type: "num", get: (l) => l.aum },
+    pc: { type: "num", get: (l) => l.pcAllocationPct },
+    ticket: { type: "num", get: (l) => l.typicalTicket },
+    mandate: { type: "txt", get: (l) => l.mandateStatus },
+  },
+};
+
+// Sort rows per the view's current { key, dir }; missing/empty values sort last.
+function applySort(rows, view) {
+  const s = filterState[view].sort;
+  const col = SORT_COLUMNS[view] && SORT_COLUMNS[view][s.key];
+  if (!col) return rows;
+  const mult = s.dir === "asc" ? 1 : -1;
+  return [...rows].sort((a, b) => {
+    const va = col.get(a), vb = col.get(b);
+    const ea = va == null || va === "", eb = vb == null || vb === "";
+    if (ea && eb) return 0;
+    if (ea) return 1;           // empties always last
+    if (eb) return -1;
+    if (col.type === "num") return (va - vb) * mult;
+    return String(va).localeCompare(String(vb)) * mult;
+  });
+}
+
+// A clickable, sort-aware <th>. Shows ▲/▼ on the active column.
+function sortTh(view, key, label, extraClass = "") {
+  const s = filterState[view].sort;
+  const active = s.key === key;
+  const arrow = active ? (s.dir === "asc" ? " ▲" : " ▼") : "";
+  return `<th class="sortable${active ? " active" : ""}${extraClass ? " " + extraClass : ""}" data-sortcol="${view}:${key}" role="button" tabindex="0" aria-sort="${active ? (s.dir === "asc" ? "ascending" : "descending") : "none"}">${esc(label)}${arrow}</th>`;
+}
 
 // ================================ DASHBOARD =================================
 function viewDashboard() {
@@ -276,8 +332,9 @@ function selectFilter(id, label, options, current) {
 }
 
 function fundTable(rows) {
+  rows = applySort(rows, "funds");
   return `<div class="table-wrap"><table class="data-table">
-      <thead><tr><th>Fund</th><th>Manager</th><th>Strategy</th><th>Geography</th><th>Status</th><th>Target</th><th class="prog-col">Progress</th></tr></thead>
+      <thead><tr>${sortTh("funds", "name", "Fund")}${sortTh("funds", "manager", "Manager")}${sortTh("funds", "strategy", "Strategy")}${sortTh("funds", "geo", "Geography")}${sortTh("funds", "status", "Status")}${sortTh("funds", "target", "Target")}${sortTh("funds", "progress", "Progress", "prog-col")}</tr></thead>
       <tbody>
         ${rows.map((x) => `<tr class="clickable" data-href="#/fund/${x.id}">
           <td>${followBtn("fund", x.id)} <strong>${esc(x.name)}</strong><div class="muted small">${x.vintage} · ${esc(x.domicile)}</div></td>
@@ -425,7 +482,8 @@ function viewManagers() {
   const rows = managers.filter((m) =>
     (!f.q || m.name.toLowerCase().includes(f.q.toLowerCase()) || m.hq.toLowerCase().includes(f.q.toLowerCase())) &&
     (!f.strategy || m.strategies.includes(f.strategy))
-  ).sort((a, b) => a.name.localeCompare(b.name));
+  );
+  const sorted = applySort(rows, "managers");
 
   app.innerHTML = `
     <div class="page-head"><h1>Managers</h1><p class="muted">${rows.length} of ${managers.length} GPs</p></div>
@@ -434,9 +492,9 @@ function viewManagers() {
       ${selectFilter("strategy", "Strategy", STRATEGIES, f.strategy)}
     </div>
     <div class="table-wrap"><table class="data-table">
-      <thead><tr><th>Manager</th><th>HQ</th><th>AUM</th><th>Strategies</th><th>Funds</th><th>In&nbsp;mkt</th></tr></thead>
+      <thead><tr>${sortTh("managers", "name", "Manager")}${sortTh("managers", "hq", "HQ")}${sortTh("managers", "aum", "AUM")}<th>Strategies</th>${sortTh("managers", "funds", "Funds")}${sortTh("managers", "live", "In&nbsp;mkt")}</tr></thead>
       <tbody>
-        ${rows.map((m) => {
+        ${sorted.map((m) => {
           const fs = fundsByManager(m.id);
           const live = fs.filter((x) => !x.evergreen && !x.lifecycle && x.status !== "Final Close").length;
           const strat = m.strategies.slice(0, 2).map((s) => chip(s)).join(" ") + (m.strategies.length > 2 ? ` <span class="muted small">+${m.strategies.length - 2}</span>` : "") || '<span class="muted small">—</span>';
@@ -540,7 +598,8 @@ function viewLps() {
     (!f.q || l.name.toLowerCase().includes(f.q.toLowerCase()) || l.hq.toLowerCase().includes(f.q.toLowerCase())) &&
     (!f.type || l.type === f.type) &&
     (!f.strategy || l.strategies.includes(f.strategy))
-  ).sort((a, b) => a.name.localeCompare(b.name));
+  );
+  const sorted = applySort(rows, "lps");
 
   app.innerHTML = `
     <div class="page-head"><h1>Investors / Allocators</h1><p class="muted">${rows.length} of ${lps.length} LPs</p></div>
@@ -550,9 +609,9 @@ function viewLps() {
       ${selectFilter("strategy", "Interest", STRATEGIES, f.strategy)}
     </div>
     <div class="table-wrap"><table class="data-table">
-      <thead><tr><th>Investor</th><th>Type</th><th>HQ</th><th>AUM</th><th>PC alloc.</th><th>Typical ticket</th><th>Mandate</th></tr></thead>
+      <thead><tr>${sortTh("lps", "name", "Investor")}${sortTh("lps", "type", "Type")}${sortTh("lps", "hq", "HQ")}${sortTh("lps", "aum", "AUM")}${sortTh("lps", "pc", "PC alloc.")}${sortTh("lps", "ticket", "Typical ticket")}${sortTh("lps", "mandate", "Mandate")}</tr></thead>
       <tbody>
-        ${rows.map((l) => `<tr class="clickable" data-href="#/lp/${l.id}">
+        ${sorted.map((l) => `<tr class="clickable" data-href="#/lp/${l.id}">
           <td>${followBtn("lp", l.id)} <strong>${esc(l.name)}</strong></td><td>${esc(l.type)}</td><td>${esc(l.hq)}</td>
           <td>€${l.aum}bn</td><td>${pct(l.pcAllocationPct)}</td><td>${eur(l.typicalTicket)}</td>
           <td>${chip(l.mandateStatus, mandateClass(l.mandateStatus))}</td>
@@ -787,6 +846,16 @@ app.addEventListener("click", (e) => {
     router();
     return;
   }
+  const sortcol = e.target.closest("[data-sortcol]");
+  if (sortcol) {
+    e.stopPropagation();
+    const [view, key] = sortcol.getAttribute("data-sortcol").split(":");
+    const s = filterState[view].sort;
+    if (s.key === key) s.dir = s.dir === "asc" ? "desc" : "asc";
+    else { s.key = key; s.dir = "asc"; }
+    router();
+    return;
+  }
   const jump = e.target.closest("[data-jump]");
   if (jump) {
     const route = jump.getAttribute("data-jump");
@@ -804,6 +873,15 @@ app.addEventListener("click", (e) => {
   }
   const row = e.target.closest("[data-href]");
   if (row && !e.target.closest("a")) location.hash = row.getAttribute("data-href");
+});
+
+// Keyboard activation for sortable column headers (Enter / Space).
+app.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" && e.key !== " ") return;
+  const sortcol = e.target.closest("[data-sortcol]");
+  if (!sortcol) return;
+  e.preventDefault();
+  sortcol.click();
 });
 
 // ================================= router ==================================
