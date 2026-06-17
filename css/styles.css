@@ -322,5 +322,38 @@ a.intel-head:hover { color: var(--primary); }
   .grid-2 { grid-template-columns: 1fr; }
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .card-grid { grid-template-columns: 1fr; }
-  .mainnav { display: none; }
+
+  /* Topbar: brand + account share the first row; the nav becomes a full-width
+     horizontally-scrollable strip below it (so it stays usable on phones). */
+  .topbar { height: auto; flex-wrap: wrap; gap: .4rem 1rem; padding: .55rem .9rem; }
+  .brand { flex: 1 1 auto; }
+  .topbar-right { order: 2; flex: 0 1 auto; }
+  .account-nav, .data-status { white-space: normal; font-size: .66rem; }
+  .mainnav {
+    display: flex; order: 3; flex-basis: 100%; width: 100%;
+    justify-content: flex-start; gap: .15rem;
+    overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+  .mainnav::-webkit-scrollbar { display: none; }
+  .nav-link { padding: .4rem .6rem; white-space: nowrap; flex: 0 0 auto; }
+  .nav-sep { display: none; }
+
+  .container { padding: 1rem 1rem 2.5rem; }
+  .card { padding: 1rem; }
+  .table-wrap { -webkit-overflow-scrolling: touch; }
+
+  /* Stack intel/deal rows so the date/type column doesn't eat the width. */
+  .intel-row { flex-direction: column; gap: .35rem; }
+  .intel-meta { width: auto; flex-direction: row; align-items: center; gap: .5rem; }
+}
+
+@media (max-width: 480px) {
+  h1 { font-size: 1.35rem; }
+  .kpi-value { font-size: 1.35rem; }
+  .kpi-value.kpi-aum { font-size: 1.05rem; }
+  /* Filters stack to full width and stay tappable. */
+  .filters { gap: .5rem; }
+  .filter { flex: 1 1 100%; }
+  .filter select, .filter input, .filter.search input { min-width: 0; width: 100%; }
 }
