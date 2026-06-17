@@ -33,6 +33,18 @@ export const STRATEGIES = [
 
 export const FUND_STATUS = ["Pre-marketing", "Open", "First Close", "Final Close"];
 
+// Deal-level activity types (distinct from the fundraising intelligence feed).
+export const DEAL_TYPES = [
+  "Investment",
+  "Financing",
+  "Disposal / Exit",
+  "Refinancing",
+  "Restructuring",
+  "Bankruptcy / Distress",
+  "Acquisition",
+  "NPL / Portfolio",
+];
+
 export const GEOS = [
   "Pan-European",
   "UK & Ireland",
@@ -259,8 +271,105 @@ export const commitments = [
   { lpId: "l1", managerId: "m15", fundId: null, note: "€200m to AllianzGI Impact Private Credit" },
 ];
 
-// Keep the intelligence feed strictly newest-first regardless of insertion order.
+// ---------------------------------------------------------------------------
+// Deal-level activity feed — transactions, financings, disposals, refinancings,
+// restructurings, bankruptcies, NPL/portfolio deals and M&A. Each carries a
+// public sourceUrl. Tagged to a managerId (and a fundId where applicable).
+// ---------------------------------------------------------------------------
+export const deals = [
+  // Ares (m20)
+  { id: "d1", date: "2025-08-14", type: "Refinancing", managerId: "m20", fundId: null, headline: "Ares leads record €6.5bn unitranche refinancing of Adevinta", summary: "Ares anchored the largest unitranche ever agreed in Europe, refinancing the Blackstone/Permira-owned online-classifieds group.", sourceUrl: "https://alternativecreditinvestor.com/2025/08/14/ares-tops-direct-lender-rankings-as-activity-reaches-all-time-high/" },
+  { id: "d2", date: "2025-07-01", type: "Refinancing", managerId: "m20", fundId: null, headline: "Ares, Carlyle & Goldman commit ~£1.2bn to refinance OneAdvanced", summary: "The trio provided a debt package to fully refinance the UK enterprise-software provider's existing facilities.", sourceUrl: "https://www.carlyle.com/media-room/news-release-archive/ares-management-carlyle-and-goldman-sachs-alternatives-commit-%C2%A312" },
+  // ICG (m2)
+  { id: "d3", date: "2025-11-21", type: "Refinancing", managerId: "m2", fundId: null, headline: "ICG leads €2.0bn senior secured refinancing for Funecap Group", summary: "ICG arranged the largest French direct-lending deal of 2025 (with Apollo and Hayfin participating) for the funeral-services group it has backed since 2015.", sourceUrl: "https://www.icgam.com/2025/11/21/icg-leads-e2bn-refinancing-for-funecap-group/" },
+  { id: "d4", date: "2025-12-18", type: "Disposal / Exit", managerId: "m2", fundId: null, headline: "ICG exits SCF via sale to ABL", summary: "ICG realised its investment in container business SCF through a sale to PT Asian Bulk Logistics.", sourceUrl: "https://www.icgam.com/2025/12/18/icg-completes-successful-exit-from-scf-via-sale-to-abl/" },
+  // CVC Credit (m21)
+  { id: "d5", date: "2025-08-12", type: "Financing", managerId: "m21", fundId: null, headline: "CVC Credit finances CapVest-backed Novus Foods' acquisition of noosa", summary: "CVC provided a Capital Solutions financing supporting the refrigerated-foods platform's M&A and growth.", sourceUrl: "https://www.cvc.com/media/news/2025/cvc-credit-provides-financing-to-capvest-backed-novus-foods-through-its-capital-solutions-strategy/" },
+  { id: "d6", date: "2025-06-01", type: "Financing", managerId: "m21", fundId: "f30", headline: "CVC Credit funds KKR/Impilo acquisition of Immedica Pharma", summary: "Debt facilities via European Direct Lending IV for the Swedish rare-disease specialty pharma company.", sourceUrl: "https://www.cvc.com/media/news/2025/cvc-credit-provides-debt-facilities-for-the-joint-acquisition-of-immedica-pharma-by-kkr-and-impilo/" },
+  { id: "d7", date: "2026-02-01", type: "Financing", managerId: "m21", fundId: null, headline: "CVC Credit finances Waterland's acquisition of Palletways", summary: "CVC backed the buyout of the European express-logistics network.", sourceUrl: "https://www.cvc.com/media/news/2026/cvc-credit-finances-acquisition-of-palletways-by-waterland-private-equity/" },
+  // Tikehau (m3)
+  { id: "d8", date: "2025-07-30", type: "Disposal / Exit", managerId: "m3", fundId: null, headline: "Tikehau exits flagship private-debt investment Dedalus at ~1.9x MOIC", summary: "Via a KKR/Clearlake refinancing, Tikehau realised its 2016 direct-lending position in the Italian healthcare-software firm (14.2% net IRR).", sourceUrl: "https://www.tikehaucapital.com/~/media/Files/T/Tikehau-Capital-V2/documents/media/en/pr-2025-en/20250730-Tikehau-Capital-exits-flagship-private-debt-investment-Dedalus.pdf" },
+  // Barings (m6)
+  { id: "d9", date: "2023-07-01", type: "Financing", managerId: "m6", fundId: null, headline: "Barings provides unitranche for IK Partners' £269m take-private of Medica Group", summary: "Barings acted as sole lender of secured facilities backing the UK teleradiology firm's delisting.", sourceUrl: "https://www.barings.com/en-us/guest/contact/media/news/barings-supports-public-to-private-transaction-of-medica-group-plc-by-ik-partners" },
+  // Apollo (m7)
+  { id: "d10", date: "2025-06-20", type: "Financing", managerId: "m7", fundId: null, headline: "Apollo commits up to £4.5bn to Électricité de France (EDF)", summary: "Apollo-managed funds agreed to buy notes under EDF's EMTN programme, mainly funding UK projects incl. Hinkley Point C — the largest sterling-denominated private-credit transaction.", sourceUrl: "https://www.apollo.com/insights-news/pressreleases/2025/06/apollo-commits-to-4-5-billion-financing-for-lectricit-de-france-marking-the-largest-sterling-denominated-private-credit-transaction-3102855" },
+  { id: "d11", date: "2025-09-08", type: "Investment", managerId: "m7", fundId: null, headline: "Apollo commits €3.2bn to an RWE JV supporting Germany's transmission grid", summary: "Apollo funds invested in a JV holding RWE's 25.1% stake in Amprion to fund grid-expansion capex.", sourceUrl: "https://www.globenewswire.com/news-release/2025/09/08/3145796/0/en/Apollo-Commits-3-2-Billion-to-RWE-Joint-Venture-Supporting-the-German-Transmission-Grid.html" },
+  // Blackstone (m8)
+  { id: "d12", date: "2024-11-26", type: "NPL / Portfolio", managerId: "m8", fundId: null, headline: "BXCI acquires ~$1bn infrastructure-loan portfolio from Santander", summary: "The portfolio finances digital infrastructure, renewables, energy efficiency and transport assets largely in Western Europe and the US.", sourceUrl: "https://www.blackstone.com/news/press/blackstone-credit-insurance-announces-1-billion-infrastructure-loan-portfolio-purchase-from-santander/" },
+  { id: "d13", date: "2025-12-05", type: "Acquisition", managerId: "m8", fundId: null, headline: "AmTrust and BXCI form ANV Group Holdings", summary: "BXCI carved out AmTrust's global MGA and fee businesses (US, UK and Continental Europe) into a new independent company.", sourceUrl: "https://www.blackstone.com/news/press/amtrust-financial-services-and-blackstone-credit-insurance-enter-into-strategic-transaction-for-amtrusts-global-mga-and-fee-businesses/" },
+  // Goldman Sachs Alternatives (m9)
+  { id: "d14", date: "2025-06-30", type: "Financing", managerId: "m9", fundId: null, headline: "Goldman Sachs Alternatives leads record €6.5bn direct-lending loan for Adevinta", summary: "GS led the largest European unitranche on record (~19 direct-lending funds participating) for the Blackstone/Permira-owned classifieds group.", sourceUrl: "https://octus.com/resources/articles/adevinta-unitranche/" },
+  // AXA IM Alts (m14)
+  { id: "d15", date: "2025-07-01", type: "Financing", managerId: "m14", fundId: null, headline: "AXA IM Alts closes five managed CLOs totalling ~$2bn in H1 2025", summary: "New issuance and resets across its managed CLO platform, including Allegro CLO XVII ($500m) and a reset of Adagio X EUR CLO (€330m).", sourceUrl: "https://alts.axa-im.com/media-centre/axa-im-alts-closed-five-transactions-its-managed-collateralised-loan-obligation-activity-h1-2025-c-2" },
+  { id: "d16", date: "2025-01-23", type: "Financing", managerId: "m14", fundId: "f21", headline: "AXA IM Alts deploys ~€3bn in European real estate debt over 12 months", summary: "Senior and whole-loan CRE lending, majority in logistics, residential and data-centre assets; platform now ~€26bn invested.", sourceUrl: "https://alts.axa-im.com/media-centre/axa-im-alts-real-estate-debt-platform-raises-record-eu4-billion-and-deploys-ceu3-billion-12-months" },
+  // Aviva Investors (m16)
+  { id: "d17", date: "2025-03-01", type: "Financing", managerId: "m16", fundId: "f25", headline: "Aviva Investors provides £40.3m debt facility to Brydell Partners", summary: "First real estate debt deal from Aviva's Multi-Sector Private Debt LTAF since its Nov 2024 launch.", sourceUrl: "https://www.avivainvestors.com/en-gb/about/company-news/2025/03/aviva-investors-completes-40-million-debt-investment-with-brydell-partners/" },
+  { id: "d18", date: "2024-06-01", type: "Financing", managerId: "m16", fundId: null, headline: "Aviva Investors extends lending programme with Urban Logistics REIT", summary: "A new loan under Aviva's sustainable transition loans framework to the UK logistics landlord.", sourceUrl: "https://realassets.ipe.com/news/aviva-extends-lending-programme-with-urban-logistics/10068134.article" },
+  // LGIM (m17)
+  { id: "d19", date: "2024-02-28", type: "Refinancing", managerId: "m17", fundId: "f26", headline: "LGIM provides €150m sustainability-linked loan to SATO Corporation", summary: "A 12-year secured term loan to the Finnish residential landlord, used to refinance existing debt.", sourceUrl: "https://finance.yahoo.com/news/sato-corporation-signed-eur-150-105000030.html" },
+  { id: "d20", date: "2024-04-01", type: "Financing", managerId: "m17", fundId: null, headline: "LGIM provides £150m senior loan to Unite Students", summary: "A senior loan secured against 10 UK purpose-built student accommodation assets.", sourceUrl: "https://group.legalandgeneral.com/en/newsroom/press-releases/lgim-furthers-unite-relationship-with-150m-funding" },
+  // AlpInvest (m18)
+  { id: "d21", date: "2024-10-30", type: "Financing", managerId: "m18", fundId: "f27", headline: "AlpInvest closes $1bn collateralized fund obligation (GP-led CFO)", summary: "Then the largest publicly rated GP-led CFO, exceeding its $800m target, backed by AlpInvest secondaries and portfolio-finance funds.", sourceUrl: "https://www.carlyle.com/media-room/news-release-archive/alpinvest-successfully-closes-1-billion-collateralized-fund" },
+  { id: "d22", date: "2025-06-01", type: "Financing", managerId: "m18", fundId: null, headline: "Carlyle/AlpInvest closes record $1.25bn GP-led CFO", summary: "The largest publicly rated GP-led collateralized fund obligation to date, taking aggregate CFO issuance to $2.25bn.", sourceUrl: "https://www.carlyle.com/media-room/news-release-archive/carlyle-alpinvest-closes-largest-publicly-rated-gp-led-cfo" },
+  { id: "d23", date: "2024-10-01", type: "Financing", managerId: "m18", fundId: null, headline: "AlpInvest leads TJC's second continuation fund at $2.1bn", summary: "AlpInvest led the close of TJC LP's $2.1bn continuation vehicle.", sourceUrl: "https://markets.financialcontent.com/times-online/article/bizwire-2024-10-1-tjc-closes-second-continuation-fund-of-21-billion-led-by-alpinvest" },
+  // MV Credit / Clearlake (m13)
+  { id: "d24", date: "2025-05-07", type: "Acquisition", managerId: "m13", fundId: null, headline: "Clearlake completes acquisition of MV Credit, launches Clearlake Credit", summary: "Clearlake integrated MV Credit and WhiteStar into a >$57bn credit platform.", sourceUrl: "https://www.prnewswire.com/news-releases/clearlake-capital-launches-clearlake-credit-as-it-completes-strategic-acquisition-of-mv-credit-302446757.html" },
+  // Cheyne (m12)
+  { id: "d25", date: "2025-08-01", type: "Refinancing", managerId: "m12", fundId: null, headline: "Cheyne refinances German mid-market group Kaffee Partner", summary: "Cheyne provided a private-credit financing solution to refinance the sponsor-backed coffee-services group.", sourceUrl: "https://www.bakermckenzie.com/en/newsroom/2025/08/cheyne-capital-refinancing-kaffee-partner" },
+  { id: "d26", date: "2024-02-01", type: "Financing", managerId: "m12", fundId: null, headline: "Cheyne provides £143m debt for a third Riverstone later-living scheme", summary: "Cheyne Real Estate extended senior development financing for a Riverstone retirement-living development.", sourceUrl: "https://www.cheynecapital.com/media/2622/press-release-feb-2024-cheyne-provides-143m-debt-funding-for-third-riverstone-later-living-development.pdf" },
+  // AlbaCore (m11)
+  { id: "d27", date: "2024-12-05", type: "Restructuring", managerId: "m11", fundId: null, headline: "AlbaCore joins consortium recapitalising Hurtigruten", summary: "A consortium (with Arini and Barings) injected ~€360–400m of new capital and cut the Norwegian cruise operator's debt by over €1bn.", sourceUrl: "https://press.hurtigruten.com/pressreleases/hurtigruten-announces-acquisition-by-consortium-of-existing-investors-contributing-more-than-eur-360m-of-new-capital-into-the-business-3357493" },
+  // Signal (m32)
+  { id: "d28", date: "2024-05-01", type: "Acquisition", managerId: "m32", fundId: null, headline: "Signal Capital & Eurofund acquire Parma Retail (Spanish retail real estate)", summary: "Signal closed a special-situations real estate acquisition of the Parma Retail portfolio with partner Eurofund.", sourceUrl: "https://www.cbinsights.com/investor/signal-capital" },
+  // Attestor (m37)
+  { id: "d29", date: "2025-09-01", type: "Disposal / Exit", managerId: "m37", fundId: null, headline: "Attestor runs a sale process for Condor/Marabu", summary: "Attestor mandated Barclays to find buyers/strategic partners for the German leisure airline it acquired via distress in 2021.", sourceUrl: "https://aviation.direct/en/condor-und-marabu-vor-neuer-aera-attestor-forciert-strategische-partnersuche" },
+  { id: "d30", date: "2024-06-01", type: "Bankruptcy / Distress", managerId: "m37", fundId: null, headline: "Attestor in dispute over a large FTX bankruptcy claim", summary: "Attestor bought one of the largest FTX accounts from Lemma Technologies; the claim's value jumped, sparking a dispute.", sourceUrl: "https://www.pymnts.com/cryptocurrency/2024/distressed-assets-buyer-attestor-battles-over-ftx-claim/" },
+  // Sona (m38)
+  { id: "d31", date: "2024-02-01", type: "Restructuring", managerId: "m38", fundId: null, headline: "Sona, with Bain Capital, takes over Accolade Wines via debt-for-equity swap", summary: "Lenders including Sona swapped debt for equity to recapitalise the Australian wine producer hit by China tariffs.", sourceUrl: "https://www.bloomberg.com/news/articles/2024-02-01/bain-sona-group-agrees-deal-for-accolade-wines-of-australia" },
+  // Farallon (m39)
+  { id: "d32", date: "2025-06-01", type: "Investment", managerId: "m39", fundId: null, headline: "Farallon commits €761m for healthcare real estate operated by emeis (ex-Orpea)", summary: "Farallon (with TwentyTwo Real Estate) created a dedicated healthcare-property vehicle, helping emeis cut net debt by ~€700m.", sourceUrl: "https://www.whitecase.com/news/press-release/white-case-advises-emeis-eu761-million-investment-farallon-capital-and-twentytwo" },
+  { id: "d33", date: "2024-04-01", type: "Restructuring", managerId: "m39", fundId: null, headline: "Ares and Farallon take control of IBMG via debt restructuring", summary: "Farallon converted/injected capital to gain control of IBMG through a debt-led restructuring.", sourceUrl: "https://pe-insights.com/ares-and-farallon-poised-to-take-control-of-ibmg-through-debt-restructuring/" },
+  // Arini (m40)
+  { id: "d34", date: "2025-10-01", type: "Restructuring", managerId: "m40", fundId: null, headline: "Arini a lead creditor in Altice France's €24bn restructuring", summary: "The largest EMEA restructuring of 2025; Altice France cut gross debt by ~€9bn with Arini taking a lead role.", sourceUrl: "https://www.ifre.com/ifr-awards/2333229/emea-restructuring-altice-frances-24bn-restructuring" },
+  { id: "d35", date: "2024-12-05", type: "Restructuring", managerId: "m40", fundId: null, headline: "Arini joins consortium recapitalising Hurtigruten", summary: "Arini joined the equity consortium injecting new capital and cutting the cruise operator's debt by over €1bn.", sourceUrl: "https://press.hurtigruten.com/pressreleases/hurtigruten-announces-acquisition-by-consortium-of-existing-investors-contributing-more-than-eur-360m-of-new-capital-into-the-business-3357493" },
+  // Eurazeo (m24)
+  { id: "d36", date: "2025-11-01", type: "Financing", managerId: "m24", fundId: null, headline: "Eurazeo Private Debt provides unitranche for Antin's acquisition of Matawan", summary: "A senior unitranche facility backing Antin's buyout of the European smart-mobility software company.", sourceUrl: "https://www.linklaters.com/en/about-us/news-and-deals/deals/2025/november/linklaters-advises-eurazeo-private-debt-on-unitranche-financing-for-the-acquisition-of-matawan" },
+  { id: "d37", date: "2025-05-05", type: "Financing", managerId: "m24", fundId: null, headline: "Eurazeo Private Debt unitranche for Siparex's WVT Industries / Roam Technology", summary: "Unitranche supporting Siparex's investment in the pan-European specialty hygiene-chemicals group.", sourceUrl: "https://www.stblaw.com/about-us/news/view/2025/05/05/simpson-thacher-advises-eurazeo-private-debt-on-unitranche-financing-for-siparex-investment-in-wvt-industries-and-roam-technology" },
+  { id: "d38", date: "2023-06-15", type: "Financing", managerId: "m24", fundId: null, headline: "Eurazeo provides unitranche for Keensight's acquisition of Inke", summary: "Unitranche credit facility backing Keensight's buyout of the Barcelona-based pharma ingredients specialist.", sourceUrl: "https://en.newsroom.eurazeo.com/news/eurazeo-provides-a-unitranche-financing-for-keensight-capitals-acquisition-of-inke-01a16-52e2c.html" },
+  // Kartesia (m25)
+  { id: "d39", date: "2025-05-27", type: "Acquisition", managerId: "m25", fundId: null, headline: "Kartesia takes control of Van de Velde Packaging (Benelux)", summary: "Dutch competition regulator cleared Kartesia gaining indirect control of the packaging group via a capital increase and unitranche.", sourceUrl: "https://www.acm.nl/nl/publicaties/kartesia-mag-indirect-uitsluitende-zeggenschap-verkrijgen-over-van-de-velde-packaging-eindmededeling" },
+  // Apera (m26)
+  { id: "d40", date: "2024-11-01", type: "Refinancing", managerId: "m26", fundId: null, headline: "Apera arranges unitranche for the refinancing of Terras Holding (Germany)", summary: "Apera provided unitranche plus acquisition and revolving facilities to refinance the German group.", sourceUrl: "https://www.lw.com/en/news/2024/11/latham-watkins-advises-apera-on-refinancing-of-terras" },
+  { id: "d41", date: "2025-06-04", type: "Acquisition", managerId: "m26", fundId: null, headline: "Franklin Templeton agrees to acquire a majority interest in Apera", summary: "Franklin to buy a majority of the ~€5bn pan-European private credit firm; close expected Q3 2025.", sourceUrl: "https://apera-am.com/news/press-release-franklin-templeton-continues-expansion-of-alternatives-platform-with-agreement-to-acquire-apera" },
+  // Crescent (m27)
+  { id: "d42", date: "2025-09-25", type: "Financing", managerId: "m27", fundId: "f36", headline: "Crescent finances Procuritas's acquisition of Parkman (Swedish parking operator)", summary: "Unitranche financing from Crescent European Specialty Lending backing the majority-stake buyout.", sourceUrl: "https://www.businesswire.com/news/home/20250925332291/en/Crescent-European-Specialty-Lending-Announces-Financing-for-the-Majority-Stake-Acquisition-of-Parkman-by-Procuritas" },
+  { id: "d43", date: "2025-03-24", type: "Financing", managerId: "m27", fundId: "f36", headline: "Crescent finances VIA equity's partnership with Saarni Cloud (Finnish SaaS)", summary: "Unitranche financing supporting VIA equity's investment in the Finland-based HCM SaaS provider.", sourceUrl: "https://www.businesswire.com/news/home/20250324038309/en/Crescent-European-Specialty-Lending-Announces-Financing-for-VIA-equitys-Strategic-Partnership-with-Saarni-Cloud" },
+  // CAPZA (m28)
+  { id: "d44", date: "2025-03-01", type: "Financing", managerId: "m28", fundId: null, headline: "CAPZA provides unitranche for IceLake's acquisition of quattron & NEXTRAIL", summary: "Unitranche backing the majority acquisition of the rail-technology companies.", sourceUrl: "https://capza.co/category/private-debt/" },
+  { id: "d45", date: "2024-10-01", type: "Financing", managerId: "m28", fundId: null, headline: "CAPZA provides unitranche for Adagia Partners' acquisition of Technoflex", summary: "Unitranche facility supporting the buyout of Technoflex.", sourceUrl: "https://capza.co/news/capza-supports-technoflex/" },
+  // FitzWalter (m35)
+  { id: "d46", date: "2026-01-05", type: "Restructuring", managerId: "m35", fundId: null, headline: "FitzWalter acquires UK altnet G.Network in a lender-triggered deal", summary: "Lenders forced a sale of the London fibre operator (~£300m debt, 25k customers) to FitzWalter; close expected H1 2026.", sourceUrl: "https://www.ispreview.co.uk/index.php/2026/01/g-network-sell-london-uk-full-fibre-broadband-network-to-fitzwalter-capital.html" },
+  // OneIM (m34)
+  { id: "d47", date: "2024-11-01", type: "Investment", managerId: "m34", fundId: null, headline: "OneIM & Foundation Partners acquire two UK holiday parks", summary: "LaSalle provided a £123m loan to finance OneIM/Foundation's buyout of the Unity Farm and Skirlington holiday parks.", sourceUrl: "https://www.lasalle.com/news/lasalle-supports-oneim-and-foundation-partners-acquisition-of-two-uk-holiday-parks-through-123-million-debt-financing/" },
+  // Corinthia (m33)
+  { id: "d48", date: "2025-08-01", type: "Financing", managerId: "m33", fundId: null, headline: "Corinthia arranges senior facilities for Oakley Capital's acquisition of G3", summary: "Corinthia acted as arranger and lender of senior-secured direct lending facilities backing Oakley's buyout of the strategic-risk advisory firm.", sourceUrl: "https://corinthiagm.com/press-releases/corinthia-supports-the-acquisition-of-g3-by-oakley-capital/" },
+  // Pemberton (m22)
+  { id: "d49", date: "2025-03-10", type: "Financing", managerId: "m22", fundId: null, headline: "Pemberton backs Exponent's strategic investment in Hippo Digital", summary: "Pemberton provided debt financing to support Exponent's investment in the UK digital-transformation provider.", sourceUrl: "https://pembertonam.com/news/pemberton-supports-exponent-in-their-strategic-investment-in-hippo-digital/" },
+  // Permira Credit (m5)
+  { id: "d50", date: "2024-04-24", type: "Financing", managerId: "m5", fundId: null, headline: "Permira Credit sole senior secured lender to Bionic", summary: "Funds advised by Permira Credit provided the senior secured facility to OMERS Private Equity's UK SME business-essentials comparison service.", sourceUrl: "https://www.permira.com/news-and-insights/announcements/funds-advised-by-permira-credit-support-omers-private-equity-s-portfolio-company-bionic-a-leading-business-essentials-comparison-service-for-uk-smes" },
+  { id: "d51", date: "2025-06-01", type: "Financing", managerId: "m5", fundId: null, headline: "Permira Credit backs Astorg's acquisition of Xceptor", summary: "Funds advised by Permira Credit acted as senior secured lenders for Astorg's buyout of the no-code process-automation firm from CBPE.", sourceUrl: "https://www.permira.com/news-and-insights/announcements/funds-advised-by-permira-credit-support-astorg-s-acquisition-of-xceptor-a-global-leader-in-the-end-to-end-no-code-process-automation-market" },
+  // Hayfin (m30)
+  { id: "d52", date: "2026-06-03", type: "Financing", managerId: "m30", fundId: null, headline: "Hayfin underwrites debt for Hellman & Friedman's acquisition of Hyve Group", summary: "Hayfin fully underwrote the senior-secured acquisition financing for the events business, extending a lending relationship since 2021.", sourceUrl: "https://www.hayfin.com/hayfin-supports-hellman-friedmans-acquisition-of-hyve/" },
+  { id: "d53", date: "2025-12-24", type: "Financing", managerId: "m30", fundId: null, headline: "Hayfin & SVP provide €465m for the management buyout of Uvesco", summary: "A €465m senior secured term loan backing the management-led buyout of the Spanish food retailer from PAI Partners.", sourceUrl: "https://www.prnewswire.com/news-releases/hayfin-and-strategic-value-partners-to-provide-465-million-financing-to-support-uvesco-acquisition-302649260.html" },
+  // HPS (m31)
+  { id: "d54", date: "2025-07-01", type: "Acquisition", managerId: "m31", fundId: null, headline: "BlackRock completes ~$12bn acquisition of HPS Investment Partners", summary: "Corporate M&A of the manager, creating a combined private-credit platform of ~$220bn.", sourceUrl: "https://ir.blackrock.com/news-and-events/press-releases/press-releases-details/2025/BlackRock-Completes-Acquisition-of-HPS-Investment-Partners/default.aspx" },
+  // Sixth Street (m23)
+  { id: "d55", date: "2024-09-18", type: "Investment", managerId: "m23", fundId: null, headline: "Sixth Street & Patron Capital acquire UK housebuilder Cala for £1.35bn", summary: "Sixth Street and Patron Capital agreed to buy Cala Group from Legal & General at a £1.35bn enterprise value.", sourceUrl: "https://sixthstreet.com/investment_announce/cala-announces-new-ownership-legal-general-agrees-sale-with-sixth-street-and-patron/" },
+];
+
+// Keep both feeds strictly newest-first regardless of insertion order.
 intel.sort((a, b) => b.date.localeCompare(a.date));
+deals.sort((a, b) => b.date.localeCompare(a.date));
 
 // ---------------------------------------------------------------------------
 // Lookup helpers
@@ -277,4 +386,10 @@ export function intelForManager(managerId) {
 }
 export function intelForFund(fundId) {
   return intel.filter((i) => i.fundId === fundId);
+}
+export function dealsForManager(managerId) {
+  return deals.filter((d) => d.managerId === managerId);
+}
+export function dealsForFund(fundId) {
+  return deals.filter((d) => d.fundId === fundId);
 }

@@ -4,10 +4,10 @@
 // =============================================================================
 
 import {
-  STRATEGIES, FUND_STATUS, GEOS, LP_TYPES,
-  managers, funds, lps, intel, commitments,
+  STRATEGIES, FUND_STATUS, GEOS, LP_TYPES, DEAL_TYPES,
+  managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
-  fundsByManager, intelForManager, intelForFund,
+  fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
 } from "./data.js";
 import { barChart, donutChart, lineChart } from "./charts.js";
 
@@ -92,6 +92,7 @@ const filterState = {
   managers: { q: "", strategy: "" },
   lps: { q: "", type: "", strategy: "" },
   intel: { q: "", type: "" },
+  deals: { q: "", type: "" },
 };
 
 // ================================ DASHBOARD =================================
@@ -147,11 +148,18 @@ function viewDashboard() {
       <section class="card"><h2>Capital raised by geography <span class="muted">(€bn)</span></h2>${barChart(byGeo, { unit: "€", width: 540 })}</section>
       <section class="card"><h2>Fundraising momentum <span class="muted">(closes / quarter)</span></h2>${lineChart(trend)}</section>
     </div>
-    <section class="card">
-      <h2>Latest intelligence</h2>
-      ${intel.slice(0, 6).map(intelRow).join("")}
-      <div class="card-foot">${link("#/intel", "View full intelligence feed →")}</div>
-    </section>`;
+    <div class="grid-2">
+      <section class="card">
+        <h2>Latest intelligence</h2>
+        ${intel.slice(0, 6).map(intelRow).join("")}
+        <div class="card-foot">${link("#/intel", "View full intelligence feed →")}</div>
+      </section>
+      <section class="card">
+        <h2>Latest deal activity</h2>
+        ${deals.length ? deals.slice(0, 6).map(dealRow).join("") : '<p class="muted small">No deal activity yet.</p>'}
+        <div class="card-foot">${link("#/deals", "View all deal activity →")}</div>
+      </section>
+    </div>`;
 }
 
 // ================================== FUNDS ===================================
@@ -242,6 +250,7 @@ function viewFund(id) {
       <h2>Related intelligence</h2>
       ${related.length ? related.map(intelRow).join("") : '<p class="muted">No intelligence items linked to this fund yet.</p>'}
     </section>
+    ${dealsForFund(x.id).length ? `<section class="card"><h2>Deal activity <span class="muted">(${dealsForFund(x.id).length})</span></h2>${dealsForFund(x.id).map(dealRow).join("")}</section>` : ""}
     <section class="card">
       <h2>Peer funds — ${esc(x.strategy)}</h2>
       <ul class="link-list">
@@ -317,6 +326,7 @@ function viewManager(id) {
         </tr>`).join("")}</tbody>
       </table></div>
     </section>
+    ${dealsForManager(m.id).length ? `<section class="card"><h2>Deal activity <span class="muted">(${dealsForManager(m.id).length})</span></h2>${dealsForManager(m.id).map(dealRow).join("")}</section>` : ""}
     ${commitmentsForManager(m.id).length ? `<section class="card"><h2>Known investors <span class="muted">(${commitmentsForManager(m.id).length})</span></h2><ul class="link-list">${commitmentsForManager(m.id).map((c) => `<li>${link(`#/lp/${c.lpId}`, lpById[c.lpId].name)} <span class="muted small">${esc(c.note)}</span></li>`).join("")}</ul></section>` : ""}
     <section class="card">
       <h2>Intelligence</h2>
@@ -426,6 +436,42 @@ function viewIntel() {
       ${rows.length ? rows.map(intelRow).join("") : '<p class="empty">No intelligence items match these filters.</p>'}
     </section>`;
   wireFilters("intel");
+}
+
+// ============================== DEAL ACTIVITY ==============================
+const dealTypeClass = (t) => ({
+  "Investment": "dt-invest", "Financing": "dt-fin", "Disposal / Exit": "dt-exit",
+  "Refinancing": "dt-refi", "Restructuring": "dt-restr", "Bankruptcy / Distress": "dt-bank",
+  "Acquisition": "dt-acq", "NPL / Portfolio": "dt-npl",
+}[t] || "");
+
+function dealRow(d) {
+  const m = d.managerId ? managerById[d.managerId] : null;
+  const tgt = d.fundId ? `#/fund/${d.fundId}` : (m ? `#/manager/${m.id}` : null);
+  const tag = m ? link(`#/manager/${m.id}`, m.name, "muted small") : "";
+  const head = tgt ? link(tgt, d.headline, "intel-head") : `<span class="intel-head">${esc(d.headline)}</span>`;
+  return `<div class="intel-row">
+    <div class="intel-meta"><span class="chip ${dealTypeClass(d.type)}">${esc(d.type)}</span><span class="muted small">${fmtDate(d.date)}</span></div>
+    <div class="intel-body">${head}<p class="muted small">${esc(d.summary)}</p><div>${tag}${d.sourceUrl ? ` · <a href="${esc(d.sourceUrl)}" target="_blank" rel="noopener noreferrer" class="muted small">source ↗</a>` : ""}</div></div>
+  </div>`;
+}
+
+function viewDeals() {
+  const f = filterState.deals;
+  const rows = deals.filter((d) =>
+    (!f.q || (d.headline + d.summary + (managerById[d.managerId] ? managerById[d.managerId].name : "")).toLowerCase().includes(f.q.toLowerCase())) &&
+    (!f.type || d.type === f.type)
+  );
+  app.innerHTML = `
+    <div class="page-head"><h1>Deal Activity</h1><p class="muted">${rows.length} of ${deals.length} transactions · investments, exits, refinancings, restructurings &amp; distress</p></div>
+    <div class="filters">
+      <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Company, manager…" value="${esc(f.q)}"></label>
+      ${selectFilter("type", "Type", DEAL_TYPES, f.type)}
+    </div>
+    <section class="card">
+      ${rows.length ? rows.map(dealRow).join("") : '<p class="empty">No deal items match these filters.</p>'}
+    </section>`;
+  wireFilters("deals");
 }
 
 // =============================== MANDATES ==================================
@@ -556,6 +602,7 @@ function router() {
     case "lps": return viewLps();
     case "lp": return viewLp(arg);
     case "intel": return viewIntel();
+    case "deals": return viewDeals();
     case "mandates": return viewMandates();
     case "league": return viewLeague();
     case "watchlist": return viewWatchlist();
