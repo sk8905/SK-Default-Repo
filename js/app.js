@@ -700,7 +700,7 @@ function viewIntel() {
 const dealTypeClass = (t) => ({
   "Investment": "dt-invest", "Financing": "dt-fin", "Disposal / Exit": "dt-exit",
   "Refinancing": "dt-refi", "Restructuring": "dt-restr", "Bankruptcy / Distress": "dt-bank",
-  "Acquisition": "dt-acq", "NPL / Portfolio": "dt-npl",
+  "Acquisition": "dt-acq", "NPL / Portfolio": "dt-npl", "Continuation Vehicle": "dt-cv",
 }[t] || "");
 
 function dealRow(d) {

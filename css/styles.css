@@ -98,6 +98,7 @@ h3 { font-size: 1rem; margin: 0; }
 .dt-bank{ background:#fee2e2; color:#991b1b; }
 .dt-acq{ background:#f3e8ff; color:#6b21a8; }
 .dt-npl{ background:#ffe4e6; color:#9f1239; }
+.dt-cv{ background:#e0e7ff; color:#3730a3; }
 
 h3.sub { font-size: .82rem; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin: .9rem 0 .35rem; }
 h3.sub:first-of-type { margin-top: .2rem; }
