@@ -109,3 +109,39 @@ export function lineChart(data, { unit = "", width = 560, height = 220 } = {}) {
     ${dots}${xlabels}
   </svg>`;
 }
+
+// Multi-series line chart. series: [{ name, color, points:[{label, value}] }].
+// All series share the same x positions (labels + click hit-areas come from the
+// first series' points, which may carry a `nav` object for drill-down).
+export function multiLineChart(series, { unit = "", width = 1120, height = 240 } = {}) {
+  const left = 50, right = 20, top = 24, bottom = 30;
+  const base = series[0] ? series[0].points : [];
+  const n = base.length;
+  const max = Math.max(1, ...series.flatMap((s) => s.points.map((p) => p.value)));
+  const plotW = width - left - right, plotH = height - top - bottom;
+  const stepX = n > 1 ? plotW / (n - 1) : 0;
+  const X = (i) => left + i * stepX;
+  const Y = (v) => top + plotH - (v / max) * plotH;
+  const gridY = [0, 0.5, 1].map((f) => {
+    const y = top + plotH - f * plotH;
+    return `<line x1="${left}" y1="${y}" x2="${width - right}" y2="${y}" class="chart-grid"/>
+      <text x="${left - 8}" y="${y + 4}" text-anchor="end" class="chart-axis">${unit}${Math.round(max * f).toLocaleString()}</text>`;
+  }).join("");
+  const lines = series.map((s) => {
+    const path = s.points.map((p, i) => `${i === 0 ? "M" : "L"} ${X(i).toFixed(1)} ${Y(p.value).toFixed(1)}`).join(" ");
+    const dots = s.points.map((p, i) => `<circle cx="${X(i).toFixed(1)}" cy="${Y(p.value).toFixed(1)}" r="3" fill="${s.color}"><title>${esc(s.name)} — ${esc(p.label || "")}: ${unit}${p.value.toLocaleString()}</title></circle>`).join("");
+    return `<path d="${path}" fill="none" stroke="${s.color}" stroke-width="2.5"/>${dots}`;
+  }).join("");
+  const hitW = stepX > 0 ? stepX : plotW;
+  const xaxis = base.map((p, i) => {
+    const lbl = `<text x="${X(i).toFixed(1)}" y="${height - 8}" text-anchor="middle" class="chart-axis">${esc(p.label || "")}</text>`;
+    if (!p.nav) return `<g>${lbl}</g>`;
+    const hx = Math.max(0, X(i) - hitW / 2);
+    return `<g class="line-pt clickable" ${navAttrs(p.nav)}><rect x="${hx.toFixed(1)}" y="${top}" width="${hitW.toFixed(1)}" height="${plotH}" fill="transparent"/>${lbl}</g>`;
+  }).join("");
+  const legend = series.map((s) =>
+    `<div class="legend-item"><span class="legend-swatch" style="background:${s.color}"></span>${esc(s.name)}</div>`
+  ).join("");
+  return `<div class="chart-legend">${legend}</div>
+    <svg viewBox="0 0 ${width} ${height}" class="chart" role="img">${gridY}${lines}${xaxis}</svg>`;
+}

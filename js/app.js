@@ -9,7 +9,7 @@ import {
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
 } from "./data.js";
-import { barChart, donutChart, lineChart } from "./charts.js";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js";
 
 const app = document.getElementById("app");
 
@@ -322,6 +322,9 @@ function viewDashboard() {
   const dQuarters = [];
   for (let i = 0; i < 40; i++) { dQuarters.unshift(`${dy}-Q${dqr}`); dqr--; if (dqr < 1) { dqr = 4; dy--; } }
   const dealTrend = dQuarters.map((q) => ({ label: q.endsWith("Q1") ? "'" + q.slice(2, 4) : "", value: dq[q] || 0, nav: { jump: "deals" } }));
+  // fund closes (first + final) per quarter over the same 10-year window, to
+  // overlay fundraising activity on the deal-activity trend (qCounts built above).
+  const closeTrend = dQuarters.map((q) => ({ label: q.endsWith("Q1") ? "'" + q.slice(2, 4) : "", value: qCounts[q] || 0 }));
 
   // Primary KPIs lead with deal-flow; fundraising is represented but secondary.
   const kpis = [
@@ -347,9 +350,12 @@ function viewDashboard() {
       <div class="card-foot">${link("#/deals", "View all deal activity →")}</div>
     </section>
     <section class="card">
-      <h2>Deal activity by quarter <span class="muted">(past 10 years)</span></h2>
-      <p class="muted small">Click any quarter to open the full deal feed.</p>
-      ${lineChart(dealTrend, { width: 1120, height: 240 })}
+      <h2>Deal &amp; fundraising activity by quarter <span class="muted">(past 10 years)</span></h2>
+      <p class="muted small">Deal transactions vs. fund closes (first + final) per quarter. Click any quarter to open the full deal feed.</p>
+      ${multiLineChart([
+        { name: "Deals", color: "#2563eb", points: dealTrend },
+        { name: "Fund closes", color: "#f97316", points: closeTrend },
+      ], { width: 1120, height: 240 })}
     </section>
     <div class="grid-2">
       <section class="card"><h2>Deals by type</h2>${byDealType.length ? donutChart(byDealType) : '<p class="muted small">No deals tracked.</p>'}</section>
