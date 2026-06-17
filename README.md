@@ -8,7 +8,7 @@ debt, structured credit, NAV/fund finance) across Europe.
 
 > ℹ️ **The dataset is now real**, compiled **16 June 2026 from public sources
 > only** (manager & investor press releases, regulatory/results disclosures and
-> trade press) — covering ~40 managers, ~50 funds, ~23 LP allocators, ~48
+> trade press) — covering ~112 managers, ~86 funds, ~23 LP allocators, ~48
 > fundraising-news items and ~55 deal-activity items. It is **not affiliated with, and contains no data
 > from, any subscription database** (With Intelligence, Preqin, PitchBook,
 > Debtwire). Figures are shown in € for consistency (several originally in
