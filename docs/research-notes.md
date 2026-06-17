@@ -319,3 +319,40 @@ The Deals tab has no date cutoff, so it displays the full available history.
   span 2016-09 -> 2026-06; 167 total), from newswires/manager & law-firm releases,
   deduped, type-validated, attributed to verified managers. Dropped fund-close
   items (those belong in fundraising/intel) and PitchBook/Tracxn-only items.
+
+## Filling identified information gaps — funds, news, deals & fund depth (2026-06-17)
+
+Acted on three coverage gaps surfaced by an audit (no-fund managers, "bare"
+managers with no intel/deals, and funds missing investment/deployment detail).
+Ten public-source-only research agents (excl. Preqin/PitchBook/Debtwire/With
+Intelligence/Crunchbase/Mergr/GuruFocus/CapEdge/Tracxn). Per the brief, managers
+that are EQUITY-focused (not credit) are still included — their flagship funds,
+news and deals are shown — but each such fund is tagged `assetClass:"Equity"`
+("Equity · not credit" badge) and excluded from the credit market aggregates
+(open funds, capital raised, strategy/geography mixes, momentum).
+
+- **18 new funds (f211-f228).** Credit: Diameter Dislocation Fund II & III and
+  Diameter Capital EU CLO 1 DAC (m48); Anchorage Credit Opportunities IX (m67);
+  Fortress Credit Europe BSL 2024-1 & 2025-2 (m71); Rivage Infrastructure Credit
+  Europe / RICE (m80); Azimut Diversified Corporate Credit ESG-8 (m96, EIF-
+  anchored); D. E. Shaw Diopter Fund II (m99). Equity (flagged, not credit): EQT
+  Infrastructure VI, EQT Active Core Infra, EQT X (m83); PAI Partners VIII (m84);
+  TDR Capital V and the David Lloyd single-asset continuation fund TDR Titan
+  (m85); Astorg VIII (m87); Equitix European Infrastructure Funds I & II (m108).
+  Dropped Diameter DDF II's Preqin source (kept the BusinessWire lineage cite);
+  mapped an invalid "Launch" status to "Open".
+- **+22 intelligence items and +20 deals** for previously bare managers (Diameter/
+  Apollo stake, Palmer Square CLO ETFs, Barclays-AGL, DB distressed personnel &
+  Marelli DIP, Blantyre OQ Chemicals, Soho Square, Bank Leumi RE lending, EQT/PAI/
+  TDR/Astorg buyouts, AACP-Kennedy Lewis GP stake, etc.), deduped by URL+headline
+  and type-validated. Dropped an EQT/Crown Castle deal (Wikipedia-only) and a PAI/
+  Alvest deal (Mergr-only) for lack of an admissible source.
+- **Fund depth:** added named investments to ~19 funds and disclosed deployment %
+  to 8 (e.g. Zetland SSF II ~80% deployed; Eiffel Impact Debt II ~60% with
+  Serioplast/Groupe Bertrand; CVC EUDL III with IRCA/OPEN Health; King Street ESS
+  II hotels; Eurazeo EPD V/VI; Barings EPLF III). Deployment figures derived from
+  fundraising announcements are flagged `deployedEstimated:true`; figures from an
+  explicit deployment disclosure are not. Funds with nothing public were left
+  empty rather than guessed.
+
+Data now: 228 funds (9 flagged equity), 132 intel items, 187 deals.
