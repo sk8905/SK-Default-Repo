@@ -39,17 +39,17 @@ h3 { font-size: 1rem; margin: 0; }
   padding: 0 1.5rem; height: 60px;
   position: sticky; top: 0; z-index: 10;
 }
-.brand { display: flex; align-items: center; gap: .6rem; }
+.brand { display: flex; align-items: center; gap: .6rem; flex: 1 1 0; }
 .brand strong { display: block; font-size: 1.05rem; letter-spacing: .3px; }
 .brand-sub { font-size: .7rem; color: #93c5fd; text-transform: uppercase; letter-spacing: 1px; }
 .logo { color: var(--accent); font-size: 1.3rem; }
-.mainnav { display: flex; gap: .25rem; margin-left: 1rem; }
+.mainnav { display: flex; gap: .25rem; flex: 0 0 auto; justify-content: center; }
 .nav-link {
   color: #cbd5e1; padding: .5rem .85rem; border-radius: 6px; font-weight: 500;
 }
 .nav-link:hover { color: #fff; text-decoration: none; background: rgba(255,255,255,.08); }
 .nav-link.active { color: #fff; background: rgba(255,255,255,.15); }
-.topbar-tag { margin-left: auto; font-size: .72rem; color: #93c5fd; text-transform: uppercase; letter-spacing: 1px; }
+.topbar-tag { flex: 1 1 0; text-align: right; font-size: .72rem; color: #93c5fd; text-transform: uppercase; letter-spacing: 1px; }
 
 /* ---------- layout ---------- */
 .container { max-width: 1180px; margin: 0 auto; padding: 1.75rem 1.5rem 3rem; }
