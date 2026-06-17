@@ -21,7 +21,21 @@ const fmtDate = (d) => new Date(d).toLocaleDateString("en-GB", { day: "2-digit",
 
 const statusClass = (s) => ({
   "Pre-marketing": "st-pre", "Open": "st-open", "First Close": "st-first", "Final Close": "st-final",
+  "Evergreen": "st-ever",
 }[s] || "");
+
+// Funds page categories. Evergreen funds are open-ended (continuously subscribable)
+// rather than raising a vintage, so they get their own category — never "Open".
+const FUND_CATEGORIES = ["Open", "First Close", "Final Close", "Evergreen", "Pre-marketing"];
+const fundCategory = (x) => (x.evergreen ? "Evergreen" : x.status);
+// The status chip a fund should display (Evergreen funds show "Evergreen").
+const fundStatusChip = (x) => chip(fundCategory(x), statusClass(fundCategory(x)));
+// Lifecycle badge for funds that have been wound down / liquidated / fully realised.
+function lifecycleBadge(x) {
+  if (!x.lifecycle) return "";
+  const s = typeof x.lifecycle === "string" ? x.lifecycle : x.lifecycle.status;
+  return `<span class="chip st-wound" title="${esc(typeof x.lifecycle === "object" && x.lifecycle.note ? x.lifecycle.note : s)}">${esc(s)}</span>`;
+}
 const mandateClass = (s) => ({
   "Actively allocating": "st-final", "Selective": "st-first", "Not currently active": "st-pre",
 }[s] || "");
@@ -74,6 +88,26 @@ function deploymentBlock(x) {
   </div>`;
 }
 
+// Notable / high-profile investments a fund is publicly known for. Each entry is
+// { name, note?, url? }; renders an honest empty-state when none are compiled.
+function notableInvestmentsCard(x) {
+  const items = x.notableInvestments || [];
+  const body = items.length
+    ? `<ul class="link-list">${items.map((n) => {
+        const head = n.url ? `<a href="${esc(n.url)}" target="_blank" rel="noopener noreferrer">${esc(n.name)}</a>` : `<strong>${esc(n.name)}</strong>`;
+        return `<li>${head}${n.note ? ` <span class="muted small">— ${esc(n.note)}</span>` : ""}</li>`;
+      }).join("")}</ul>`
+    : `<p class="muted small">Notable portfolio investments not yet compiled / not publicly disclosed for this fund.</p>`;
+  return `<section class="card"><h2>Notable investments</h2>${body}</section>`;
+}
+
+// A prominent note for funds that have been wound down / liquidated / fully realised.
+function lifecycleNote(x) {
+  if (!x.lifecycle) return "";
+  const o = typeof x.lifecycle === "string" ? { status: x.lifecycle } : x.lifecycle;
+  return `<div class="lifecycle-note">${lifecycleBadge(x)} <strong>${esc(o.status)}</strong>${o.date ? ` <span class="muted small">· ${esc(o.date)}</span>` : ""}${o.note ? `<p class="muted small">${esc(o.note)}</p>` : ""}</div>`;
+}
+
 function chip(text, cls = "") { return `<span class="chip ${cls}">${esc(text)}</span>`; }
 function link(href, text, cls = "") { return `<a href="${href}" class="${cls}">${esc(text)}</a>`; }
 
@@ -123,7 +157,7 @@ const filterState = {
 
 // ================================ DASHBOARD =================================
 function viewDashboard() {
-  const open = funds.filter((f) => f.status === "Open" || f.status === "First Close");
+  const open = funds.filter((f) => !f.evergreen && (f.status === "Open" || f.status === "First Close"));
   const totalRaised = funds.reduce((s, f) => s + (f.raised || 0), 0);
   const finalClosesYTD = funds.filter((f) => f.status === "Final Close" && f.vintage >= 2025).length;
   const trackedRaise = intel.filter((i) => i.type === "Final Close" || i.type === "First Close").length;
@@ -136,8 +170,9 @@ function viewDashboard() {
     label: s, value: bnRaised(funds.filter((f) => f.strategy === s)), nav: { jump: "funds", strategy: s },
   })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
 
-  // funds by status — segments/legend link to Funds filtered by status
-  const byStatus = FUND_STATUS.map((s) => ({ label: s, value: funds.filter((f) => f.status === s).length, nav: { jump: "funds", status: s } })).filter((d) => d.value > 0);
+  // funds by category — segments/legend link to Funds filtered by category
+  // (Evergreen funds counted separately rather than under "Open").
+  const byStatus = FUND_CATEGORIES.map((s) => ({ label: s, value: funds.filter((f) => fundCategory(f) === s).length, nav: { jump: "funds", status: s } })).filter((d) => d.value > 0);
 
   // capital by geography (€bn) — bars link to Funds filtered by geography
   const byGeo = GEOS.map((g) => ({
@@ -203,10 +238,10 @@ function fundTable(rows) {
       <tbody>
         ${rows.map((x) => `<tr class="clickable" data-href="#/fund/${x.id}">
           <td>${followBtn("fund", x.id)} <strong>${esc(x.name)}</strong><div class="muted small">${x.vintage} · ${esc(x.domicile)}</div></td>
-          <td>${esc(managerById[x.managerId].name)}</td>
+          <td>${link(`#/manager/${x.managerId}`, managerById[x.managerId].name)}</td>
           <td>${chip(x.strategy)}</td>
           <td>${esc(x.geoFocus)}</td>
-          <td>${chip(x.status, statusClass(x.status))}</td>
+          <td>${fundStatusChip(x)} ${lifecycleBadge(x)}</td>
           <td>${x.evergreen ? "—" : eur(x.targetSize)}</td>
           <td class="prog-col">${raiseDisplay(x)}</td>
         </tr>`).join("")}
@@ -216,17 +251,18 @@ function fundTable(rows) {
 
 function viewFunds() {
   const f = filterState.funds;
+  const inMarket = (x) => !x.evergreen && (x.status === "Open" || x.status === "First Close");
   const rows = funds.filter((x) =>
     (!f.q || (x.name + managerById[x.managerId].name).toLowerCase().includes(f.q.toLowerCase())) &&
     (!f.strategy || x.strategy === f.strategy) &&
-    (!f.status || (f.status === "in-market" ? (x.status === "Open" || x.status === "First Close") : x.status === f.status)) &&
+    (!f.status || (f.status === "in-market" ? inMarket(x) : fundCategory(x) === f.status)) &&
     (!f.geo || x.geoFocus === f.geo)
   ).sort((a, b) => (b.raised || 0) - (a.raised || 0));
 
-  // Group into Open / First Close / Final Close (plus Pre-marketing if present).
-  const sectionOrder = ["Open", "First Close", "Final Close", "Pre-marketing"];
-  const sections = sectionOrder
-    .map((st) => ({ st, items: rows.filter((x) => x.status === st) }))
+  // Group by category: Open / First Close / Final Close / Evergreen / Pre-marketing.
+  // Evergreen funds are open-ended, so they sit in their own category, not "Open".
+  const sections = FUND_CATEGORIES
+    .map((st) => ({ st, items: rows.filter((x) => fundCategory(x) === st) }))
     .filter((s) => s.items.length);
   const body = sections.length
     ? sections.map((s) => `<section class="fund-section">
@@ -244,7 +280,7 @@ function viewFunds() {
         <select data-filter="status">
           <option value="">All</option>
           <option value="in-market" ${f.status === "in-market" ? "selected" : ""}>In market (Open + First Close)</option>
-          ${FUND_STATUS.map((o) => `<option value="${esc(o)}" ${o === f.status ? "selected" : ""}>${esc(o)}</option>`).join("")}
+          ${FUND_CATEGORIES.map((o) => `<option value="${esc(o)}" ${o === f.status ? "selected" : ""}>${esc(o)}</option>`).join("")}
         </select>
       </label>
       ${selectFilter("geo", "Geography", GEOS, f.geo)}
@@ -267,10 +303,11 @@ function viewFund(id) {
       <div>
         <h1>${followBtn("fund", x.id)} ${esc(x.name)}</h1>
         <p class="muted">${link(`#/manager/${m.id}`, m.name)} · ${esc(x.domicile)} · Vintage ${x.vintage}</p>
-        <div>${chip(x.strategy)} ${chip(x.status, statusClass(x.status))} ${chip(x.geoFocus)}</div>
+        <div>${chip(x.strategy)} ${fundStatusChip(x)} ${lifecycleBadge(x)} ${chip(x.geoFocus)}</div>
       </div>
     </div>
     <p class="lead">${esc(x.description)}</p>
+    ${lifecycleNote(x)}
     ${sources(x)}
     <div class="grid-2">
       <section class="card">
@@ -280,7 +317,7 @@ function viewFund(id) {
           <div><dt>Target size</dt><dd>${x.evergreen ? "Evergreen (open-ended)" : eur(x.targetSize)}</dd></div>
           <div><dt>Hard cap</dt><dd>${eur(x.hardCap)}</dd></div>
           <div><dt>${x.evergreen ? "Current AUM/NAV" : "Raised to date"}</dt><dd>${eur(x.raised)}</dd></div>
-          <div><dt>Status</dt><dd>${chip(x.status, statusClass(x.status))}</dd></div>
+          <div><dt>Status</dt><dd>${fundStatusChip(x)}</dd></div>
           <div><dt>Sector focus</dt><dd>${esc(x.sectorFocus)}</dd></div>
           <div><dt>Domicile</dt><dd>${esc(x.domicile)}</dd></div>
         </dl>
@@ -298,6 +335,7 @@ function viewFund(id) {
       <h2>Related intelligence</h2>
       ${related.length ? related.map(intelRow).join("") : '<p class="muted">No intelligence items linked to this fund yet.</p>'}
     </section>
+    ${notableInvestmentsCard(x)}
     ${dealsForFund(x.id).length ? `<section class="card"><h2>Deal activity <span class="muted">(${dealsForFund(x.id).length})</span></h2>${dealsForFund(x.id).map(dealRow).join("")}</section>` : ""}
     <section class="card">
       <h2>Peer funds — ${esc(x.strategy)}</h2>
@@ -326,7 +364,7 @@ function viewManagers() {
       <tbody>
         ${rows.map((m) => {
           const fs = fundsByManager(m.id);
-          const live = fs.filter((x) => x.status !== "Final Close").length;
+          const live = fs.filter((x) => !x.evergreen && !x.lifecycle && x.status !== "Final Close").length;
           const strat = m.strategies.slice(0, 2).map((s) => chip(s)).join(" ") + (m.strategies.length > 2 ? ` <span class="muted small">+${m.strategies.length - 2}</span>` : "") || '<span class="muted small">—</span>';
           return `<tr class="clickable" data-href="#/manager/${m.id}">
             <td>${followBtn("manager", m.id)} <strong>${esc(m.name)}</strong></td>
@@ -382,7 +420,7 @@ function viewManager(id) {
   if (!m) return notFound();
   const fs = fundsByManager(id).sort((a, b) => b.vintage - a.vintage);
   const news = intelForManager(id);
-  const liveFunds = fs.filter((x) => x.status !== "Final Close").length;
+  const liveFunds = fs.filter((x) => !x.evergreen && !x.lifecycle && x.status !== "Final Close").length;
 
   app.innerHTML = `
     ${breadcrumb([["#/managers", "Managers"], [null, m.name]])}
@@ -405,7 +443,7 @@ function viewManager(id) {
         <thead><tr><th>Fund</th><th>Strategy</th><th>Geography</th><th>Vintage</th><th>Status</th><th>Target</th><th class="prog-col">Progress</th></tr></thead>
         <tbody>${fs.map((x) => `<tr class="clickable" data-href="#/fund/${x.id}">
           <td>${followBtn("fund", x.id)} <strong>${esc(x.name)}</strong></td><td>${chip(x.strategy)}</td><td>${esc(x.geoFocus)}</td><td>${x.vintage}</td>
-          <td>${chip(x.status, statusClass(x.status))}</td><td>${x.evergreen ? "—" : eur(x.targetSize)}</td>
+          <td>${fundStatusChip(x)} ${lifecycleBadge(x)}</td><td>${x.evergreen ? "—" : eur(x.targetSize)}</td>
           <td class="prog-col">${raiseDisplay(x)}</td>
         </tr>`).join("")}</tbody>
       </table></div>`
