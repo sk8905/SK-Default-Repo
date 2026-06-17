@@ -356,3 +356,32 @@ news and deals are shown — but each such fund is tagged `assetClass:"Equity"`
   empty rather than guessed.
 
 Data now: 228 funds (9 flagged equity), 132 intel items, 187 deals.
+
+## Named investors & disclosed target IRRs backfill + data-completeness UI (2026-06-17)
+
+Two improvements to close the remaining data gaps and make gaps explicit.
+
+**(1) Investors & disclosed return targets.** Researched the 216 credit funds that
+were missing a named investor and/or a *disclosed* target IRR (7 agents, public
+sources only — public-pension board/committee papers, EIF/EIB InvestEU notices,
+sovereign-wealth and manager press releases — excluding all subscription
+aggregators + Wikipedia). Added 35 named LP commitments across 30 funds and 3
+fund-disclosed target IRRs, deduped against existing investors (incl. fuzzy
+institution-name dups). Credit funds with named investors rose 39 -> 60; with a
+fund-disclosed target IRR 7 -> 10. Most funds stayed empty — the overwhelming
+majority of LP names surfaced only via PitchBook/Preqin or attached to a
+different vintage/vehicle, so they were correctly omitted rather than guessed.
+Examples kept: ICG Europe IX (NJ DOI €200m, PA PSERS €150m), Ares Capital Europe
+V (CalPERS $1.1bn), Sixth Street SLE III (PA PSERS, Oregon OIC), Tikehau DL IV
+(EIB €75m), M&G RE Debt (LGPS Central £200m), Overland Advantage (ADIA + BCI),
+Anchorage IX (Connecticut CRPTF $175m); disclosed targets for SCOR Mid Market
+Loans (Euribor+400bps), ICG Europe VII (double-digit net) and Rivage RICE (6.5-7%
+net). USD/GBP commitments converted to approx EUR and flagged [est].
+
+**(2) "Data as-of & gaps" UI.** Every fund now shows a "Data as of <date>" line
+with an inline completeness meter, and a "Data completeness & provenance" card
+that marks each tracked data point as disclosed / estimate / indicative proxy /
+not disclosed / n/a. The Funds table carries a compact "n/m data" meter per fund
+(tooltip naming the undisclosed fields). Disclosed counts hard facts + flagged
+estimates; indicative strategy-proxy IRRs and gaps are not counted; evergreen-only
+fields are excluded from the denominator.
