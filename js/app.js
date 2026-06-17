@@ -4,16 +4,16 @@
 // =============================================================================
 
 import {
-  STRATEGIES, FUND_STATUS, GEOS, LP_TYPES, DEAL_TYPES,
+  STRATEGIES, FUND_STATUS, GEOS, LP_TYPES, DEAL_TYPES, DATA_UPDATED,
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260617-30";
+} from "./data.js?v=20260617-31";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260617-30";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260617-31";
 
 const app = document.getElementById("app");
 
@@ -186,6 +186,18 @@ function toggleFollow(type, id) {
   saveFollows();
 }
 function followCount() { return FOLLOW_TYPES.reduce((n, t) => n + followList(t).length, 0); }
+// Topbar data-freshness line: dataset "last updated" date + the time this view
+// was last loaded/refreshed, plus a manual Refresh button that reloads to pull
+// the latest deployed data and re-sync the watchlist.
+function renderDataStatus() {
+  const el = document.getElementById("data-status");
+  if (!el) return;
+  const t = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  el.innerHTML = `<span class="ds-text">Data ${esc(fmtDate(DATA_UPDATED))} · refreshed ${t}</span>` +
+    ` <button type="button" class="refresh-btn" id="refresh-btn" title="Reload to fetch the latest data and re-sync your watchlist" aria-label="Refresh data">↻</button>`;
+  const btn = document.getElementById("refresh-btn");
+  if (btn) btn.addEventListener("click", () => location.reload());
+}
 // Fill the persistent topbar identity area once we know the signed-in user.
 // Hidden when not behind Access (device-local mode).
 function renderAccountNav() {
@@ -1183,4 +1195,5 @@ function router() {
 window.addEventListener("hashchange", router);
 window.addEventListener("DOMContentLoaded", router);
 router();
+renderDataStatus();
 initWatchlistSync();

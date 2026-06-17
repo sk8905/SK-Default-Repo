@@ -18,6 +18,9 @@
 //  See docs/research-notes.md for the fuller sourcing trail and caveats.
 // =============================================================================
 
+// When the dataset was last compiled/updated (shown in the UI "last updated").
+export const DATA_UPDATED = "2026-06-17";
+
 export const STRATEGIES = [
   "Senior Direct Lending",
   "Unitranche",
