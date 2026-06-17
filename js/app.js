@@ -26,6 +26,21 @@ const fundQuarter = (f) => {
 };
 const isClose = (f) => f.status === "Final Close" || f.status === "First Close";
 
+// Indicative NET target IRR ranges by strategy — market-typical conventions, NOT
+// a specific fund's disclosed target. Used only where a fund discloses no target.
+const STRATEGY_IRR = {
+  "Senior Direct Lending": "8–10%",
+  "Unitranche": "9–12%",
+  "Mezzanine / Junior Debt": "12–15%",
+  "Distressed & Special Situations": "15–20%+",
+  "Structured Credit / CLO": "12–16%",
+  "Real Estate Debt": "7–10%",
+  "Infrastructure Debt": "6–9%",
+  "Asset-Based Lending": "8–12%",
+  "Opportunistic Credit": "10–14%",
+  "NAV / Fund Finance": "8–12%",
+};
+
 const statusClass = (s) => ({
   "Pre-marketing": "st-pre", "Open": "st-open", "First Close": "st-first", "Final Close": "st-final",
   "Evergreen": "st-ever",
@@ -419,6 +434,28 @@ function actualInvestorsCard(x) {
     <p class="muted small">Limited partners publicly disclosed as having committed to this fund.</p>${body}</section>`;
 }
 
+// Target IRR (disclosed where known, else indicative strategy range) + any
+// publicly-disclosed actual performance (net/gross IRR, MOIC, DPI).
+function returnsCard(x) {
+  const ti = x.targetIRR;
+  const target = ti
+    ? `<p><strong>${esc(ti.range)}${ti.basis ? " " + esc(ti.basis) : ""}</strong> <span class="muted small">target — disclosed${ti.asOf ? `, ${esc(ti.asOf)}` : ""}</span>${ti.sourceUrl ? ` · <a href="${esc(ti.sourceUrl)}" target="_blank" rel="noopener noreferrer" class="muted small">source</a>` : ""}</p>`
+    : `<p><strong>${esc(STRATEGY_IRR[x.strategy] || "—")} net</strong> <span class="chip est" title="Indicative market-typical range for the strategy, not this fund's disclosed target">indicative</span> <span class="muted small">typical for ${esc(x.strategy)}; the fund's own target is not publicly disclosed</span></p>`;
+  const p = x.performance;
+  const metrics = p ? [
+    p.netIRR != null ? `<span><strong>${p.netIRR}%</strong> net IRR</span>` : "",
+    p.grossIRR != null ? `<span><strong>${p.grossIRR}%</strong> gross IRR</span>` : "",
+    p.moic != null ? `<span><strong>${p.moic}x</strong> MOIC</span>` : "",
+    p.dpi != null ? `<span><strong>${p.dpi}x</strong> DPI</span>` : "",
+  ].filter(Boolean).join("") : "";
+  const perf = p
+    ? `<div class="deploy-stats">${metrics || '<span class="muted small">disclosed</span>'}</div>${p.note ? `<p class="muted small">${esc(p.note)}</p>` : ""}${p.asOf ? `<p class="muted small">as of ${esc(p.asOf)}</p>` : ""}${p.sourceUrl ? sources({ sources: [{ label: "Performance source", url: p.sourceUrl }] }) : ""}`
+    : `<p class="muted small">No fund-level performance publicly disclosed. (Net IRR / multiples for private funds are usually only visible via public-pension reports or listed vehicles; shown here when available.)</p>`;
+  return `<section class="card"><h2>Target return &amp; performance</h2>
+    <h3 class="sub">Target IRR</h3>${target}
+    <h3 class="sub">Actual performance</h3>${perf}</section>`;
+}
+
 function viewFund(id) {
   const x = fundById[id];
   if (!x) return notFound();
@@ -462,6 +499,7 @@ function viewFund(id) {
       ${investorCard}
     </div>
     ${extraInvestorCard}
+    ${returnsCard(x)}
     <section class="card">
       <h2>Related intelligence</h2>
       ${related.length ? related.map(intelRow).join("") : '<p class="muted">No intelligence items linked to this fund yet.</p>'}
