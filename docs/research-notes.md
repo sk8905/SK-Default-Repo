@@ -404,3 +404,24 @@ intelligence platform with fundraising as a secondary lens.
   (capital by strategy/geography, funds by status, sought, momentum) are retained
   unchanged but moved below a "Fundraising intelligence" divider as a secondary
   band. Added deal-type / intel-type deep-linking to the dashboard click handler.
+
+## Intelligence expansion — untapped angles & sources (2026-06-17)
+
+Coverage audit showed the intel feed was dominated by fund closes; personnel (10)
+and manager-level corporate moves were thin, and 33 managers had no intel at all.
+Ran 7 public-source-only agents across all 112 managers, prioritising the 33 with
+no coverage and the UNDER-TAPPED angles: senior personnel moves, GP-stake/M&A and
+ownership changes, insurance & bank strategic partnerships, and geographic/strategy
+expansion — steered toward under-used sources (Reuters, Bloomberg, FT, IPE, ACI,
+Creditflux, manager/insurer press releases, law-firm & regulatory notices).
+
+Added 80 verifiable items (intel now 212), deduped against the existing intel AND
+deals feeds plus within-batch (19 URL duplicates + 1 cross-feed Overland dup + 1
+Form-D-aggregator source dropped). Net: Personnel +23, Strategy/corporate +48,
+Final Close +6, Launch +2, Mandate +1; managers with no intel fell 33 -> 15.
+Highlights: ICG x Amundi (9.9% stake), M&G acquiring P Capital Partners, EQT x
+Coller, Franklin Templeton x Apera, NYLIM/Candriam taking Kartesia majority, USS x
+Venn, Hayfin's Arctos MBO, Clearlake Credit / MV Credit, Citi x HPS EUR15bn,
+Oaktree x Allianz Lloyd's syndicate, Bain x SMBC JV, CVC x AIG, Tikehau defence
+fund with insurers, plus Davidson Kempner / Golub / NorthWall European CLO build-outs
+and numerous senior hires. All items carry a real, non-excluded source URL.
