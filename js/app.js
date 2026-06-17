@@ -48,6 +48,29 @@ function raiseDisplay(x) {
   return `<span class="muted small">Undisclosed</span>`;
 }
 
+// Deployment vs raised (dry powder) where publicly disclosed; links to the
+// fund's disclosed deals (what the capital was spent on).
+function deploymentBlock(x) {
+  const dl = dealsForFund(x.id);
+  const dealNote = dl.length ? `<p class="muted small deploy-note">Disclosed investments: ${dl.length} — see Deal activity below.</p>` : "";
+  if (x.deployedPct == null) {
+    return `<div class="deploy"><div class="deploy-head"><span>Deployment / dry powder</span><span class="muted small">not separately disclosed</span></div>${dealNote}</div>`;
+  }
+  const raised = x.raised;
+  const dep = raised != null ? Math.round(raised * x.deployedPct / 100) : null;
+  const dry = (raised != null && dep != null) ? raised - dep : null;
+  return `<div class="deploy">
+    <div class="deploy-head"><span>Deployment${x.deployedEstimated ? " (est.)" : ""}</span><span>${x.deployedPct}% invested${x.deployedAsOf ? ` · as of ${esc(x.deployedAsOf)}` : ""}</span></div>
+    <div class="deploy-bar" title="${x.deployedPct}% deployed"><div class="deploy-fill" style="width:${Math.min(100, x.deployedPct)}%"></div></div>
+    <div class="deploy-stats">
+      <span><strong>${dep != null ? eur(dep) : "—"}</strong> deployed</span>
+      <span><strong>${dry != null ? eur(dry) : "—"}</strong> dry powder</span>
+      <span><strong>${raised != null ? eur(raised) : "—"}</strong> raised</span>
+    </div>
+    ${dealNote}
+  </div>`;
+}
+
 function chip(text, cls = "") { return `<span class="chip ${cls}">${esc(text)}</span>`; }
 function link(href, text, cls = "") { return `<a href="${href}" class="${cls}">${esc(text)}</a>`; }
 
@@ -237,6 +260,7 @@ function viewFund(id) {
           <div><dt>Sector focus</dt><dd>${esc(x.sectorFocus)}</dd></div>
           <div><dt>Domicile</dt><dd>${esc(x.domicile)}</dd></div>
         </dl>
+        ${deploymentBlock(x)}
       </section>
       <section class="card">
         <h2>Potential investor fit <span class="muted">(${interestedLps.length})</span></h2>

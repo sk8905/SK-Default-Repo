@@ -116,6 +116,15 @@ h3 { font-size: 1rem; margin: 0; }
 .data-table .num { text-align: right; font-weight: 700; color: var(--primary-ink); white-space: nowrap; }
 .card-aum { font-size: .98rem; }
 
+/* ---------- deployment / dry powder ---------- */
+.deploy { margin-top: .85rem; padding-top: .75rem; border-top: 1px solid var(--border); }
+.deploy-head { display: flex; justify-content: space-between; gap: 1rem; font-size: .8rem; font-weight: 600; color: #334155; margin-bottom: .4rem; }
+.deploy-bar { background: #eef2f7; border: 1px solid var(--border); border-radius: 6px; height: 16px; overflow: hidden; }
+.deploy-fill { height: 100%; background: linear-gradient(90deg, #16a34a, #22c55e); }
+.deploy-stats { display: flex; gap: 1.25rem; margin-top: .5rem; font-size: .82rem; flex-wrap: wrap; }
+.deploy-stats strong { color: var(--primary-ink); }
+.deploy-note { margin-top: .4rem; }
+
 /* ---------- source citations ---------- */
 .sources { margin: .4rem 0 .25rem; line-height: 1.6; }
 .sources .src-label { font-weight: 600; }
