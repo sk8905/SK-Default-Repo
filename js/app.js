@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260617-27";
+} from "./data.js?v=20260617-28";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260617-27";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260617-28";
 
 const app = document.getElementById("app");
 
@@ -376,12 +376,15 @@ function viewDashboard() {
     </section>
     <section class="card">
       <h2>Deal &amp; fundraising activity by quarter</h2>
-      <p class="muted small">Deal transactions vs. fund closes (first + final) per quarter. Drag the sliders to set the date range (up to 10 years); click any quarter to open the full deal feed.</p>
+      <p class="muted small">Deal transactions vs. fund closes (first + final) per quarter. Drag either handle to set the date range (up to 10 years); click any quarter to open the full deal feed.</p>
       <div class="trend-controls">
-        <label class="trend-range">From <strong id="trend-start-lbl">${esc(dQuarters[tStart])}</strong>
-          <input type="range" id="trend-start" min="0" max="${NQ - 1}" value="${tStart}" aria-label="Range start quarter"></label>
-        <label class="trend-range">To <strong id="trend-end-lbl">${esc(dQuarters[tEnd])}</strong>
-          <input type="range" id="trend-end" min="0" max="${NQ - 1}" value="${tEnd}" aria-label="Range end quarter"></label>
+        <div class="range-readout"><strong id="trend-start-lbl">${esc(dQuarters[tStart])}</strong> <span class="muted">→</span> <strong id="trend-end-lbl">${esc(dQuarters[tEnd])}</strong></div>
+        <div class="range-slider">
+          <div class="range-track"></div>
+          <div class="range-fill" id="trend-fill" style="left:${(tStart / (NQ - 1)) * 100}%; width:${((tEnd - tStart) / (NQ - 1)) * 100}%"></div>
+          <input type="range" id="trend-start" min="0" max="${NQ - 1}" value="${tStart}" aria-label="Range start quarter">
+          <input type="range" id="trend-end" min="0" max="${NQ - 1}" value="${tEnd}" aria-label="Range end quarter">
+        </div>
       </div>
       <div id="trend-chart">${multiLineChart(buildTrend(tStart, tEnd), { width: 1120, height: 240 })}</div>
     </section>
@@ -417,15 +420,19 @@ function viewDashboard() {
   const sEl = document.getElementById("trend-start");
   const eEl = document.getElementById("trend-end");
   if (sEl && eEl) {
+    const fill = document.getElementById("trend-fill");
     const rerender = () => {
       const a = +sEl.value, b = +eEl.value;
       trendState.start = a; trendState.end = b;
       document.getElementById("trend-start-lbl").textContent = dQuarters[a];
       document.getElementById("trend-end-lbl").textContent = dQuarters[b];
+      if (fill) { fill.style.left = (a / (NQ - 1)) * 100 + "%"; fill.style.width = ((b - a) / (NQ - 1)) * 100 + "%"; }
       document.getElementById("trend-chart").innerHTML = multiLineChart(buildTrend(a, b), { width: 1120, height: 240 });
     };
-    sEl.addEventListener("input", () => { if (+sEl.value > +eEl.value) sEl.value = eEl.value; rerender(); });
-    eEl.addEventListener("input", () => { if (+eEl.value < +sEl.value) eEl.value = sEl.value; rerender(); });
+    // keep the two handles from crossing; raise the last-touched handle so it
+    // stays grabbable even when both sit on the same quarter.
+    sEl.addEventListener("input", () => { if (+sEl.value > +eEl.value) sEl.value = eEl.value; sEl.style.zIndex = 5; eEl.style.zIndex = 4; rerender(); });
+    eEl.addEventListener("input", () => { if (+eEl.value < +sEl.value) eEl.value = sEl.value; eEl.style.zIndex = 5; sEl.style.zIndex = 4; rerender(); });
   }
 }
 
