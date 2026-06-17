@@ -53,6 +53,9 @@ function raiseDisplay(x) {
 function deploymentBlock(x) {
   const dl = dealsForFund(x.id);
   const dealNote = dl.length ? `<p class="muted small deploy-note">Disclosed investments: ${dl.length} — see Deal activity below.</p>` : "";
+  if (x.evergreen) {
+    return `<div class="deploy"><div class="deploy-head"><span>Deployment</span><span class="muted small">evergreen — capital deployed &amp; recycled on a rolling basis</span></div>${dealNote}</div>`;
+  }
   if (x.deployedPct == null) {
     return `<div class="deploy"><div class="deploy-head"><span>Deployment / dry powder</span><span class="muted small">not separately disclosed</span></div>${dealNote}</div>`;
   }
