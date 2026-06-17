@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260617-24";
+} from "./data.js?v=20260617-25";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260617-24";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260617-25";
 
 const app = document.getElementById("app");
 
@@ -319,6 +319,13 @@ function viewDashboard() {
 
   // deals by type — donut, segments link to the Deals feed filtered by type
   const byDealType = DEAL_TYPES.map((t) => ({ label: t, value: deals.filter((d) => d.type === t).length, nav: { jump: "deals", dtype: t } })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
+  // most active managers by disclosed deal count (top 10) — bars link to the manager
+  const dealMgrCounts = {};
+  deals.forEach((d) => { if (d.managerId) dealMgrCounts[d.managerId] = (dealMgrCounts[d.managerId] || 0) + 1; });
+  const byDealManager = Object.entries(dealMgrCounts)
+    .map(([id, value]) => ({ label: managerById[id] ? managerById[id].name : id, value, nav: { jump: "manager/" + id } }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 10);
   // deal activity per quarter over the past 10 years (40 quarters), clickable → Deals
   const dq = {};
   deals.forEach((d) => { const q = quarterOf(d.date); if (q) dq[q] = (dq[q] || 0) + 1; });
@@ -362,7 +369,10 @@ function viewDashboard() {
       ], { width: 1120, height: 240 })}
     </section>
     <div class="grid-2">
-      <section class="card"><h2>Deals by type</h2>${byDealType.length ? donutChart(byDealType) : '<p class="muted small">No deals tracked.</p>'}</section>
+      <section class="card"><h2>Deals by type</h2>${byDealType.length ? donutChart(byDealType) : '<p class="muted small">No deals tracked.</p>'}
+        <h2 class="card-subhead">Most active managers <span class="muted">(by deal count)</span></h2>
+        ${byDealManager.length ? barChart(byDealManager, { width: 520 }) : '<p class="muted small">No deals tracked.</p>'}
+      </section>
       <section class="card">
         <h2>Latest intelligence</h2>
         <p class="muted small">Fund launches, first/final closes, LP mandates, senior personnel and strategy moves.</p>
