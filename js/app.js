@@ -304,21 +304,65 @@ function viewDashboard() {
     label: "'" + q.slice(2), value: qCounts[q] || 0, nav: { jump: "funds", period: q },
   }));
 
+  // ---- Deal-intelligence aggregates (primary focus of the platform) ----------
+  const dealsByDate = [...deals].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  const intelByDate = [...intel].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  const quarterOf = (d) => { const m = /^(\d{4})-(\d{2})/.exec(d || ""); return m ? `${m[1]}-Q${Math.floor((+m[2] - 1) / 3) + 1}` : null; };
+  // deals in the trailing 12 months (today is mid-2026)
+  const cutoff = (() => { const d = new Date(nowD); d.setFullYear(d.getFullYear() - 1); return d.toISOString().slice(0, 10); })();
+  const dealsLast12 = deals.filter((d) => String(d.date) >= cutoff).length;
+  const activeMgrs = new Set(deals.map((d) => d.managerId).filter(Boolean)).size;
+
+  // deals by type — donut, segments link to the Deals feed filtered by type
+  const byDealType = DEAL_TYPES.map((t) => ({ label: t, value: deals.filter((d) => d.type === t).length, nav: { jump: "deals", dtype: t } })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
+  // deal activity per quarter over the past 4 years (16 quarters), clickable → Deals
+  const dq = {};
+  deals.forEach((d) => { const q = quarterOf(d.date); if (q) dq[q] = (dq[q] || 0) + 1; });
+  let dy = nowD.getFullYear(), dqr = Math.floor(nowD.getMonth() / 3) + 1;
+  const dQuarters = [];
+  for (let i = 0; i < 16; i++) { dQuarters.unshift(`${dy}-Q${dqr}`); dqr--; if (dqr < 1) { dqr = 4; dy--; } }
+  const dealTrend = dQuarters.map((q) => ({ label: "'" + q.slice(2), value: dq[q] || 0, nav: { jump: "deals" } }));
+
+  // Primary KPIs lead with deal-flow; fundraising is represented but secondary.
   const kpis = [
-    { label: "Tracked funds", value: funds.length, sub: `${managers.length} managers`, jump: 'data-jump="funds"' },
-    { label: "Funds in market", value: open.length, sub: "open or at first close", jump: 'data-jump="funds" data-status="in-market"' },
-    { label: "Capital raised (tracked)", value: eur(totalRaised), sub: "across tracked funds", jump: 'data-jump="league"' },
-    { label: "Final closes (2025–26)", value: finalClosesYTD, sub: `${trackedRaise} close events`, jump: 'data-jump="funds" data-status="Final Close"' },
+    { label: "Deals tracked", value: deals.length, sub: "investments, exits, refis, distress", jump: 'data-jump="deals"' },
+    { label: "Deals last 12 months", value: dealsLast12, sub: "transaction flow", jump: 'data-jump="deals"' },
+    { label: "Intelligence items", value: intel.length, sub: "launches, closes, mandates", jump: 'data-jump="intel"' },
+    { label: "Active managers", value: activeMgrs, sub: "credit GPs with deal activity", jump: 'data-jump="managers"' },
   ];
 
   app.innerHTML = `
     <div class="page-head">
-      <h1>Market Dashboard</h1>
-      <p class="muted">European private credit fundraising at a glance · real data compiled from public sources (mid-2026)</p>
+      <h1>Credit Deal Intelligence</h1>
+      <p class="muted">European private credit deal flow &amp; market intelligence — with fundraising as a secondary lens · real data compiled from public sources (mid-2026)</p>
     </div>
     <div class="kpi-grid">
       ${kpis.map((k) => `<div class="kpi-card clickable" ${k.jump}><div class="kpi-value">${k.value}</div><div class="kpi-label">${k.label}</div><div class="kpi-sub muted">${k.sub}</div></div>`).join("")}
     </div>
+
+    <section class="card feature-card">
+      <h2>Latest deal activity</h2>
+      <p class="muted small">Financings, investments, acquisitions, refinancings, restructurings, exits and distress across tracked European credit managers.</p>
+      ${deals.length ? dealsByDate.slice(0, 8).map(dealRow).join("") : '<p class="muted small">No deal activity yet.</p>'}
+      <div class="card-foot">${link("#/deals", "View all deal activity →")}</div>
+    </section>
+    <div class="grid-2">
+      <section class="card"><h2>Deals by type</h2>${byDealType.length ? donutChart(byDealType) : '<p class="muted small">No deals tracked.</p>'}</section>
+      <section class="card">
+        <h2>Deal activity by quarter <span class="muted">(past 4 years)</span></h2>
+        <p class="muted small">Click any quarter to open the full deal feed.</p>
+        ${lineChart(dealTrend, { width: 540, height: 220 })}
+      </section>
+    </div>
+    <section class="card">
+      <h2>Latest intelligence</h2>
+      <p class="muted small">Fund launches, first/final closes, LP mandates, senior personnel and strategy moves.</p>
+      ${intelByDate.slice(0, 6).map(intelRow).join("")}
+      <div class="card-foot">${link("#/intel", "View full intelligence feed →")}</div>
+    </section>
+
+    <div class="section-divider"><span>Fundraising intelligence</span></div>
+    <p class="muted small section-intro">Secondary view — European private credit capital formation: ${open.length} funds in market, ${eur(totalRaised)} raised across tracked funds, ${finalClosesYTD} final closes in 2025–26.</p>
     <div class="grid-2">
       <section class="card"><h2>Capital raised by strategy <span class="muted">(€bn)</span></h2>${barChart(byStrategy, { unit: "€", width: 540 })}</section>
       <section class="card"><h2>Capital sought by strategy <span class="muted">(€bn · disclosed targets, funds in market)</span></h2>${bySought.length ? barChart(bySought, { unit: "€", width: 540 }) : '<p class="muted small">No disclosed target sizes for funds currently in market.</p>'}</section>
@@ -329,19 +373,7 @@ function viewDashboard() {
       <h2>Fundraising momentum <span class="muted">(fund closes / quarter · past 5 years)</span></h2>
       <p class="muted small">Click any quarter to see the funds that reached a first or final close in it.</p>
       ${lineChart(trend, { width: 1120, height: 240 })}
-    </section>
-    <div class="grid-2">
-      <section class="card">
-        <h2>Latest intelligence</h2>
-        ${intel.slice(0, 6).map(intelRow).join("")}
-        <div class="card-foot">${link("#/intel", "View full intelligence feed →")}</div>
-      </section>
-      <section class="card">
-        <h2>Latest deal activity</h2>
-        ${deals.length ? deals.slice(0, 6).map(dealRow).join("") : '<p class="muted small">No deal activity yet.</p>'}
-        <div class="card-foot">${link("#/deals", "View all deal activity →")}</div>
-      </section>
-    </div>`;
+    </section>`;
 }
 
 // ================================== FUNDS ===================================
@@ -980,6 +1012,10 @@ app.addEventListener("click", (e) => {
         period: jump.getAttribute("data-period") || "",
         sort: filterState.funds.sort || { key: "name", dir: "asc" },
       };
+    } else if (route === "deals") {
+      filterState.deals = { q: "", type: jump.getAttribute("data-dtype") || "" };
+    } else if (route === "intel") {
+      filterState.intel = { q: "", type: jump.getAttribute("data-itype") || "" };
     }
     location.hash = "#/" + route;
     return;

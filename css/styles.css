@@ -49,6 +49,10 @@ h3 { font-size: 1rem; margin: 0; }
 }
 .nav-link:hover { color: #fff; text-decoration: none; background: rgba(255,255,255,.08); }
 .nav-link.active { color: #fff; background: rgba(255,255,255,.15); }
+/* Deal/intelligence are the platform's primary lens — emphasised in the nav. */
+.nav-link.nav-primary { color: #fff; font-weight: 700; }
+.nav-link.nav-primary.active { background: var(--accent, #2563eb); }
+.nav-sep { width: 1px; align-self: center; height: 18px; background: rgba(255,255,255,.18); margin: 0 .35rem; }
 .topbar-tag { flex: 1 1 0; text-align: right; font-size: .72rem; color: #93c5fd; text-transform: uppercase; letter-spacing: 1px; }
 
 /* ---------- layout ---------- */
@@ -113,6 +117,14 @@ h3.sub:first-of-type { margin-top: .2rem; }
 .fund-section { margin-bottom: 1.4rem; }
 .section-head { font-size: 1.05rem; margin: 1.1rem 0 .6rem; display: flex; align-items: center; gap: .5rem; }
 .section-head .chip { font-size: .72rem; }
+
+/* ---------- dashboard: deal-led layout ---------- */
+.feature-card { border-top: 3px solid var(--accent, #2563eb); }
+/* Divider that demotes fundraising to a clearly-secondary band on the dashboard. */
+.section-divider { display: flex; align-items: center; gap: .9rem; margin: 2rem 0 .25rem; }
+.section-divider::before, .section-divider::after { content: ""; height: 1px; background: var(--border); flex: 1; }
+.section-divider span { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #64748b; white-space: nowrap; }
+.section-intro { margin: 0 0 1rem; }
 
 /* ---------- watchlist / follow stars ---------- */
 .follow-btn {

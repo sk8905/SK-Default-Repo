@@ -385,3 +385,22 @@ not disclosed / n/a. The Funds table carries a compact "n/m data" meter per fund
 (tooltip naming the undisclosed fields). Disclosed counts hard facts + flagged
 estimates; indicative strategy-proxy IRRs and gaps are not counted; evergreen-only
 fields are excluded from the denominator.
+
+## Repositioning: deal intelligence first, fundraising secondary (2026-06-17)
+
+Reorganised the platform's framing (landing page + nav only; no change to other
+views or to the underlying data/organisation) so it reads as a credit DEAL
+intelligence platform with fundraising as a secondary lens.
+
+- **Navigation:** Deals and Intelligence are promoted directly after Dashboard and
+  emphasised (bold/accent), with a separator before the now-secondary fundraising
+  group (Funds, Managers, Investors, Mandates, League). Tagline updated to
+  "European Private Credit · Deal & Fundraising Intelligence".
+- **Dashboard:** retitled "Credit Deal Intelligence". KPIs now lead with deal flow
+  (deals tracked, deals last 12 months, intelligence items, active managers).
+  The page opens with a full-width "Latest deal activity" feature, a new
+  "Deals by type" donut and "Deal activity by quarter" trend (both deep-link into
+  the Deals feed), then "Latest intelligence". The previous fundraising charts
+  (capital by strategy/geography, funds by status, sought, momentum) are retained
+  unchanged but moved below a "Fundraising intelligence" divider as a secondary
+  band. Added deal-type / intel-type deep-linking to the dashboard click handler.
