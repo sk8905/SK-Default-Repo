@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260618-11";
+} from "./data.js?v=20260618-12";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260618-11";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260618-12";
 
 const app = document.getElementById("app");
 
@@ -731,6 +731,20 @@ function newsBlock(m) {
   </section>`;
 }
 
+// Senior legal team — general counsel and other senior legal counsel, with the
+// city they are based in and a link to their LinkedIn profile where known.
+function legalBlock(m) {
+  const people = m.legal || [];
+  return `<section class="card">
+    <h2>Legal &amp; senior counsel</h2>
+    ${people.length
+      ? `<ul class="link-list">${people.map((p) => `<li>
+          <strong>${esc(p.name)}</strong> <span class="muted small">${esc(p.role)}${p.city ? ` · ${esc(p.city)}` : ""}</span>${p.linkedin ? ` · <a href="${esc(p.linkedin)}" target="_blank" rel="noopener noreferrer" class="muted small">LinkedIn ↗</a>` : ""}
+        </li>`).join("")}</ul>`
+      : '<p class="muted small">Senior legal contacts not yet compiled for this manager (sourced from the firm\'s own website and LinkedIn where disclosed).</p>'}
+  </section>`;
+}
+
 function viewManager(id) {
   const m = managerById[id];
   if (!m) return notFound();
@@ -765,9 +779,12 @@ function viewManager(id) {
       </table></div>`
       : `<p class="muted">${esc(m.fundsNote || "No fund tracked for this manager — see the profile note above (e.g. it is a bank/balance-sheet lender, has no dedicated credit arm, or runs only US/global vehicles).")}</p>`}
     </section>
-    ${dealsForManager(m.id).length ? `<section class="card"><h2>Deal activity <span class="muted">(${dealsForManager(m.id).length})</span></h2>${dealsForManager(m.id).map(dealRow).join("")}</section>` : ""}
     ${commitmentsForManager(m.id).length ? `<section class="card"><h2>Known investors <span class="muted">(${commitmentsForManager(m.id).length})</span></h2><ul class="link-list">${commitmentsForManager(m.id).map((c) => `<li>${link(`#/lp/${c.lpId}`, lpById[c.lpId].name)} <span class="muted small">${esc(c.note)}</span></li>`).join("")}</ul></section>` : ""}
     ${ownersFilingsBlock(m)}
+    ${legalBlock(m)}
+
+    <div class="section-divider"><span>News, deals &amp; intelligence</span></div>
+    ${dealsForManager(m.id).length ? `<section class="card"><h2>Deal activity <span class="muted">(${dealsForManager(m.id).length})</span></h2>${dealsForManager(m.id).map(dealRow).join("")}</section>` : ""}
     ${newsBlock(m)}
     <section class="card">
       <h2>Intelligence</h2>
