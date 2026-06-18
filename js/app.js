@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260618-9";
+} from "./data.js?v=20260618-10";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260618-9";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260618-10";
 
 const app = document.getElementById("app");
 
@@ -239,6 +239,12 @@ function followBtn(type, id) {
   return `<button type="button" class="follow-btn ${on ? "on" : ""}" data-follow="${type}:${id}" title="${on ? "Following — click to remove from watchlist" : "Add to your watchlist"}" aria-label="Follow">${on ? "★" : "☆"}</button>`;
 }
 
+// Star + name as two flex columns, so a wrapping name stays in its own column
+// (and never slides back under the star).
+function nameCell(type, id, inner) {
+  return `<span class="namecell">${followBtn(type, id)}<span class="namecell-text">${inner}</span></span>`;
+}
+
 // ----------------------- relationship lookups ------------------------------
 function commitmentsForLp(lpId) { return commitments.filter((c) => c.lpId === lpId); }
 function commitmentsForManager(managerId) { return commitments.filter((c) => c.managerId === managerId); }
@@ -431,7 +437,7 @@ function fundTable(rows) {
       <thead><tr>${sortTh("funds", "name", "Fund")}${sortTh("funds", "manager", "Manager")}${sortTh("funds", "strategy", "Strategy")}${sortTh("funds", "geo", "Geography")}${sortTh("funds", "status", "Status")}${sortTh("funds", "target", "Target")}${sortTh("funds", "progress", "Progress", "prog-col")}</tr></thead>
       <tbody>
         ${rows.map((x) => `<tr class="clickable" data-href="#/fund/${x.id}">
-          <td>${followBtn("fund", x.id)} <strong>${esc(x.name)}</strong><div class="muted small fund-sub">${x.vintage} · ${esc(x.domicile)} · ${completenessPill(x)}</div></td>
+          <td>${nameCell("fund", x.id, `<strong>${esc(x.name)}</strong><div class="muted small fund-sub">${x.vintage} · ${esc(x.domicile)} · ${completenessPill(x)}</div>`)}</td>
           <td>${link(`#/manager/${x.managerId}`, managerById[x.managerId].name)}</td>
           <td>${chip(x.strategy)}</td>
           <td>${esc(x.geoFocus)}</td>
@@ -612,7 +618,7 @@ function viewFund(id) {
     ${breadcrumb([["#/funds", "Funds"], [null, x.name]])}
     <div class="detail-head">
       <div>
-        <h1>${followBtn("fund", x.id)} ${esc(x.name)}</h1>
+        <h1>${nameCell("fund", x.id, esc(x.name))}</h1>
         <p class="muted">${link(`#/manager/${m.id}`, m.name)} · ${esc(x.domicile)} · Vintage ${x.vintage}</p>
         <div>${chip(x.strategy)} ${fundStatusChip(x)} ${lifecycleBadge(x)} ${equityBadge(x)} ${chip(x.geoFocus)}</div>
         <p class="muted small data-asof">Data as of ${esc(x.asOf || "—")} · ${completenessPill(x)}</p>
@@ -677,7 +683,7 @@ function viewManagers() {
           const live = fs.filter((x) => !x.evergreen && !x.lifecycle && x.status !== "Final Close").length;
           const strat = m.strategies.slice(0, 2).map((s) => chip(s)).join(" ") + (m.strategies.length > 2 ? ` <span class="muted small">+${m.strategies.length - 2}</span>` : "") || '<span class="muted small">—</span>';
           return `<tr class="clickable" data-href="#/manager/${m.id}">
-            <td>${followBtn("manager", m.id)} <strong>${esc(m.name)}</strong></td>
+            <td>${nameCell("manager", m.id, `<strong>${esc(m.name)}</strong>`)}</td>
             <td class="muted small">${esc(m.hq)}</td>
             <td>${m.aumText ? esc(m.aumText) : "€" + m.aum + "bn"}</td>
             <td>${strat}</td>
@@ -735,7 +741,7 @@ function viewManager(id) {
   app.innerHTML = `
     ${breadcrumb([["#/managers", "Managers"], [null, m.name]])}
     <div class="detail-head"><div>
-      <h1>${followBtn("manager", m.id)} ${esc(m.name)}</h1>
+      <h1>${nameCell("manager", m.id, esc(m.name))}</h1>
       <p class="muted">${esc(m.hq)} · Founded ${m.founded}</p>
       <div>${m.strategies.map((s) => chip(s)).join(" ")}</div>
     </div></div>
@@ -752,7 +758,7 @@ function viewManager(id) {
       ${fs.length ? `<div class="table-wrap"><table class="data-table">
         <thead><tr><th>Fund</th><th>Strategy</th><th>Geography</th><th>Vintage</th><th>Status</th><th>Target</th><th class="prog-col">Progress</th></tr></thead>
         <tbody>${fs.map((x) => `<tr class="clickable" data-href="#/fund/${x.id}">
-          <td>${followBtn("fund", x.id)} <strong>${esc(x.name)}</strong></td><td>${chip(x.strategy)}</td><td>${esc(x.geoFocus)}</td><td>${x.vintage}</td>
+          <td>${nameCell("fund", x.id, `<strong>${esc(x.name)}</strong>`)}</td><td>${chip(x.strategy)}</td><td>${esc(x.geoFocus)}</td><td>${x.vintage}</td>
           <td>${fundStatusChip(x)} ${lifecycleBadge(x)} ${equityBadge(x)}</td><td>${x.evergreen ? "—" : eur(x.targetSize)}</td>
           <td class="prog-col">${raiseDisplay(x)}</td>
         </tr>`).join("")}</tbody>
@@ -790,7 +796,7 @@ function viewLps() {
       <thead><tr>${sortTh("lps", "name", "Investor")}${sortTh("lps", "type", "Type")}${sortTh("lps", "hq", "HQ")}${sortTh("lps", "aum", "AUM")}${sortTh("lps", "pc", "PC alloc.")}${sortTh("lps", "ticket", "Typical ticket")}${sortTh("lps", "mandate", "Mandate")}</tr></thead>
       <tbody>
         ${sorted.map((l) => `<tr class="clickable" data-href="#/lp/${l.id}">
-          <td>${followBtn("lp", l.id)} <strong>${esc(l.name)}</strong></td><td>${esc(l.type)}</td><td>${esc(l.hq)}</td>
+          <td>${nameCell("lp", l.id, `<strong>${esc(l.name)}</strong>`)}</td><td>${esc(l.type)}</td><td>${esc(l.hq)}</td>
           <td>€${l.aum}bn</td><td>${pct(l.pcAllocationPct)}</td><td>${eur(l.typicalTicket)}</td>
           <td>${chip(l.mandateStatus, mandateClass(l.mandateStatus))}</td>
         </tr>`).join("")}
@@ -809,7 +815,7 @@ function viewLp(id) {
   app.innerHTML = `
     ${breadcrumb([["#/lps", "Investors"], [null, l.name]])}
     <div class="detail-head"><div>
-      <h1>${followBtn("lp", l.id)} ${esc(l.name)}</h1>
+      <h1>${nameCell("lp", l.id, esc(l.name))}</h1>
       <p class="muted">${esc(l.type)} · ${esc(l.hq)}</p>
       <div>${chip(l.mandateStatus, mandateClass(l.mandateStatus))} ${l.strategies.map((s) => chip(s)).join(" ")}</div>
     </div></div>
@@ -1058,7 +1064,7 @@ function viewWatchlist() {
   }
   const listCard = (title, items, type, render) =>
     `<section class="card"><h2>${title} <span class="muted">(${items.length})</span></h2>${items.length
-      ? `<ul class="link-list">${items.map((x) => `<li>${followBtn(type, x.id)} ${render(x)}</li>`).join("")}</ul>`
+      ? `<ul class="link-list">${items.map((x) => `<li>${nameCell(type, x.id, render(x))}</li>`).join("")}</ul>`
       : '<p class="muted small">None followed.</p>'}</section>`;
   app.innerHTML = `
     <div class="page-head"><h1>My Watchlist</h1><p class="muted">${fm.length + ff.length + fl.length} followed · ${cloudSync ? "synced across devices" : "saved on this device"}</p></div>

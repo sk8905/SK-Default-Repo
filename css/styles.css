@@ -146,6 +146,10 @@ h3.sub:first-of-type { margin-top: .2rem; }
 }
 .follow-btn:hover { color: #f59e0b; }
 .follow-btn.on { color: #f59e0b; }
+/* Star + name as two columns: a wrapping name stays beside the star, not under it. */
+.namecell { display: flex; align-items: baseline; gap: .35rem; }
+.namecell .follow-btn { flex: 0 0 auto; margin-right: 0; }
+.namecell-text { display: block; min-width: 0; }
 .nav-badge {
   display: inline-block; min-width: 16px; padding: 0 5px; margin-left: .15rem;
   background: var(--accent); color: #fff; border-radius: 999px;
