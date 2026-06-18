@@ -495,3 +495,17 @@ named GC are intentionally left blank (the UI shows a "not yet compiled" note).
 LinkedIn blocks automated fetching, so profile URLs were located via search and
 should be treated as best-effort; a few people in transition (e.g. incoming GCs,
 group-level vs business-unit GCs) are noted in their titles.
+
+---
+
+## Round update — 2026-06-18: manager-website announcements (webNews)
+
+Swept every manager's own website (news / press-release / insights pages) and
+added a `webNews` array per record, separate from the curated `news` feed so the
+provenance stays clear. The manager page combines `news` + `webNews`, de-duped
+by URL then title and grouped by year. Net new after de-duplication against the
+existing curated feed: 156 announcements across 95 managers (946 raw items were
+gathered; the remainder were already captured in `news`, or were dropped as
+data-aggregator pages — gurufocus, tracxn, simplywall, marketbeat, etc. — which
+are not primary sources). Items keep the manager's own press-release URL where
+one exists so each headline links back to the firm's site.
