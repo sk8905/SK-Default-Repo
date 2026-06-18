@@ -425,3 +425,33 @@ Venn, Hayfin's Arctos MBO, Clearlake Credit / MV Credit, Citi x HPS EUR15bn,
 Oaktree x Allianz Lloyd's syndicate, Bain x SMBC JV, CVC x AIG, Tikehau defence
 fund with insurers, plus Davidson Kempner / Golub / NorthWall European CLO build-outs
 and numerous senior hires. All items carry a real, non-excluded source URL.
+
+## Daily deal refresh (2026-06-18)
+
+Searched for European private credit deals from roughly the last 5–7 days (June
+11–18 2026). Public sources only; subscription aggregators excluded. One new deal
+added (d188):
+
+- **d188 — Arcmont & Ares lead €1.1bn Cegid / Shine financing (2026-06-12)**.
+  Arcmont Asset Management (m29) and Ares Management led a €1.1bn private credit
+  facility (E+550, OID 98, maturity 2030) to Cegid (Silver Lake-backed French
+  software group) to finance the acquisition of fintech unicorn Shine, creating a
+  fully integrated, AI-driven SMB financial platform across the EU. Co-lenders
+  included Vista Credit Partners, PGIM, Clearlake, JPMorgan and Mandatum.
+  Src: Yahoo Finance — https://finance.yahoo.com/markets/stocks/articles/cegid-closes-shine-acquisition-1-154242169.html
+
+Other items researched but not added (outside 5-7 day window or not admissible):
+  - Arini/IHG Hotels EMEA collaboration (June 2, 2026) — undisclosed amount,
+    strategic mandate not a specific financing; also outside the window.
+  - Kartesia/Avedon/Atlas NextWave acquisition financing (May 20, 2026) —
+    undisclosed amount; outside the window.
+  - Hayfin/Oaktree CRE portfolio acquisition (March 26, 2025) — outside window.
+  - Arini/Victoria Plc £130m loan (July 2, 2025) — outside window.
+  - Arini/Vita Group refinancing (July 28, 2025) — outside window.
+  - KKR/Altavair aircraft leasing $1.4bn commitment (June 17, 2026) — global/US
+    focus, not specifically European.
+  - Air France-KLM €1bn credit facility (June 17, 2026) — bank syndicated loan,
+    not private credit.
+  - Blackstone SablePointe ABL launch (June 16, 2026) — US platform, not European.
+
+DATA_UPDATED bumped to 2026-06-18. Cache-buster updated to 20260618-1 (all four).
