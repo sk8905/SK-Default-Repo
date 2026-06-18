@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260618-23";
+} from "./data.js?v=20260618-24";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260618-23";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260618-24";
 
 const app = document.getElementById("app");
 
@@ -1100,7 +1100,28 @@ function viewWatchlist() {
   const ff = followList("fund").map((id) => fundById[id]).filter(Boolean).sort(byName);
   const fl = followList("lp").map((id) => lpById[id]).filter(Boolean).sort(byName);
   const mIds = new Set(fm.map((m) => m.id)), fIds = new Set(ff.map((f) => f.id));
-  const feed = intel.filter((i) => (i.managerId && mIds.has(i.managerId)) || (i.fundId && fIds.has(i.fundId)));
+
+  // Combined feed for followed managers/funds: in the news, deal activity and
+  // fundraising intelligence — tagged so a single year-grouped list can render
+  // each item with its own row style.
+  const matches = (x) => (x.managerId && mIds.has(x.managerId)) || (x.fundId && fIds.has(x.fundId));
+  const dealItems = deals.filter(matches).map((d) => ({ ...d, _kind: "deal" }));
+  const intelItems = intel.filter(matches).map((i) => ({ ...i, _kind: "intel" }));
+  const newsItems = [];
+  fm.forEach((m) => {
+    const all = [...(m.news || []), ...(m.webNews || [])];
+    const seen = new Set();
+    all.forEach((x) => {
+      const k = (x.url || x.title || "").toLowerCase().split(/[?#]/)[0].replace(/\/$/, "");
+      if (seen.has(k)) return;
+      seen.add(k);
+      newsItems.push({ ...x, _kind: "news", _mid: m.id, _mname: m.name });
+    });
+  });
+  const feed = [...newsItems, ...dealItems, ...intelItems];
+  const feedRow = (x) => x._kind === "deal" ? dealRow(x)
+    : x._kind === "intel" ? intelRow(x)
+    : `<div class="intel-row"><div class="intel-meta"><span class="chip">News</span><span class="muted small">${fmtDate(x.date)}</span></div><div class="intel-body"><a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer" class="intel-head">${esc(x.title)}</a><div>${link(`#/manager/${x._mid}`, x._mname, "muted small")}${x.outlet ? ` · <span class="muted small">${esc(x.outlet)}</span>` : ""}</div></div></div>`;
 
   const syncNote = cloudSync
     ? `☁ Synced to your account across devices${account ? ` · signed in as <strong>${esc(account)}</strong>` : ""} · <a href="/cdn-cgi/access/logout">Sign out</a>`
@@ -1120,10 +1141,12 @@ function viewWatchlist() {
   app.innerHTML = `
     <div class="page-head"><h1>My Watchlist</h1><p class="muted">${fm.length + ff.length + fl.length} followed · ${cloudSync ? "synced across devices" : "saved on this device"}</p></div>
     ${accountBar}
-    <section class="card"><h2>Your intelligence feed <span class="muted">(${feed.length})</span></h2>${feed.length ? feed.map(intelRow).join("") : '<p class="muted small">No intelligence yet for the managers/funds you follow.</p>'}</section>
-    ${listCard("Managers", fm, "manager", (m) => link(`#/manager/${m.id}`, m.name))}
-    ${listCard("Funds", ff, "fund", (f) => `${link(`#/fund/${f.id}`, f.name)} <span class="muted small">${esc(managerById[f.managerId].name)}</span>`)}
-    ${listCard("Investors", fl, "lp", (l) => `${link(`#/lp/${l.id}`, l.name)} <span class="muted small">${esc(l.type)}</span>`)}`;
+    <div class="grid-3">
+      ${listCard("Managers", fm, "manager", (m) => link(`#/manager/${m.id}`, m.name))}
+      ${listCard("Funds", ff, "fund", (f) => `${link(`#/fund/${f.id}`, f.name)} <span class="muted small">${esc(managerById[f.managerId].name)}</span>`)}
+      ${listCard("Investors", fl, "lp", (l) => `${link(`#/lp/${l.id}`, l.name)} <span class="muted small">${esc(l.type)}</span>`)}
+    </div>
+    <section class="card"><h2>News, deals &amp; fundraising <span class="muted">(${feed.length})</span></h2>${feed.length ? byYear(feed, feedRow) : '<p class="muted small">No news, deals or fundraising yet for the managers/funds you follow.</p>'}</section>`;
 }
 
 // ============================== shared bits ================================
