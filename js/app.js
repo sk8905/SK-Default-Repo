@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260618-14";
+} from "./data.js?v=20260618-15";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260618-14";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260618-15";
 
 const app = document.getElementById("app");
 
@@ -784,11 +784,11 @@ function viewManager(id) {
     ${legalBlock(m)}
 
     <div class="section-divider"><span>News, deals &amp; intelligence</span></div>
-    ${dealsForManager(m.id).length ? `<section class="card"><h2>Deal activity <span class="muted">(${dealsForManager(m.id).length})</span></h2>${dealsForManager(m.id).map(dealRow).join("")}</section>` : ""}
     ${newsBlock(m)}
+    ${dealsForManager(m.id).length ? `<section class="card"><h2>Deal activity <span class="muted">(${dealsForManager(m.id).length})</span></h2>${dealsForManager(m.id).map(dealRow).join("")}</section>` : ""}
     <section class="card">
-      <h2>Intelligence</h2>
-      ${news.length ? news.map(intelRow).join("") : '<p class="muted">No intelligence items for this manager yet.</p>'}
+      <h2>Fundraising intelligence</h2>
+      ${news.length ? news.map(intelRow).join("") : '<p class="muted">No fundraising intelligence items for this manager yet.</p>'}
     </section>`;
 }
 
