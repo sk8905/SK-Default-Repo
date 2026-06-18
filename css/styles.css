@@ -201,12 +201,13 @@ h3.sub:first-of-type { margin-top: .2rem; }
 /* ---------- filters ---------- */
 .filters { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 1rem; align-items: flex-end; }
 .filter { display: flex; flex-direction: column; gap: .25rem; font-size: .75rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
-.filter select, .filter input {
+/* Direct children only, so the popover checkboxes aren't styled like text inputs. */
+.filter > select, .filter > input {
   font-size: .85rem; padding: .45rem .6rem; border: 1px solid var(--border);
   border-radius: 7px; background: #fff; color: var(--ink); min-width: 150px; font-weight: 400; text-transform: none; letter-spacing: 0;
 }
-.filter.search input { min-width: 230px; }
-.filter select:focus, .filter input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: var(--accent); }
+.filter.search > input { min-width: 230px; }
+.filter > select:focus, .filter > input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: var(--accent); }
 
 /* ---------- tables ---------- */
 .table-wrap { overflow-x: auto; }
@@ -362,7 +363,7 @@ a.intel-head:hover { color: var(--primary); }
   /* Filters stack to full width and stay tappable. */
   .filters { gap: .5rem; }
   .filter { flex: 1 1 100%; }
-  .filter select, .filter input, .filter.search input { min-width: 0; width: 100%; }
+  .filter > select, .filter > input, .filter.search > input { min-width: 0; width: 100%; }
   .filter.ms { flex: 1 1 100%; }
   .ms-btn { width: 100%; }
 }
@@ -379,17 +380,22 @@ a.intel-head:hover { color: var(--primary); }
 .ms-btn[aria-expanded="true"] { border-color: var(--accent); outline: 2px solid var(--accent); outline-offset: 0; }
 .ms-caret { color: var(--muted); font-size: .7rem; }
 .ms-pop {
-  position: absolute; z-index: 30; top: calc(100% + 4px); left: 0; min-width: 100%;
-  max-height: 280px; overflow-y: auto; background: #fff; border: 1px solid var(--border);
-  border-radius: 8px; box-shadow: 0 8px 24px rgba(15, 23, 42, .14); padding: .35rem;
+  position: absolute; z-index: 30; top: calc(100% + 4px); left: 0;
+  width: max-content; min-width: 100%; max-width: 320px;
+  max-height: 300px; overflow-y: auto; background: #fff; border: 1px solid var(--border);
+  border-radius: 8px; box-shadow: 0 8px 24px rgba(15, 23, 42, .14); padding: 4px;
 }
 .ms-opt {
-  display: flex; align-items: center; gap: .55rem; padding: .35rem .5rem;
-  font-size: .82rem; text-transform: none; letter-spacing: 0; color: var(--ink);
-  font-weight: 500; white-space: nowrap; border-radius: 5px; cursor: pointer;
+  display: flex; align-items: center; justify-content: flex-start; gap: .5rem;
+  padding: .4rem .55rem; margin: 0; font-size: .82rem; text-transform: none;
+  letter-spacing: 0; color: var(--ink); font-weight: 500; white-space: nowrap;
+  border-radius: 5px; cursor: pointer;
 }
 .ms-opt:hover { background: #f1f5f9; }
-.ms-opt input { accent-color: var(--accent); margin: 0; }
+.ms-opt input {
+  flex: 0 0 auto; width: 15px; height: 15px; min-width: 0; margin: 0; padding: 0;
+  accent-color: var(--accent); cursor: pointer;
+}
 
 /* ---------- dashboard compact feeds ---------- */
 .compact-list { list-style: none; margin: .25rem 0 0; padding: 0; }
