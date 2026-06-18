@@ -326,8 +326,9 @@ a.intel-head:hover { color: var(--primary); }
   /* Topbar: brand + account share the first row; the nav becomes a full-width
      horizontally-scrollable strip below it (so it stays usable on phones). */
   .topbar { height: auto; flex-wrap: wrap; gap: .4rem 1rem; padding: .55rem .9rem; }
-  .brand { flex: 1 1 auto; }
-  .topbar-right { order: 2; flex: 0 1 auto; }
+  .brand { flex: 1 1 100%; }
+  /* Sign-in + refresh sit on their own row under the brand, left-aligned. */
+  .topbar-right { order: 2; flex-basis: 100%; width: 100%; align-items: flex-start; }
   .account-nav, .data-status { white-space: normal; font-size: .66rem; }
   .mainnav {
     display: flex; order: 3; flex-basis: 100%; width: 100%;
