@@ -509,3 +509,20 @@ gathered; the remainder were already captured in `news`, or were dropped as
 data-aggregator pages — gurufocus, tracxn, simplywall, marketbeat, etc. — which
 are not primary sources). Items keep the manager's own press-release URL where
 one exists so each headline links back to the firm's site.
+
+---
+
+## Round update — 2026-06-18: targeted website re-sweep (thin-coverage managers)
+
+After noticing some managers' own-site announcements were missing (e.g. Signal
+Capital, whose site returns HTTP 403 to automated fetchers), re-swept the 71
+managers that had ≤1 `webNews` item. Research was done via `site:`-scoped web
+searches rather than direct page fetches, since most manager sites block
+automated crawlers. Each item keeps the firm's own press-release/insights URL
+where available, or a corroborating trade-press URL otherwise.
+
+Net new after de-duplication against existing `news` and `webNews`: 412
+announcements across 64 managers. (A few small managers — Kimmik, Kinnerton
+Hill, Baupost, Fidera, Caius — have no public news page and remain blank.)
+A normalisation bug in the earlier merge (URLs were being compared by domain
+only) was fixed so same-domain articles are no longer treated as duplicates.
