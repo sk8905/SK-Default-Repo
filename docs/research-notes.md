@@ -455,3 +455,30 @@ Other items researched but not added (outside 5-7 day window or not admissible):
   - Blackstone SablePointe ABL launch (June 16, 2026) — US platform, not European.
 
 DATA_UPDATED bumped to 2026-06-18. Cache-buster updated to 20260618-1 (all four).
+
+---
+
+## Round update — 2026-06-18: full per-manager news/deals sweep + fund-gap fix
+
+Ran a fan-out research pass across all 112 managers (public sources only; same
+blocklist as prior rounds — With Intelligence/Preqin/PitchBook/Debtwire/
+Crunchbase/Mergr/GuruFocus/CapEdge/Tracxn/Wikipedia/SEC form-D scrapers
+excluded). Added **89 intel + 56 deals** (2024–2026), deduped by URL and
+normalised headline against the existing intel AND deals, validated managerIds,
+mapped to the existing type taxonomy, capped per manager. Equity/PE-only
+managers' items are flagged `equity:true` ("Equity / PE") and excluded from
+credit aggregates.
+
+Fund-numbering gaps the user flagged:
+- **Muzinich** — "Fund II" already existed (f189) but was named inconsistently
+  ("Muzinich Pan-European II Private Debt Fund"); renamed to
+  "Muzinich Pan-European Private Debt Fund II". No fund missing.
+- **H.I.G. Bayside** — the European series ran Fund V (2019) → Fund VII (2024);
+  **Fund VI is the US vintage** ($1.4bn, closed 8 Mar 2021). Added as f229 with a
+  note explaining why the European numbering appears to skip VI.
+
+Sources skew to manager press releases, BusinessWire/PR Newswire, Bloomberg,
+Reuters, Alternative Credit Investor, Private Debt Investor (headline), Creditflux,
+GlobalCapital and law-firm announcements. A handful of managers (e.g. Fidera,
+some allocator items) had findings only behind paywalls or on excluded domains
+and were therefore not added, preserving the verifiable-public-source rule.
