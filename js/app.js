@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260618-20";
+} from "./data.js?v=20260618-21";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260618-20";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260618-21";
 
 const app = document.getElementById("app");
 
@@ -1025,6 +1025,7 @@ function viewDeals() {
     <div class="filters">
       <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Company, manager…" value="${esc(f.q)}"></label>
       ${multiFilter("deals:type", "Type", [...new Set(deals.map((d) => d.type))].sort(), f.type)}
+      ${multiFilter("deals:year", "Year", [...new Set(deals.map((d) => yearOf(d.date)).filter(Boolean))].sort((a, b) => b.localeCompare(a)), f.year)}
     </div>
     <section class="card">
       ${rows.length ? byYear(rows, dealRow) : '<p class="empty">No deal items match these filters.</p>'}
