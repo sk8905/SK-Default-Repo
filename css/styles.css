@@ -405,6 +405,15 @@ a.intel-head:hover { color: var(--primary); }
 a.compact-head:hover { color: var(--primary); }
 .compact-meta { margin-top: .15rem; }
 
+/* ---------- year section breaks (manager feeds) ---------- */
+.year-group + .year-group { margin-top: .5rem; }
+.year-head {
+  font-size: .8rem; font-weight: 700; color: #64748b; text-transform: uppercase;
+  letter-spacing: 1px; margin: 1rem 0 .1rem; padding-bottom: .35rem;
+  border-bottom: 2px solid var(--border);
+}
+.year-group:first-child .year-head { margin-top: .25rem; }
+
 /* ---------- deep-link highlight on feed pages ---------- */
 .intel-row.flash { animation: rowflash 2.2s ease-out; }
 @keyframes rowflash { 0% { background: #fef9c3; } 100% { background: transparent; } }

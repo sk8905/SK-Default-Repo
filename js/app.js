@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260618-15";
+} from "./data.js?v=20260618-16";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260618-15";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260618-16";
 
 const app = document.getElementById("app");
 
@@ -721,13 +721,31 @@ function ownersFilingsBlock(m) {
   </section>`;
 }
 
+// Group a dated list into year sections (newest year first; undated last),
+// each rendered with a year heading acting as a section break.
+function byYear(items, rowFn) {
+  const groups = {};
+  [...items].sort((a, b) => String(b.date).localeCompare(String(a.date))).forEach((x) => {
+    const y = (String(x.date).match(/^(\d{4})/) || [])[1] || "Undated";
+    (groups[y] ||= []).push(x);
+  });
+  return Object.keys(groups)
+    .sort((a, b) => (a === "Undated") - (b === "Undated") || b.localeCompare(a))
+    .map((y) => `<div class="year-group"><h3 class="year-head">${esc(y)}</h3>${groups[y].map(rowFn).join("")}</div>`)
+    .join("");
+}
+
+function newsItemRow(x) {
+  return `<div class="intel-row"><div class="intel-meta"><span class="muted small">${esc(x.outlet || "")}</span><span class="muted small">${esc(x.date || "")}</span></div><div class="intel-body"><a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer" class="intel-head">${esc(x.title)}</a></div></div>`;
+}
+
 function newsBlock(m) {
-  const n = m.news;
+  const n = m.news || [];
   return `<section class="card">
     <h2>In the news</h2>
-    ${(n && n.length)
-      ? n.map((x) => `<div class="intel-row"><div class="intel-meta"><span class="muted small">${esc(x.outlet || "")}</span><span class="muted small">${esc(x.date || "")}</span></div><div class="intel-body"><a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer" class="intel-head">${esc(x.title)}</a></div></div>`).join("")
-      : '<p class="muted small">No curated news yet for this manager. (When populated, items are drawn from the Financial Times, Bloomberg, Wall Street Journal, Yahoo Finance and other reputable outlets.)'}
+    ${n.length
+      ? byYear(n, newsItemRow)
+      : '<p class="muted small">No curated news yet for this manager. (When populated, items are drawn from the manager\'s own website plus the Financial Times, Bloomberg, Wall Street Journal, Yahoo Finance and other reputable outlets.)'}
   </section>`;
 }
 
@@ -785,10 +803,10 @@ function viewManager(id) {
 
     <div class="section-divider"><span>News, deals &amp; intelligence</span></div>
     ${newsBlock(m)}
-    ${dealsForManager(m.id).length ? `<section class="card"><h2>Deal activity <span class="muted">(${dealsForManager(m.id).length})</span></h2>${dealsForManager(m.id).map(dealRow).join("")}</section>` : ""}
+    ${dealsForManager(m.id).length ? `<section class="card"><h2>Deal activity <span class="muted">(${dealsForManager(m.id).length})</span></h2>${byYear(dealsForManager(m.id), dealRow)}</section>` : ""}
     <section class="card">
       <h2>Fundraising intelligence</h2>
-      ${news.length ? news.map(intelRow).join("") : '<p class="muted">No fundraising intelligence items for this manager yet.</p>'}
+      ${news.length ? byYear(news, intelRow) : '<p class="muted">No fundraising intelligence items for this manager yet.</p>'}
     </section>`;
 }
 
