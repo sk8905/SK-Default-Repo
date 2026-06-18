@@ -138,9 +138,11 @@ h3.sub:first-of-type { margin-top: .2rem; }
 .section-intro { margin: 0 0 1rem; }
 
 /* ---------- watchlist / follow stars ---------- */
+/* Fixed-width, vertically-centred so the star never shifts the text after it. */
 .follow-btn {
-  background: none; border: none; cursor: pointer; padding: 0 .15rem;
-  font-size: 1rem; line-height: 1; color: #cbd5e1; vertical-align: baseline;
+  display: inline-block; width: 1.25em; min-width: 1.25em; text-align: center;
+  background: none; border: none; cursor: pointer; padding: 0; margin-right: .3rem;
+  font-size: 1rem; line-height: 1; color: #cbd5e1; vertical-align: middle;
 }
 .follow-btn:hover { color: #f59e0b; }
 .follow-btn.on { color: #f59e0b; }
@@ -357,4 +359,42 @@ a.intel-head:hover { color: var(--primary); }
   .filters { gap: .5rem; }
   .filter { flex: 1 1 100%; }
   .filter select, .filter input, .filter.search input { min-width: 0; width: 100%; }
+  .filter.ms { flex: 1 1 100%; }
+  .ms-btn { width: 100%; }
 }
+
+/* ---------- multi-select filter dropdowns ---------- */
+.ms { position: relative; }
+.ms-btn {
+  font: inherit; font-size: .8rem; text-transform: none; letter-spacing: 0;
+  background: #fff; border: 1px solid var(--border); border-radius: 6px;
+  padding: .42rem .6rem; min-width: 160px; cursor: pointer; color: var(--ink);
+  display: flex; align-items: center; justify-content: space-between; gap: .6rem;
+}
+.ms-btn:hover { border-color: var(--accent); }
+.ms-btn[aria-expanded="true"] { border-color: var(--accent); outline: 2px solid var(--accent); outline-offset: 0; }
+.ms-caret { color: var(--muted); font-size: .7rem; }
+.ms-pop {
+  position: absolute; z-index: 30; top: calc(100% + 4px); left: 0; min-width: 100%;
+  max-height: 280px; overflow-y: auto; background: #fff; border: 1px solid var(--border);
+  border-radius: 8px; box-shadow: 0 8px 24px rgba(15, 23, 42, .14); padding: .35rem;
+}
+.ms-opt {
+  display: flex; align-items: center; gap: .55rem; padding: .35rem .5rem;
+  font-size: .82rem; text-transform: none; letter-spacing: 0; color: var(--ink);
+  font-weight: 500; white-space: nowrap; border-radius: 5px; cursor: pointer;
+}
+.ms-opt:hover { background: #f1f5f9; }
+.ms-opt input { accent-color: var(--accent); margin: 0; }
+
+/* ---------- dashboard compact feeds ---------- */
+.compact-list { list-style: none; margin: .25rem 0 0; padding: 0; }
+.compact-item { padding: .5rem 0; border-bottom: 1px solid var(--border); }
+.compact-item:last-child { border-bottom: none; }
+.compact-head { font-weight: 600; color: var(--ink); }
+a.compact-head:hover { color: var(--primary); }
+.compact-meta { margin-top: .15rem; }
+
+/* ---------- deep-link highlight on feed pages ---------- */
+.intel-row.flash { animation: rowflash 2.2s ease-out; }
+@keyframes rowflash { 0% { background: #fef9c3; } 100% { background: transparent; } }

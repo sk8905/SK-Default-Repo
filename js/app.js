@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260618-7";
+} from "./data.js?v=20260618-8";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260618-7";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260618-8";
 
 const app = document.getElementById("app");
 
@@ -265,13 +265,20 @@ function investorsForFund(f) {
 
 // --------------------------- simple filter state ---------------------------
 // Persists per-view filter selections across re-renders within a session.
+// Dropdown filters hold ARRAYS of selected values (multi-select). An empty
+// array means "All". `period` stays a single string (chart drill-down).
 const filterState = {
-  funds: { q: "", strategy: "", status: "", geo: "", period: "", sort: { key: "name", dir: "asc" } },
-  managers: { q: "", strategy: "", sort: { key: "name", dir: "asc" } },
-  lps: { q: "", type: "", strategy: "", sort: { key: "name", dir: "asc" } },
-  intel: { q: "", type: "" },
-  deals: { q: "", type: "" },
+  funds: { q: "", strategy: [], status: [], geo: [], period: "", sort: { key: "name", dir: "asc" } },
+  managers: { q: "", strategy: [], sort: { key: "name", dir: "asc" } },
+  lps: { q: "", type: [], strategy: [], sort: { key: "name", dir: "asc" } },
+  intel: { q: "", type: [] },
+  deals: { q: "", type: [] },
 };
+
+// Which multi-select popover (if any) is open — kept open across re-renders.
+let openMs = null;
+// Pending scroll-to target after navigating to a feed page ({view, id}).
+let pendingFocus = null;
 
 // Dashboard quarterly-trend window (indices into the 40-quarter range). null =>
 // default to the last 8 quarters (2 years). Persists across re-renders.
@@ -338,179 +345,84 @@ function viewDashboard() {
   // Credit-only universe for the headline aggregates (equity-strategy funds are
   // tracked and listed elsewhere but excluded from private-credit market stats).
   const creditFunds = funds.filter((f) => !isEquity(f));
-  const open = creditFunds.filter((f) => !f.evergreen && (f.status === "Open" || f.status === "First Close"));
-  const totalRaised = creditFunds.reduce((s, f) => s + (f.raised || 0), 0);
-  const finalClosesYTD = creditFunds.filter((f) => f.status === "Final Close" && f.vintage >= 2025).length;
-  const trackedRaise = intel.filter((i) => i.type === "Final Close" || i.type === "First Close").length;
+  const nowD = new Date();
+  const monthKey = `${nowD.getFullYear()}-${String(nowD.getMonth() + 1).padStart(2, "0")}`;
+  const curQ = `${nowD.getFullYear()}-Q${Math.floor(nowD.getMonth() / 3) + 1}`;
+  const longMonth = nowD.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+  const quarterOf = (d) => { const m = /^(\d{4})-(\d{2})/.exec(d || ""); return m ? `${m[1]}-Q${Math.floor((+m[2] - 1) / 3) + 1}` : null; };
 
-  // helper: capital raised in approximate €bn (one decimal) for chart readability
-  const bnRaised = (list) => Math.round(list.reduce((a, f) => a + (f.raised || 0), 0) / 100) / 10;
+  // ---- headline KPIs ----
+  const dealsThisMonth = deals.filter((d) => String(d.date).startsWith(monthKey)).length;
+  const dealsThisQuarter = deals.filter((d) => quarterOf(d.date) === curQ).length;
+  const openProcesses = creditFunds.filter((f) => !f.evergreen && (f.status === "Open" || f.status === "First Close")).length;
+  const closesThisQuarter = creditFunds.filter((f) => isClose(f) && fundQuarter(f) === curQ).length;
+  const kpis = [
+    { label: "Deals this month", value: dealsThisMonth, sub: longMonth, jump: 'data-jump="deals"' },
+    { label: "Deals this quarter", value: dealsThisQuarter, sub: curQ, jump: 'data-jump="deals"' },
+    { label: "Open fundraising processes", value: openProcesses, sub: "funds currently in market", jump: 'data-jump="funds" data-status="in-market"' },
+    { label: "Fundraising closes this quarter", value: closesThisQuarter, sub: curQ, jump: `data-jump="funds" data-period="${curQ}"` },
+  ];
 
-  // capital raised by strategy (€bn) — bars link to Funds filtered by strategy
-  const byStrategy = STRATEGIES.map((s) => ({
-    label: s, value: bnRaised(creditFunds.filter((f) => f.strategy === s)), nav: { jump: "funds", strategy: s },
-  })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
-
-  // capital SOUGHT by strategy (€bn) — disclosed target sizes of funds actively
-  // raising (Open / First Close / Pre-marketing; evergreen has no fixed target).
-  const seekingCapital = (f) => !f.evergreen && !f.lifecycle && (f.status === "Open" || f.status === "First Close" || f.status === "Pre-marketing");
-  const bnTarget = (list) => Math.round(list.reduce((a, f) => a + (f.targetSize || 0), 0) / 100) / 10;
-  const bySought = STRATEGIES.map((s) => ({
-    label: s, value: bnTarget(creditFunds.filter((f) => seekingCapital(f) && f.strategy === s)), nav: { jump: "funds", strategy: s, status: "in-market" },
-  })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
-
-  // funds by category — segments/legend link to Funds filtered by category
-  // (Evergreen funds counted separately rather than under "Open").
+  // ---- the two charts retained on the dashboard ----
+  const byDealType = [...new Set(deals.map((d) => d.type))].map((t) => ({ label: t, value: deals.filter((d) => d.type === t).length, nav: { jump: "deals", dtype: t } })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
   const byStatus = FUND_CATEGORIES.map((s) => ({ label: s, value: creditFunds.filter((f) => fundCategory(f) === s).length, nav: { jump: "funds", status: s } })).filter((d) => d.value > 0);
 
-  // capital by geography (€bn) — bars link to Funds filtered by geography
-  const byGeo = GEOS.map((g) => ({
-    label: g, value: bnRaised(creditFunds.filter((f) => f.geoFocus === g)), nav: { jump: "funds", geo: g },
-  })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
-
-  // fundraising momentum — fund closes (first + final) per quarter over the past
-  // 5 years (20 quarters). Each quarter is clickable → Funds closing that quarter.
-  const qCounts = {};
-  creditFunds.filter(isClose).forEach((f) => { const q = fundQuarter(f); if (q) qCounts[q] = (qCounts[q] || 0) + 1; });
-  const nowD = new Date();
-  let cy = nowD.getFullYear(), cq = Math.floor(nowD.getMonth() / 3) + 1;
-  const quarters = [];
-  for (let i = 0; i < 20; i++) { quarters.unshift(`${cy}-Q${cq}`); cq--; if (cq < 1) { cq = 4; cy--; } }
-  const trend = quarters.map((q) => ({
-    label: "'" + q.slice(2), value: qCounts[q] || 0, nav: { jump: "funds", period: q },
-  }));
-
-  // ---- Deal-intelligence aggregates (primary focus of the platform) ----------
+  // ---- latest feeds (headlines + links only; click → item on its feed page) ----
   const dealsByDate = [...deals].sort((a, b) => String(b.date).localeCompare(String(a.date)));
   const intelByDate = [...intel].sort((a, b) => String(b.date).localeCompare(String(a.date)));
-  const quarterOf = (d) => { const m = /^(\d{4})-(\d{2})/.exec(d || ""); return m ? `${m[1]}-Q${Math.floor((+m[2] - 1) / 3) + 1}` : null; };
-  // deals in the trailing 12 months (today is mid-2026)
-  const cutoff = (() => { const d = new Date(nowD); d.setFullYear(d.getFullYear() - 1); return d.toISOString().slice(0, 10); })();
-  const dealsLast12 = deals.filter((d) => String(d.date) >= cutoff).length;
-  const activeMgrs = new Set(deals.map((d) => d.managerId).filter(Boolean)).size;
-
-  // deals by type — donut, segments link to the Deals feed filtered by type
-  const byDealType = DEAL_TYPES.map((t) => ({ label: t, value: deals.filter((d) => d.type === t).length, nav: { jump: "deals", dtype: t } })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
-  // most active managers by disclosed deal count (top 10) — bars link to the manager
-  const dealMgrCounts = {};
-  deals.forEach((d) => { if (d.managerId) dealMgrCounts[d.managerId] = (dealMgrCounts[d.managerId] || 0) + 1; });
-  const byDealManager = Object.entries(dealMgrCounts)
-    .map(([id, value]) => ({ label: managerById[id] ? managerById[id].name : id, value, nav: { jump: "manager/" + id } }))
-    .sort((a, b) => b.value - a.value)
-    .slice(0, 10);
-  // deal activity per quarter over the past 10 years (40 quarters), clickable → Deals
-  const dq = {};
-  deals.forEach((d) => { const q = quarterOf(d.date); if (q) dq[q] = (dq[q] || 0) + 1; });
-  let dy = nowD.getFullYear(), dqr = Math.floor(nowD.getMonth() / 3) + 1;
-  const dQuarters = [];
-  for (let i = 0; i < 40; i++) { dQuarters.unshift(`${dy}-Q${dqr}`); dqr--; if (dqr < 1) { dqr = 4; dy--; } }
-  // Windowed quarterly series for the combined chart. A "From"/"To" slider picks
-  // any sub-range of the 40 quarters; default is the last 8 quarters (2 years).
-  const NQ = dQuarters.length;
-  const buildTrend = (a, b) => {
-    const win = dQuarters.slice(a, b + 1);
-    // label every quarter for short windows; only Q1 (year) for long ones
-    const lab = win.length <= 16 ? (q) => "'" + q.slice(2) : (q) => (q.endsWith("Q1") ? "'" + q.slice(2, 4) : "");
-    return [
-      { name: "Deals", color: "#2563eb", points: win.map((q) => ({ label: lab(q), value: dq[q] || 0, nav: { jump: "deals" } })) },
-      { name: "Fund closes", color: "#f97316", points: win.map((q) => ({ label: lab(q), value: qCounts[q] || 0 })) },
-    ];
-  };
-  const tStart = Math.min(Math.max(0, trendState.start ?? (NQ - 8)), NQ - 1);
-  const tEnd = Math.min(Math.max(tStart, trendState.end ?? (NQ - 1)), NQ - 1);
-
-  // Primary KPIs lead with deal-flow; fundraising is represented but secondary.
-  const kpis = [
-    { label: "Deals tracked", value: deals.length, sub: "investments, exits, refis, distress", jump: 'data-jump="deals"' },
-    { label: "Deals last 12 months", value: dealsLast12, sub: "transaction flow", jump: 'data-jump="deals"' },
-    { label: "Intelligence items", value: intel.length, sub: "launches, closes, mandates", jump: 'data-jump="intel"' },
-    { label: "Active managers", value: activeMgrs, sub: "credit GPs with deal activity", jump: 'data-jump="managers"' },
-  ];
 
   app.innerHTML = `
     <div class="page-head">
       <h1>Credit Deal Intelligence</h1>
-      <p class="muted">European private credit deal flow &amp; market intelligence — with fundraising as a secondary lens · real data compiled from public sources (mid-2026)</p>
+      <p class="muted">European private credit deal flow &amp; market intelligence, with fundraising as a secondary lens · real data compiled from public sources (mid-2026)</p>
     </div>
     <div class="kpi-grid">
       ${kpis.map((k) => `<div class="kpi-card clickable" ${k.jump}><div class="kpi-value">${k.value}</div><div class="kpi-label">${k.label}</div><div class="kpi-sub muted">${k.sub}</div></div>`).join("")}
     </div>
 
-    <section class="card feature-card">
-      <h2>Latest deal activity</h2>
-      <p class="muted small">Financings, investments, acquisitions, refinancings, restructurings, exits and distress across tracked European credit managers.</p>
-      ${deals.length ? dealsByDate.slice(0, 8).map(dealRow).join("") : '<p class="muted small">No deal activity yet.</p>'}
-      <div class="card-foot">${link("#/deals", "View all deal activity →")}</div>
-    </section>
-    <section class="card">
-      <h2>Deal &amp; fundraising activity by quarter</h2>
-      <p class="muted small">Deal transactions vs. fund closes (first + final) per quarter. Drag either handle to set the date range (up to 10 years); click any quarter to open the full deal feed.</p>
-      <div class="trend-controls">
-        <div class="range-readout"><strong id="trend-start-lbl">${esc(dQuarters[tStart])}</strong> <span class="muted">→</span> <strong id="trend-end-lbl">${esc(dQuarters[tEnd])}</strong></div>
-        <div class="range-slider">
-          <div class="range-track"></div>
-          <div class="range-fill" id="trend-fill" style="left:${(tStart / (NQ - 1)) * 100}%; width:${((tEnd - tStart) / (NQ - 1)) * 100}%"></div>
-          <input type="range" id="trend-start" min="0" max="${NQ - 1}" value="${tStart}" aria-label="Range start quarter">
-          <input type="range" id="trend-end" min="0" max="${NQ - 1}" value="${tEnd}" aria-label="Range end quarter">
-        </div>
-      </div>
-      <div id="trend-chart">${multiLineChart(buildTrend(tStart, tEnd), { width: 1120, height: 240 })}</div>
-    </section>
     <div class="grid-2">
-      <section class="card"><h2>Deals by type</h2>${byDealType.length ? donutChart(byDealType) : '<p class="muted small">No deals tracked.</p>'}
-        <h2 class="card-subhead">Most active managers <span class="muted">(by deal count)</span></h2>
-        ${byDealManager.length ? barChart(byDealManager, { width: 520 }) : '<p class="muted small">No deals tracked.</p>'}
+      <section class="card feature-card">
+        <h2>Latest deal activity</h2>
+        <p class="muted small">Financings, investments, acquisitions, refinancings, restructurings and exits. Click a headline to open it in the deal feed.</p>
+        ${deals.length ? `<ul class="compact-list">${dealsByDate.slice(0, 12).map((d) => compactRow(d, "deals")).join("")}</ul>` : '<p class="muted small">No deal activity yet.</p>'}
+        <div class="card-foot">${link("#/deals", "View all deal activity →")}</div>
       </section>
-      <section class="card">
-        <h2>Latest intelligence</h2>
-        <p class="muted small">Fund launches, first/final closes, LP mandates, senior personnel and strategy moves.</p>
-        ${intelByDate.slice(0, 6).map(intelRow).join("")}
-        <div class="card-foot">${link("#/intel", "View full intelligence feed →")}</div>
+      <section class="card feature-card">
+        <h2>Latest fundraising intelligence</h2>
+        <p class="muted small">Fund launches, first/final closes, LP mandates, personnel and strategy moves. Click a headline to open it in the fundraising feed.</p>
+        ${intel.length ? `<ul class="compact-list">${intelByDate.slice(0, 12).map((i) => compactRow(i, "intel")).join("")}</ul>` : '<p class="muted small">No items yet.</p>'}
+        <div class="card-foot">${link("#/intel", "View full fundraising intelligence →")}</div>
       </section>
     </div>
 
-    <div class="section-divider"><span>Fundraising intelligence</span></div>
-    <p class="muted small section-intro">Secondary view — European private credit capital formation: ${open.length} funds in market, ${eur(totalRaised)} raised across tracked funds, ${finalClosesYTD} final closes in 2025–26.</p>
     <div class="grid-2">
-      <section class="card"><h2>Capital raised by strategy <span class="muted">(€bn)</span></h2>${barChart(byStrategy, { unit: "€", width: 540 })}</section>
-      <section class="card"><h2>Capital sought by strategy <span class="muted">(€bn · disclosed targets, funds in market)</span></h2>${bySought.length ? barChart(bySought, { unit: "€", width: 540 }) : '<p class="muted small">No disclosed target sizes for funds currently in market.</p>'}</section>
+      <section class="card"><h2>Deals by type</h2>${byDealType.length ? donutChart(byDealType) : '<p class="muted small">No deals tracked.</p>'}</section>
       <section class="card"><h2>Funds by status</h2>${donutChart(byStatus)}</section>
-      <section class="card"><h2>Capital raised by geography <span class="muted">(€bn)</span></h2>${barChart(byGeo, { unit: "€", width: 540 })}</section>
-    </div>
-    <section class="card">
-      <h2>Fundraising momentum <span class="muted">(fund closes / quarter · past 5 years)</span></h2>
-      <p class="muted small">Click any quarter to see the funds that reached a first or final close in it.</p>
-      ${lineChart(trend, { width: 1120, height: 240 })}
-    </section>`;
-
-  // Wire the quarterly-trend range sliders: re-render only the chart on drag,
-  // keep the two handles from crossing, and persist the window in trendState.
-  const sEl = document.getElementById("trend-start");
-  const eEl = document.getElementById("trend-end");
-  if (sEl && eEl) {
-    const fill = document.getElementById("trend-fill");
-    const rerender = () => {
-      const a = +sEl.value, b = +eEl.value;
-      trendState.start = a; trendState.end = b;
-      document.getElementById("trend-start-lbl").textContent = dQuarters[a];
-      document.getElementById("trend-end-lbl").textContent = dQuarters[b];
-      if (fill) { fill.style.left = (a / (NQ - 1)) * 100 + "%"; fill.style.width = ((b - a) / (NQ - 1)) * 100 + "%"; }
-      document.getElementById("trend-chart").innerHTML = multiLineChart(buildTrend(a, b), { width: 1120, height: 240 });
-    };
-    // keep the two handles from crossing; raise the last-touched handle so it
-    // stays grabbable even when both sit on the same quarter.
-    sEl.addEventListener("input", () => { if (+sEl.value > +eEl.value) sEl.value = eEl.value; sEl.style.zIndex = 5; eEl.style.zIndex = 4; rerender(); });
-    eEl.addEventListener("input", () => { if (+eEl.value < +sEl.value) eEl.value = sEl.value; eEl.style.zIndex = 5; sEl.style.zIndex = 4; rerender(); });
-  }
+    </div>`;
 }
 
 // ================================== FUNDS ===================================
-function selectFilter(id, label, options, current) {
-  return `<label class="filter"><span>${label}</span>
-    <select data-filter="${id}">
-      <option value="">All</option>
-      ${options.map((o) => `<option value="${esc(o)}" ${o === current ? "selected" : ""}>${esc(o)}</option>`).join("")}
-    </select></label>`;
+// Multi-select dropdown. `viewKey` is "view:key" (e.g. "funds:strategy").
+// `options` are strings, or {value,label} objects. `selected` is an array.
+function multiFilter(viewKey, label, options, selected) {
+  const opts = options.map((o) => (typeof o === "string" ? { value: o, label: o } : o));
+  const n = selected.length;
+  const summary = n === 0 ? "All" : (n === 1 ? (opts.find((o) => o.value === selected[0]) || { label: selected[0] }).label : `${n} selected`);
+  return `<div class="filter ms" data-ms="${viewKey}">
+    <span>${label}</span>
+    <button type="button" class="ms-btn" aria-haspopup="true" aria-expanded="false">${esc(summary)} <span class="ms-caret" aria-hidden="true">▾</span></button>
+    <div class="ms-pop" hidden>
+      ${opts.map((o) => `<label class="ms-opt"><input type="checkbox" value="${esc(o.value)}" ${selected.includes(o.value) ? "checked" : ""}> ${esc(o.label)}</label>`).join("")}
+    </div>
+  </div>`;
+}
+
+// Compact feed row for the dashboard: headline (links to the item on its feed
+// page) + date and source only — no summary.
+function compactRow(rec, view) {
+  const head = `<a href="#/${view}" data-goto="${view}:${rec.id}" class="compact-head">${esc(rec.headline)}</a>`;
+  const src = rec.sourceUrl ? ` · <a href="${esc(rec.sourceUrl)}" target="_blank" rel="noopener noreferrer" class="muted small">source ↗</a>` : "";
+  return `<li class="compact-item">${head}<div class="compact-meta muted small">${fmtDate(rec.date)}${src}</div></li>`;
 }
 
 function fundTable(rows) {
@@ -536,9 +448,9 @@ function viewFunds() {
   const inMarket = (x) => !x.evergreen && (x.status === "Open" || x.status === "First Close");
   const rows = funds.filter((x) =>
     (!f.q || (x.name + managerById[x.managerId].name).toLowerCase().includes(f.q.toLowerCase())) &&
-    (!f.strategy || x.strategy === f.strategy) &&
-    (!f.status || (f.status === "in-market" ? inMarket(x) : fundCategory(x) === f.status)) &&
-    (!f.geo || x.geoFocus === f.geo) &&
+    (!f.strategy.length || f.strategy.includes(x.strategy)) &&
+    (!f.status.length || f.status.some((s) => (s === "in-market" ? inMarket(x) : fundCategory(x) === s))) &&
+    (!f.geo.length || f.geo.includes(x.geoFocus)) &&
     (!f.period || (isClose(x) && fundQuarter(x) === f.period))
   ).sort((a, b) => a.name.localeCompare(b.name));
 
@@ -563,15 +475,9 @@ function viewFunds() {
     ${periodBanner}
     <div class="filters">
       <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Fund or manager…" value="${esc(f.q)}"></label>
-      ${selectFilter("strategy", "Strategy", STRATEGIES, f.strategy)}
-      <label class="filter"><span>Status</span>
-        <select data-filter="status">
-          <option value="">All</option>
-          <option value="in-market" ${f.status === "in-market" ? "selected" : ""}>In market (Open + First Close)</option>
-          ${FUND_CATEGORIES.map((o) => `<option value="${esc(o)}" ${o === f.status ? "selected" : ""}>${esc(o)}</option>`).join("")}
-        </select>
-      </label>
-      ${selectFilter("geo", "Geography", GEOS, f.geo)}
+      ${multiFilter("funds:strategy", "Strategy", STRATEGIES, f.strategy)}
+      ${multiFilter("funds:status", "Status", [{ value: "in-market", label: "In market (Open + First Close)" }, ...FUND_CATEGORIES], f.status)}
+      ${multiFilter("funds:geo", "Geography", GEOS, f.geo)}
     </div>
     ${body}`;
   wireFilters("funds");
@@ -753,7 +659,7 @@ function viewManagers() {
   const f = filterState.managers;
   const rows = managers.filter((m) =>
     (!f.q || m.name.toLowerCase().includes(f.q.toLowerCase()) || m.hq.toLowerCase().includes(f.q.toLowerCase())) &&
-    (!f.strategy || m.strategies.includes(f.strategy))
+    (!f.strategy.length || f.strategy.some((s) => m.strategies.includes(s)))
   );
   const sorted = applySort(rows, "managers");
 
@@ -761,7 +667,7 @@ function viewManagers() {
     <div class="page-head"><h1>Managers</h1><p class="muted">${rows.length} of ${managers.length} GPs</p></div>
     <div class="filters">
       <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Name or HQ…" value="${esc(f.q)}"></label>
-      ${selectFilter("strategy", "Strategy", STRATEGIES, f.strategy)}
+      ${multiFilter("managers:strategy", "Strategy", STRATEGIES, f.strategy)}
     </div>
     <div class="table-wrap"><table class="data-table">
       <thead><tr>${sortTh("managers", "name", "Manager")}${sortTh("managers", "hq", "HQ")}${sortTh("managers", "aum", "AUM")}<th>Strategies</th>${sortTh("managers", "funds", "Funds")}${sortTh("managers", "live", "In&nbsp;mkt")}</tr></thead>
@@ -868,8 +774,8 @@ function viewLps() {
   const f = filterState.lps;
   const rows = lps.filter((l) =>
     (!f.q || l.name.toLowerCase().includes(f.q.toLowerCase()) || l.hq.toLowerCase().includes(f.q.toLowerCase())) &&
-    (!f.type || l.type === f.type) &&
-    (!f.strategy || l.strategies.includes(f.strategy))
+    (!f.type.length || f.type.includes(l.type)) &&
+    (!f.strategy.length || f.strategy.some((s) => l.strategies.includes(s)))
   );
   const sorted = applySort(rows, "lps");
 
@@ -877,8 +783,8 @@ function viewLps() {
     <div class="page-head"><h1>Investors / Allocators</h1><p class="muted">${rows.length} of ${lps.length} LPs</p></div>
     <div class="filters">
       <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Name or HQ…" value="${esc(f.q)}"></label>
-      ${selectFilter("type", "Type", LP_TYPES, f.type)}
-      ${selectFilter("strategy", "Interest", STRATEGIES, f.strategy)}
+      ${multiFilter("lps:type", "Type", LP_TYPES, f.type)}
+      ${multiFilter("lps:strategy", "Interest", STRATEGIES, f.strategy)}
     </div>
     <div class="table-wrap"><table class="data-table">
       <thead><tr>${sortTh("lps", "name", "Investor")}${sortTh("lps", "type", "Type")}${sortTh("lps", "hq", "HQ")}${sortTh("lps", "aum", "AUM")}${sortTh("lps", "pc", "PC alloc.")}${sortTh("lps", "ticket", "Typical ticket")}${sortTh("lps", "mandate", "Mandate")}</tr></thead>
@@ -943,7 +849,7 @@ function intelRow(i) {
   const ftarget = i.fundId ? `#/fund/${i.fundId}` : (m ? `#/manager/${m.id}` : null);
   const tag = m ? link(`#/manager/${m.id}`, m.name, "muted small") : '<span class="muted small">Market-wide</span>';
   const head = ftarget ? link(ftarget, i.headline, "intel-head") : `<span class="intel-head">${esc(i.headline)}</span>`;
-  return `<div class="intel-row">
+  return `<div class="intel-row" id="row-${i.id}">
     <div class="intel-meta"><span class="chip ${intelTypeClass(i.type)}">${esc(i.type)}</span><span class="muted small">${fmtDate(i.date)}</span></div>
     <div class="intel-body">${head}<p class="muted small">${esc(i.summary)}</p><div>${tag}${i.sourceUrl ? ` · <a href="${esc(i.sourceUrl)}" target="_blank" rel="noopener noreferrer" class="muted small">source ↗</a>` : ""}</div></div>
   </div>`;
@@ -953,19 +859,42 @@ function viewIntel() {
   const f = filterState.intel;
   const rows = intel.filter((i) =>
     (!f.q || (i.headline + i.summary).toLowerCase().includes(f.q.toLowerCase())) &&
-    (!f.type || i.type === f.type)
+    (!f.type.length || f.type.includes(i.type))
   ).sort((a, b) => String(b.date).localeCompare(String(a.date))); // newest first
 
+  // ---- fundraising charts (moved here from the dashboard) ----
+  const creditFunds = funds.filter((x) => !isEquity(x));
+  const bnRaised = (list) => Math.round(list.reduce((a, x) => a + (x.raised || 0), 0) / 100) / 10;
+  const byStrategy = STRATEGIES.map((s) => ({ label: s, value: bnRaised(creditFunds.filter((x) => x.strategy === s)), nav: { jump: "funds", strategy: s } })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
+  const seeking = (x) => !x.evergreen && !x.lifecycle && (x.status === "Open" || x.status === "First Close" || x.status === "Pre-marketing");
+  const bnTarget = (list) => Math.round(list.reduce((a, x) => a + (x.targetSize || 0), 0) / 100) / 10;
+  const bySought = STRATEGIES.map((s) => ({ label: s, value: bnTarget(creditFunds.filter((x) => seeking(x) && x.strategy === s)), nav: { jump: "funds", strategy: s, status: "in-market" } })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
+  const byGeo = GEOS.map((g) => ({ label: g, value: bnRaised(creditFunds.filter((x) => x.geoFocus === g)), nav: { jump: "funds", geo: g } })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
+  const qCounts = {};
+  creditFunds.filter(isClose).forEach((x) => { const q = fundQuarter(x); if (q) qCounts[q] = (qCounts[q] || 0) + 1; });
+  const nowD = new Date();
+  let cy = nowD.getFullYear(), cq = Math.floor(nowD.getMonth() / 3) + 1;
+  const quarters = [];
+  for (let i = 0; i < 20; i++) { quarters.unshift(`${cy}-Q${cq}`); cq--; if (cq < 1) { cq = 4; cy--; } }
+  const trend = quarters.map((q) => ({ label: "'" + q.slice(2), value: qCounts[q] || 0, nav: { jump: "funds", period: q } }));
+
   app.innerHTML = `
-    <div class="page-head"><h1>Fundraising Intelligence</h1><p class="muted">${rows.length} of ${intel.length} items</p></div>
+    <div class="page-head"><h1>Fundraising Intelligence</h1><p class="muted">${rows.length} of ${intel.length} items · European private credit capital formation</p></div>
+    <div class="grid-2">
+      <section class="card"><h2>Capital raised by strategy <span class="muted">(€bn)</span></h2>${byStrategy.length ? barChart(byStrategy, { unit: "€", width: 540 }) : '<p class="muted small">No data.</p>'}</section>
+      <section class="card"><h2>Capital sought by strategy <span class="muted">(€bn · disclosed targets, funds in market)</span></h2>${bySought.length ? barChart(bySought, { unit: "€", width: 540 }) : '<p class="muted small">No disclosed target sizes for funds currently in market.</p>'}</section>
+      <section class="card"><h2>Capital raised by geography <span class="muted">(€bn)</span></h2>${byGeo.length ? barChart(byGeo, { unit: "€", width: 540 }) : '<p class="muted small">No data.</p>'}</section>
+      <section class="card"><h2>Fundraising momentum <span class="muted">(closes / quarter · past 5 years)</span></h2><p class="muted small">Click a quarter to see the funds that reached a first/final close in it.</p>${lineChart(trend, { width: 540, height: 240 })}</section>
+    </div>
     <div class="filters">
       <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Keyword…" value="${esc(f.q)}"></label>
-      ${selectFilter("type", "Type", INTEL_TYPES, f.type)}
+      ${multiFilter("intel:type", "Type", [...new Set(intel.map((i) => i.type))].sort(), f.type)}
     </div>
     <section class="card">
       ${rows.length ? rows.map(intelRow).join("") : '<p class="empty">No intelligence items match these filters.</p>'}
     </section>`;
   wireFilters("intel");
+  applyPendingFocus("intel");
 }
 
 // ============================== DEAL ACTIVITY ==============================
@@ -973,6 +902,7 @@ const dealTypeClass = (t) => ({
   "Investment": "dt-invest", "Financing": "dt-fin", "Disposal / Exit": "dt-exit",
   "Refinancing": "dt-refi", "Restructuring": "dt-restr", "Bankruptcy / Distress": "dt-bank",
   "Acquisition": "dt-acq", "NPL / Portfolio": "dt-npl", "Continuation Vehicle": "dt-cv",
+  "Unitranche": "dt-fin", "Structured Credit": "dt-invest", "NAV / Fund Finance": "dt-refi",
 }[t] || "");
 
 function dealRow(d) {
@@ -980,7 +910,7 @@ function dealRow(d) {
   const tgt = d.fundId ? `#/fund/${d.fundId}` : (m ? `#/manager/${m.id}` : null);
   const tag = m ? link(`#/manager/${m.id}`, m.name, "muted small") : "";
   const head = tgt ? link(tgt, d.headline, "intel-head") : `<span class="intel-head">${esc(d.headline)}</span>`;
-  return `<div class="intel-row">
+  return `<div class="intel-row" id="row-${d.id}">
     <div class="intel-meta"><span class="chip ${dealTypeClass(d.type)}">${esc(d.type)}</span><span class="muted small">${fmtDate(d.date)}</span></div>
     <div class="intel-body">${head}<p class="muted small">${esc(d.summary)}</p><div>${tag}${d.sourceUrl ? ` · <a href="${esc(d.sourceUrl)}" target="_blank" rel="noopener noreferrer" class="muted small">source ↗</a>` : ""}</div></div>
   </div>`;
@@ -990,18 +920,76 @@ function viewDeals() {
   const f = filterState.deals;
   const rows = deals.filter((d) =>
     (!f.q || (d.headline + d.summary + (managerById[d.managerId] ? managerById[d.managerId].name : "")).toLowerCase().includes(f.q.toLowerCase())) &&
-    (!f.type || d.type === f.type)
+    (!f.type.length || f.type.includes(d.type))
   ).sort((a, b) => String(b.date).localeCompare(String(a.date))); // newest first
+
+  // ---- deal charts (moved here from the dashboard) ----
+  const quarterOf = (d) => { const m = /^(\d{4})-(\d{2})/.exec(d || ""); return m ? `${m[1]}-Q${Math.floor((+m[2] - 1) / 3) + 1}` : null; };
+  const dq = {};
+  deals.forEach((d) => { const q = quarterOf(d.date); if (q) dq[q] = (dq[q] || 0) + 1; });
+  const nowD = new Date();
+  let dy = nowD.getFullYear(), dqr = Math.floor(nowD.getMonth() / 3) + 1;
+  const dQuarters = [];
+  for (let i = 0; i < 40; i++) { dQuarters.unshift(`${dy}-Q${dqr}`); dqr--; if (dqr < 1) { dqr = 4; dy--; } }
+  const NQ = dQuarters.length;
+  // deals-only quarterly series for the windowed chart (fundraising removed).
+  const buildTrend = (a, b) => {
+    const win = dQuarters.slice(a, b + 1);
+    const lab = win.length <= 16 ? (q) => "'" + q.slice(2) : (q) => (q.endsWith("Q1") ? "'" + q.slice(2, 4) : "");
+    return win.map((q) => ({ label: lab(q), value: dq[q] || 0, nav: { jump: "deals" } }));
+  };
+  const tStart = Math.min(Math.max(0, trendState.start ?? (NQ - 8)), NQ - 1);
+  const tEnd = Math.min(Math.max(tStart, trendState.end ?? (NQ - 1)), NQ - 1);
+  // most active managers by disclosed deal count (top 10).
+  const dealMgrCounts = {};
+  deals.forEach((d) => { if (d.managerId) dealMgrCounts[d.managerId] = (dealMgrCounts[d.managerId] || 0) + 1; });
+  const byDealManager = Object.entries(dealMgrCounts)
+    .map(([id, value]) => ({ label: managerById[id] ? managerById[id].name : id, value, nav: { jump: "manager/" + id } }))
+    .sort((a, b) => b.value - a.value).slice(0, 10);
+
   app.innerHTML = `
     <div class="page-head"><h1>Deal Activity</h1><p class="muted">${rows.length} of ${deals.length} transactions · investments, exits, refinancings, restructurings &amp; distress</p></div>
+    <section class="card">
+      <h2>Deal activity by quarter</h2>
+      <p class="muted small">Deal transactions per quarter. Drag either handle to set the date range (up to 10 years); click any quarter to filter the feed.</p>
+      <div class="trend-controls">
+        <div class="range-readout"><strong id="trend-start-lbl">${esc(dQuarters[tStart])}</strong> <span class="muted">→</span> <strong id="trend-end-lbl">${esc(dQuarters[tEnd])}</strong></div>
+        <div class="range-slider">
+          <div class="range-track"></div>
+          <div class="range-fill" id="trend-fill" style="left:${(tStart / (NQ - 1)) * 100}%; width:${((tEnd - tStart) / (NQ - 1)) * 100}%"></div>
+          <input type="range" id="trend-start" min="0" max="${NQ - 1}" value="${tStart}" aria-label="Range start quarter">
+          <input type="range" id="trend-end" min="0" max="${NQ - 1}" value="${tEnd}" aria-label="Range end quarter">
+        </div>
+      </div>
+      <div id="trend-chart">${lineChart(buildTrend(tStart, tEnd), { width: 1120, height: 240 })}</div>
+    </section>
+    <section class="card"><h2>Most active managers <span class="muted">(by deal count)</span></h2>${byDealManager.length ? barChart(byDealManager, { width: 540 }) : '<p class="muted small">No deals tracked.</p>'}</section>
     <div class="filters">
       <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Company, manager…" value="${esc(f.q)}"></label>
-      ${selectFilter("type", "Type", DEAL_TYPES, f.type)}
+      ${multiFilter("deals:type", "Type", [...new Set(deals.map((d) => d.type))].sort(), f.type)}
     </div>
     <section class="card">
       ${rows.length ? rows.map(dealRow).join("") : '<p class="empty">No deal items match these filters.</p>'}
     </section>`;
   wireFilters("deals");
+
+  // Wire the quarterly range sliders (re-render only the chart on drag).
+  const sEl = document.getElementById("trend-start");
+  const eEl = document.getElementById("trend-end");
+  if (sEl && eEl) {
+    const fill = document.getElementById("trend-fill");
+    const rerender = () => {
+      const a = +sEl.value, b = +eEl.value;
+      trendState.start = a; trendState.end = b;
+      document.getElementById("trend-start-lbl").textContent = dQuarters[a];
+      document.getElementById("trend-end-lbl").textContent = dQuarters[b];
+      if (fill) { fill.style.left = (a / (NQ - 1)) * 100 + "%"; fill.style.width = ((b - a) / (NQ - 1)) * 100 + "%"; }
+      document.getElementById("trend-chart").innerHTML = lineChart(buildTrend(a, b), { width: 1120, height: 240 });
+    };
+    sEl.addEventListener("input", () => { if (+sEl.value > +eEl.value) sEl.value = eEl.value; sEl.style.zIndex = 5; eEl.style.zIndex = 4; rerender(); });
+    eEl.addEventListener("input", () => { if (+eEl.value < +sEl.value) eEl.value = sEl.value; eEl.style.zIndex = 5; sEl.style.zIndex = 4; rerender(); });
+  }
+  applyPendingFocus("deals");
 }
 
 // =============================== MANDATES ==================================
@@ -1092,20 +1080,46 @@ function notFound() {
 
 // Re-render current view but keep updated filter state, without losing focus
 function wireFilters(view) {
-  const inputs = app.querySelectorAll("[data-filter]");
+  const inputs = app.querySelectorAll("input[data-filter], select[data-filter]");
   inputs.forEach((el) => {
     const key = el.getAttribute("data-filter");
     const evt = el.tagName === "SELECT" ? "change" : "input";
     el.addEventListener(evt, () => {
       filterState[view][key] = el.value;
       const active = document.activeElement === el;
+      const y = window.scrollY;
       router(); // re-render
+      window.scrollTo(0, y); // keep position across keystroke re-renders
       if (active) {
         const again = app.querySelector(`[data-filter="${key}"]`);
         if (again) { again.focus(); if (again.setSelectionRange && again.value) { const n = again.value.length; again.setSelectionRange(n, n); } }
       }
     });
   });
+  reopenMs();
+}
+
+// Re-open the multi-select popover that was open before a re-render.
+function reopenMs() {
+  if (!openMs) return;
+  const ms = app.querySelector(`.ms[data-ms="${openMs}"]`);
+  if (!ms) return;
+  const pop = ms.querySelector(".ms-pop");
+  const btn = ms.querySelector(".ms-btn");
+  if (pop) pop.removeAttribute("hidden");
+  if (btn) btn.setAttribute("aria-expanded", "true");
+}
+
+// After navigating to a feed page via a dashboard headline, scroll to and
+// briefly highlight the targeted item.
+function applyPendingFocus(view) {
+  if (!pendingFocus || pendingFocus.view !== view) return;
+  const el = document.getElementById("row-" + pendingFocus.id);
+  pendingFocus = null;
+  if (!el) return;
+  el.scrollIntoView({ behavior: "smooth", block: "center" });
+  el.classList.add("flash");
+  setTimeout(() => el.classList.remove("flash"), 2200);
 }
 
 // Click delegation: watchlist stars first, then row navigation.
@@ -1114,8 +1128,33 @@ app.addEventListener("click", (e) => {
   if (fb) {
     e.stopPropagation();
     const [type, id] = fb.getAttribute("data-follow").split(":");
+    const y = window.scrollY;
     toggleFollow(type, id);
     router();
+    window.scrollTo(0, y); // keep position; don't jump to top on a star toggle
+    return;
+  }
+  // Multi-select dropdown: toggle its popover.
+  const msBtn = e.target.closest(".ms-btn");
+  if (msBtn) {
+    e.stopPropagation();
+    const ms = msBtn.closest(".ms");
+    const pop = ms.querySelector(".ms-pop");
+    const willOpen = pop.hasAttribute("hidden");
+    app.querySelectorAll(".ms-pop").forEach((p) => p.setAttribute("hidden", ""));
+    app.querySelectorAll(".ms-btn").forEach((b) => b.setAttribute("aria-expanded", "false"));
+    if (willOpen) { pop.removeAttribute("hidden"); msBtn.setAttribute("aria-expanded", "true"); openMs = ms.getAttribute("data-ms"); }
+    else { openMs = null; }
+    return;
+  }
+  // Keep clicks inside an open popover from bubbling to row/navigation handlers.
+  if (e.target.closest(".ms-pop")) { e.stopPropagation(); return; }
+  // Dashboard headline → open the item on its feed page.
+  const goto = e.target.closest("[data-goto]");
+  if (goto) {
+    const [view, id] = goto.getAttribute("data-goto").split(":");
+    pendingFocus = { view, id };
+    // the anchor's href (#/deals or #/intel) changes the hash and triggers router
     return;
   }
   const clear = e.target.closest("[data-clearfilter]");
@@ -1139,19 +1178,20 @@ app.addEventListener("click", (e) => {
   const jump = e.target.closest("[data-jump]");
   if (jump) {
     const route = jump.getAttribute("data-jump");
+    const arr = (v) => (v ? [v] : []);
     if (route === "funds") {
       filterState.funds = {
         q: "",
-        strategy: jump.getAttribute("data-strategy") || "",
-        status: jump.getAttribute("data-status") || "",
-        geo: jump.getAttribute("data-geo") || "",
+        strategy: arr(jump.getAttribute("data-strategy")),
+        status: arr(jump.getAttribute("data-status")),
+        geo: arr(jump.getAttribute("data-geo")),
         period: jump.getAttribute("data-period") || "",
         sort: filterState.funds.sort || { key: "name", dir: "asc" },
       };
     } else if (route === "deals") {
-      filterState.deals = { q: "", type: jump.getAttribute("data-dtype") || "" };
+      filterState.deals = { q: "", type: arr(jump.getAttribute("data-dtype")) };
     } else if (route === "intel") {
-      filterState.intel = { q: "", type: jump.getAttribute("data-itype") || "" };
+      filterState.intel = { q: "", type: arr(jump.getAttribute("data-itype")) };
     }
     location.hash = "#/" + route;
     return;
@@ -1167,6 +1207,29 @@ app.addEventListener("keydown", (e) => {
   if (!sortcol) return;
   e.preventDefault();
   sortcol.click();
+});
+
+// Multi-select: a checkbox toggle updates the filter array and re-renders,
+// keeping its popover open.
+app.addEventListener("change", (e) => {
+  const cb = e.target.closest(".ms-pop input[type=checkbox]");
+  if (!cb) return;
+  const ms = cb.closest(".ms");
+  const [view, key] = ms.getAttribute("data-ms").split(":");
+  filterState[view][key] = [...ms.querySelectorAll("input[type=checkbox]:checked")].map((i) => i.value);
+  openMs = ms.getAttribute("data-ms");
+  const y = window.scrollY;
+  router();
+  window.scrollTo(0, y); // keep position; the filter sits below the charts
+});
+
+// Click anywhere outside an open multi-select closes its popover.
+document.addEventListener("click", (e) => {
+  if (e.target.closest(".ms")) return;
+  if (!openMs) return;
+  app.querySelectorAll(".ms-pop").forEach((p) => p.setAttribute("hidden", ""));
+  app.querySelectorAll(".ms-btn").forEach((b) => b.setAttribute("aria-expanded", "false"));
+  openMs = null;
 });
 
 // ================================= router ==================================
