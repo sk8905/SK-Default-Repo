@@ -105,8 +105,10 @@ function itemRow(it) {
   </div>`;
 }
 
-// A BAILII judgment as a list row (links out to bailii.org).
+// A BAILII judgment as a list row (same format as the alert rows), carrying the
+// AI-generated summary and linking out to bailii.org.
 function caseRow(c) {
+  const summary = caseSummaries[c.id] || c.summary || "";
   return `<div class="feed-row">
     <div class="feed-meta">
       <div class="chips">${areaChip(c.area)}</div>
@@ -115,7 +117,7 @@ function caseRow(c) {
     </div>
     <div class="feed-body">
       <a class="feed-title" href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">${esc(c.name)} ↗</a>
-      <p class="feed-summary">${esc(c.summary)}</p>
+      <p class="feed-summary"><span class="ai-tag">✦ AI summary</span> ${esc(summary)}</p>
       <div class="feed-foot">
         <span class="cite">${esc(c.citation)}</span>
         <span class="src-tag">BAILII</span>
@@ -327,60 +329,71 @@ function renderResults() {
 // =============================================================================
 // VIEW: Case law (#/cases) — all BAILII cases with AI-generated summaries
 // =============================================================================
-const caseFilter = { area: "", q: "" };
+const caseFilter = { areas: [], courts: [], q: "" };
 
-function caseCard(c) {
-  const a = areaById[c.area];
-  const summary = caseSummaries[c.id] || c.summary || "";
-  return `<article class="case-card" style="--c:${a ? a.color : "var(--primary)"}">
-    <div class="case-card-top">
-      ${areaChip(c.area)}
-      <span class="case-court">${esc(c.court)}</span>
-      <time class="case-date" datetime="${esc(c.date)}">${fmtDate(c.date)}</time>
-    </div>
-    <h3 class="case-name">
-      <a href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">${esc(c.name)}</a>
-      <span class="case-cite">${esc(c.citation)}</span>
-    </h3>
-    <div class="ai-summary">
-      <span class="ai-badge">✦ AI summary</span>
-      <p>${esc(summary)}</p>
-    </div>
-    <a class="case-link" href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">Read the judgment on BAILII ↗</a>
-  </article>`;
-}
+// Courts present in the data, in a sensible hierarchy order.
+const COURT_ORDER = ["Supreme Court", "Court of Appeal", "High Court (Ch)", "High Court (Comm)", "High Court (KB)", "High Court (QB)"];
 
 function viewCases() {
+  // Seed from the hash query (shareable deep links, e.g. #/cases?area=ri).
   const q = parseHashQuery();
-  caseFilter.area = q.area || "";
+  caseFilter.areas = q.area ? [q.area] : [];
+  caseFilter.courts = [];
   caseFilter.q = q.q || "";
 
-  const pills = [{ id: "", name: "All areas" }, ...practiceAreas.map((a) => ({ id: a.id, name: a.short }))]
-    .map((p) => `<button class="pill ${caseFilter.area === p.id ? "is-on" : ""}" type="button" data-area-pill="${esc(p.id)}">${esc(p.name)}</button>`).join("");
+  const courts = COURT_ORDER.filter((ct) => cases.some((c) => c.court === ct));
+
+  const checkboxGroup = (legend, name, opts) => `
+    <fieldset class="filter-group">
+      <legend>${esc(legend)}</legend>
+      ${opts.map((o) => `
+        <label class="check">
+          <input type="checkbox" name="${name}" value="${esc(o.id)}"
+            ${caseFilter[name].includes(o.id) ? "checked" : ""}/>
+          <span>${esc(o.name)}</span>
+        </label>`).join("")}
+    </fieldset>`;
 
   app.innerHTML = `
-    <section class="page-head">
+    <div class="list-head">
       <h1>Case law</h1>
       <p class="muted">English-law judgments from the Supreme Court, Court of Appeal (Civil Division) and the
         High Court (Chancery, Commercial &amp; King's/Queen's Bench), newest first. Each carries an
         AI-generated summary for orientation — always read the judgment on BAILII before relying on it.</p>
-    </section>
-    <div class="case-controls">
-      <div class="pills" role="group" aria-label="Filter by practice area">${pills}</div>
-      <input id="case-search" type="search" placeholder="Search cases, citations…"
-        value="${esc(caseFilter.q)}" aria-label="Search case law" autocomplete="off" />
     </div>
-    <div id="case-count" class="result-count" aria-live="polite"></div>
-    <div id="case-results" class="case-grid"></div>
+    <div class="list-layout">
+      <aside class="filters" aria-label="Filters">
+        <div class="filters-top">
+          <button id="clear-filters" class="link-btn" type="button">Clear all</button>
+        </div>
+        ${checkboxGroup("Practice area", "areas", practiceAreas.map((a) => ({ id: a.id, name: a.name })))}
+        ${checkboxGroup("Court", "courts", courts.map((ct) => ({ id: ct, name: ct })))}
+      </aside>
+      <section class="results-wrap">
+        <div class="searchbar">
+          <input id="case-search" type="search" placeholder="Search cases, citations…"
+            value="${esc(caseFilter.q)}" aria-label="Search case law" autocomplete="off"/>
+        </div>
+        <div id="case-count" class="result-count" aria-live="polite"></div>
+        <div id="case-results" class="feed"></div>
+      </section>
+    </div>
   `;
 
-  app.querySelectorAll("[data-area-pill]").forEach((b) => b.addEventListener("click", () => {
-    caseFilter.area = b.getAttribute("data-area-pill");
-    app.querySelectorAll("[data-area-pill]").forEach((x) => x.classList.toggle("is-on", x === b));
-    renderCaseResults();
-  }));
+  app.querySelectorAll('input[type="checkbox"][name]').forEach((cb) => {
+    cb.addEventListener("change", () => {
+      caseFilter[cb.name] = [...app.querySelectorAll(`input[name="${cb.name}"]:checked`)].map((x) => x.value);
+      renderCaseResults();
+    });
+  });
   const search = app.querySelector("#case-search");
   search.addEventListener("input", () => { caseFilter.q = search.value; renderCaseResults(); });
+  app.querySelector("#clear-filters").addEventListener("click", () => {
+    caseFilter.areas = []; caseFilter.courts = []; caseFilter.q = "";
+    app.querySelectorAll('input[type="checkbox"]').forEach((c) => (c.checked = false));
+    search.value = "";
+    renderCaseResults();
+  });
 
   renderCaseResults();
 }
@@ -390,7 +403,8 @@ function renderCaseResults() {
   const countEl = document.getElementById("case-count");
   if (!el) return;
   const matched = cases.filter((c) => {
-    if (caseFilter.area && c.area !== caseFilter.area) return false;
+    if (caseFilter.areas.length && !caseFilter.areas.includes(c.area)) return false;
+    if (caseFilter.courts.length && !caseFilter.courts.includes(c.court)) return false;
     if (caseFilter.q.trim()) {
       const hay = [c.name, c.citation, c.court, caseSummaries[c.id] || c.summary].join(" ").toLowerCase();
       if (!hay.includes(caseFilter.q.trim().toLowerCase())) return false;
@@ -398,7 +412,7 @@ function renderCaseResults() {
     return true;
   }).sort(byDateDesc);
   countEl.textContent = `${matched.length} case${matched.length === 1 ? "" : "s"}`;
-  el.innerHTML = matched.length ? matched.map(caseCard).join("") : `<div class="empty">No cases match.</div>`;
+  el.innerHTML = matched.length ? matched.map(caseRow).join("") : `<div class="empty">No cases match these filters.</div>`;
 }
 
 // =============================================================================
