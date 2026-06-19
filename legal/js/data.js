@@ -57,12 +57,15 @@ export const firms = [
   { id: "ropesgray",    name: "Ropes & Gray",                tier: "us-elite", insightsUrl: "https://www.ropesgray.com/en/insights" },
   { id: "simpsonthacher", name: "Simpson Thacher",           tier: "us-elite", insightsUrl: "https://www.stblaw.com/about-us/publications" },
   { id: "davispolk",    name: "Davis Polk",                  tier: "us-elite", insightsUrl: "https://www.davispolk.com/insights" },
+  // Barristers' chambers
+  { id: "southsquare",  name: "South Square",                tier: "chambers", insightsUrl: "https://southsquare.com/articles-publications/" },
 ];
 
 export const tiers = [
   { id: "magic",    name: "UK Magic Circle" },
   { id: "silver",   name: "UK Silver Circle" },
   { id: "us-elite", name: "US elite (London)" },
+  { id: "chambers", name: "Barristers' Chambers" },
 ];
 
 // Update / source types (the "kind" of know-how, à la Practical Law).
@@ -78,6 +81,46 @@ export const updateTypes = [
 // area: primary practice-area id. areas: all relevant practice-area ids.
 // For case notes, court/citation are populated.
 export const items = [
+  // ---------------- South Square (chambers) ----------------
+  {
+    id: "u128", title: "South Square acts in first restructuring plan of a Nasdaq-listed company (Argo Blockchain)",
+    area: "ri", areas: ["ri"], type: "update", firm: "southsquare",
+    date: "2025-12-10", jurisdiction: "England & Wales",
+    court: "High Court (Ch)",
+    summary: "Hildyard J sanctioned the Part 26A restructuring plan of Argo Blockchain plc, a Nasdaq-listed cryptocurrency-mining company — the first use of an English restructuring plan to restructure a Nasdaq-listed company directly without loss of its Nasdaq listing, and one of the first crypto-related plans. South Square members appeared on the matter.",
+    points: [
+      "First Part 26A plan used to restructure a Nasdaq-listed company without losing the listing.",
+      "Among the first crypto-related restructuring plans in England.",
+      "Illustrates the cross-border reach of the English plan for US-listed groups.",
+    ],
+    tags: ["restructuring plan", "Part 26A", "cross-border", "crypto"],
+  },
+  {
+    id: "u129", title: "South Square secures first restructuring plan indemnity costs order against an opposing creditor (Madagascar Oil)",
+    area: "ri", areas: ["ri"], type: "update", firm: "southsquare",
+    date: "2025-11-07", jurisdiction: "England & Wales",
+    court: "High Court (Ch)",
+    summary: "In the Madagascar Oil restructuring plan proceedings, Richard Smith J ordered the opposing creditor, Outrider Master Fund LP, to pay the plan company's costs on the indemnity basis on most of the issues it raised at the sanction hearing — understood to be the first indemnity costs order obtained against a plan opponent. A notable costs-risk signal for creditors mounting unsuccessful plan challenges.",
+    points: [
+      "First reported indemnity costs order against an opposing creditor in a Part 26A plan.",
+      "Raises the costs risk of pursuing weak challenges to sanction.",
+      "Richard Smith J, Companies Court.",
+    ],
+    tags: ["restructuring plan", "costs", "indemnity costs", "Part 26A"],
+  },
+  {
+    id: "u130", title: "Prezzo's restructuring plan sanctioned; HMRC challenge dismissed",
+    area: "ri", areas: ["ri"], type: "update", firm: "southsquare",
+    date: "2023-07-05", jurisdiction: "England & Wales",
+    court: "High Court (Ch)",
+    summary: "The High Court sanctioned the Part 26A restructuring plan of Prezzo Investco Limited and dismissed HMRC's challenge, cramming down HMRC as a dissenting preferential creditor in a departure from the approach in GAS and Nasmyth. The court confirmed there is no requirement for a company to provide consideration to 'out of the money' plan creditors. South Square members acted on the plan.",
+    points: [
+      "HMRC crammed down as a dissenting preferential creditor.",
+      "Departs from GAS and Nasmyth on cross-class cram down of HMRC.",
+      "No requirement to give value to 'out of the money' creditors.",
+    ],
+    tags: ["restructuring plan", "Part 26A", "HMRC", "cram down"],
+  },
   // ---------------- Banking & Finance ----------------
   {
     id: "u001", title: "Supreme Court reframes the Quincecare duty in APP-fraud claims",

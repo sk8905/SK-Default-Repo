@@ -109,7 +109,9 @@ Shared invariants (both routines):
 
 Self-contained (the Credit invariants above are credit-specific). Note the Legal
 app uses **`LAST_REVIEWED`** (not `DATA_UPDATED`), its main feed is the **`items`**
-array, and it tracks publications from a fixed set of **19 firms** only.
+array, and it tracks publications from a fixed set of tracked sources only
+(19 law firms plus South Square chambers). The Case Law page (`cases` +
+`caseSummaries`) is refreshed daily too — see step 4.
 
 > Daily full refresh of my Meridian LEGAL platform (Lexalert) — new English-law
 > legal developments, client alerts, case notes and insights from the tracked law
@@ -139,16 +141,24 @@ array, and it tracks publications from a fixed set of **19 firms** only.
 >    MUST be one of: aoshearman, cliffordchance, freshfields, linklaters,
 >    slaughtermay, ashurst, hsf, macfarlanes, traverssmith, simmons, latham,
 >    kirkland, whitecase, weil, sidley, cleary, ropesgray, simpsonthacher,
->    davispolk (skip the item if it isn't from one of these firms); `date`
+>    davispolk, southsquare (skip the item if it isn't from one of these
+>    firms/chambers); `date`
 >    (YYYY-MM-DD); `jurisdiction` (e.g. "England & Wales"); `court` and `citation`
 >    for case notes; `summary` (2–4 sentences); `points` (array of 2–4 short
 >    bullets); `tags` (array of keywords); and the source `url`. Dedupe each
 >    candidate by URL and normalised title against the existing `items`.
-> 4. Only for a genuinely landmark new judgment, also add it to the `cases` array
->    (`id` = next sequential `c<n>`, current max c35 so next c36; fields: id,
->    name, citation, court, date, area, url, summary) AND a matching longer entry
->    in the `caseSummaries` map keyed by the same id. Routine firm updates go in
->    `items`, not `cases`.
+> 4. CASE LAW (refresh daily) — search BAILII and
+>    caselaw.nationalarchives.gov.uk for English judgments handed down in roughly
+>    the last 36 hours that fall within the five practice areas (banking, ri,
+>    corporate, fundsreg, fundtax) AND one of the tracked courts ONLY: Supreme
+>    Court, Court of Appeal, High Court (Ch), High Court (Comm), High Court (KB),
+>    High Court (QB). For each new judgment, append to the `cases` array in
+>    `legal/js/data.js` (`id` = next sequential `c<n>`, current max c35 so next
+>    c36; fields: id, name, citation, court — use exactly one of the tracked court
+>    labels above — date, area, url [prefer the BAILII/National Archives judgment
+>    URL], summary) AND add a matching 3–4 sentence entry to the `caseSummaries`
+>    map keyed by the same id. Dedupe by citation/URL against existing `cases`.
+>    Skip judgments outside those areas or courts.
 > 5. If nothing qualifies, make no change, do not commit, and reply "no new
 >    items". Otherwise set `LAST_REVIEWED` in `legal/js/data.js` to today's date.
 > 6. Bump the cache-buster so the change goes live — there are FOUR `?v=YYYYMMDD-N`
