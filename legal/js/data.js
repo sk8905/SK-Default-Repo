@@ -984,7 +984,7 @@ export const items = [
     tags: ["directors' duties", "s172", "unfair prejudice"],
   },
   {
-    id: "u128", title: "FCA enforcement? All eyes on supervision",
+    id: "u131", title: "FCA enforcement? All eyes on supervision",
     area: "fundsreg", areas: ["fundsreg", "banking"], type: "insight", firm: "linklaters",
     date: "2026-06-18", jurisdiction: "United Kingdom",
     summary: "Following the 2024 BlueCrest Court of Appeal decision, the FCA can require redress through supervisory tools — OIREQs, Section 166 reviews and business restrictions — without proving breach, causation or loss. Sara Cody of Linklaters argues that the regulator's pivot from formal enforcement to supervisory interventions means asset managers and other regulated firms may face substantial operational burdens without the transparency of published enforcement decisions. The absence of a formal enforcement outcome is no longer a reliable indicator of regulatory approval.",

@@ -134,8 +134,10 @@ array, and it tracks publications from a fixed set of tracked sources only
 >    Never invent a URL, date or quote; verify each item's EXACT date from the
 >    source. Skip paywalled items you can't confirm.
 > 3. For each genuinely new item, append an object to the `items` array in
->    `legal/js/data.js` with: `id` = next sequential `u<n>` (current max is u127,
->    so next is u128); `title`; `area` = one of banking/ri/corporate/fundsreg/
+>    `legal/js/data.js` with: `id` = next sequential `u<n>` — COMPUTE the current
+>    maximum `u` id in the file and use the next integer; do NOT trust any number
+>    quoted here (e.g. as at 2026-06-19 the max was u131, so the next is u132, but
+>    always re-derive it); `title`; `area` = one of banking/ri/corporate/fundsreg/
 >    fundtax; `areas` = array of the relevant area id(s); `type` = one of
 >    case/update/alert/insight/knowhow; `firm` = the publishing firm's id, which
 >    MUST be one of: aoshearman, cliffordchance, freshfields, linklaters,
@@ -153,8 +155,9 @@ array, and it tracks publications from a fixed set of tracked sources only
 >    corporate, fundsreg, fundtax) AND one of the tracked courts ONLY: Supreme
 >    Court, Court of Appeal, High Court (Ch), High Court (Comm), High Court (KB),
 >    High Court (QB). For each new judgment, append to the `cases` array in
->    `legal/js/data.js` (`id` = next sequential `c<n>`, current max c35 so next
->    c36; fields: id, name, citation, court — use exactly one of the tracked court
+>    `legal/js/data.js` (`id` = next sequential `c<n>` — COMPUTE the current
+>    maximum `c` id in the file and use the next integer; do NOT trust any quoted
+>    number; fields: id, name, citation, court — use exactly one of the tracked court
 >    labels above — date, area, url [prefer the BAILII/National Archives judgment
 >    URL], summary) AND add a matching 3–4 sentence entry to the `caseSummaries`
 >    map keyed by the same id. Dedupe by citation/URL against existing `cases`.
