@@ -15,6 +15,8 @@
 //    rather than guessed. Evergreen funds have no fixed target.
 //  • `sources` carry the public URL(s) and `asOf` the reference date.
 //  See docs/research-notes.md for the fuller sourcing trail and caveats.
+//  New deals/intel/webNews are appended by the daily/weekly refresh routines
+//  documented in docs/refresh-routines.md.
 // =============================================================================
 
 // When the dataset was last compiled/updated (shown in the UI "last updated").
