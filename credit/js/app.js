@@ -1,1 +1,1 @@
-PLACEHOLDER_APP
+$(cat /tmp/push_app.txt)

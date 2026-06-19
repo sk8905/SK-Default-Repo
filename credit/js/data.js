@@ -1,1 +1,1 @@
-PLACEHOLDER_DATA
+$(cat /tmp/push_data.txt)
