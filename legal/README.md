@@ -1,4 +1,4 @@
-# Lexalert — English-law legal & case-law alerts
+# Meridian Legal — English-law legal & case-law alerts
 
 A **zero-build, dependency-free static web app** that surfaces Practical-Law-style
 legal updates and case-law alerts for English-law practice areas:
@@ -13,7 +13,7 @@ Each alert is curated from the public **insights / know-how / legal-update**
 pages of **UK Magic Circle**, **UK Silver Circle** and the **London offices of
 US-elite firms**. It lives in `/legal/` so it sits alongside the existing
 *Meridian* app in the same repo without touching it — the same Cloudflare Worker
-serves both (Meridian at `/`, Lexalert at `/legal/`).
+serves both (Meridian Credit at `/credit/`, Meridian Legal at `/legal/`).
 
 > ⚠️ The seed alerts summarise **genuine** English-law developments so the app is
 > realistic out of the box, but the summaries are written for this prototype and
@@ -66,7 +66,7 @@ number in `index.html` (and the matching import suffixes in `app.js`).
 
 No change to your existing setup is needed — the repo's `wrangler.jsonc` already
 serves the whole repo as static assets, so once Cloudflare is connected to the
-repo (see [`../docs/cloudflare-setup.md`](../docs/cloudflare-setup.md)) Lexalert
+repo (see [`../docs/cloudflare-setup.md`](../docs/cloudflare-setup.md)) Meridian Legal
 is live at `https://<your-worker>.<account>.workers.dev/legal/` (or
 `https://<project>.pages.dev/legal/`). The one-time dashboard clicks:
 

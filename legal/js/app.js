@@ -1,5 +1,5 @@
 // =============================================================================
-// Lexalert — hash-based router + all views. Renders each view by building an
+// Meridian Legal — hash-based router + all views. Renders each view by building an
 // HTML string and assigning it to #app.innerHTML. Zero dependencies.
 //
 // Routes:  #/                dashboard
@@ -147,9 +147,9 @@ function viewDashboard() {
   }).join("");
 
   app.innerHTML = `
-    <section class="hero">
-      <h1>English-law legal &amp; case-law alerts</h1>
-      <p class="hero-sub">Practical-Law-style updates across <strong>banking</strong>,
+    <section class="page-head">
+      <h1>Legal &amp; Case-Law Intelligence</h1>
+      <p class="lead">Practical-Law-style updates across <strong>banking</strong>,
         <strong>restructuring &amp; insolvency</strong>, <strong>corporate</strong>,
         <strong>funds regulatory</strong> and <strong>fund tax</strong> — curated from the public
         insights, know-how and legal-update pages of UK Magic Circle, UK Silver Circle and the
@@ -457,6 +457,31 @@ if (navToggle && mobileNav) {
   });
 }
 
+// ---- Top-bar chrome: "Updated …" status + Cloudflare Access identity --------
+function initChrome() {
+  const status = document.getElementById("data-status");
+  if (status) {
+    const latest = [...items].sort(byDateDesc)[0];
+    status.textContent = `Updated ${fmtDate(LAST_REVIEWED)}`
+      + (latest ? ` · latest update ${fmtDate(latest.date)}` : "");
+  }
+  // Same pattern as the Meridian app / landing page: behind Cloudflare Access
+  // this returns the verified email; otherwise we leave the slot empty.
+  const acct = document.getElementById("account-nav");
+  if (acct) {
+    fetch("/api/me", { headers: { accept: "application/json" } })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((d) => {
+        if (d && d.email) {
+          acct.innerHTML = `signed in as <strong>${esc(d.email)}</strong>`
+            + ` · <a href="/cdn-cgi/access/logout">Sign out</a>`;
+        }
+      })
+      .catch(() => { /* not behind Access (e.g. local preview) — leave empty */ });
+  }
+}
+
 window.addEventListener("hashchange", router);
+initChrome();
 router();
 markVisitedSoon();
