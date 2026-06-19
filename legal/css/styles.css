@@ -323,12 +323,21 @@ a.compact-head:hover { color: var(--primary); }
   .list-layout { grid-template-columns: 1fr; }
   .filters { position: static; max-height: none; overflow: visible; }
   .case-grid { grid-template-columns: 1fr; }
+
+  /* Topbar wraps; the nav becomes a full-width horizontally-scrollable strip
+     below the brand (matching Meridian Credit) — no dropdown menu. */
+  .topbar { height: auto; flex-wrap: wrap; gap: .4rem 1rem; padding: .55rem .9rem; }
+  .brand { flex: 1 1 100%; }
+  .topbar-right { order: 2; flex-basis: 100%; width: 100%; align-items: flex-start; }
+  .account-nav, .data-status { white-space: normal; }
+  .mainnav {
+    order: 3; flex-basis: 100%; width: 100%; justify-content: flex-start; gap: .15rem;
+    overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 2px;
+  }
+  .mainnav::-webkit-scrollbar { display: none; }
+  .nav-link { padding: .4rem .6rem; white-space: nowrap; flex: 0 0 auto; }
 }
 @media (max-width: 720px) {
-  .topbar { gap: 1rem; }
-  .mainnav, .topbar-right { display: none; }
-  .nav-toggle { display: block; margin-left: auto; }
-  .mobile-nav:not([hidden]) { display: flex; }
   .cards { grid-template-columns: 1fr; }
 }
 @media (max-width: 560px) {

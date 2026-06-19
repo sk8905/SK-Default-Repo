@@ -117,7 +117,7 @@ function caseRow(c) {
     </div>
     <div class="feed-body">
       <a class="feed-title" href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">${esc(c.name)} ↗</a>
-      <p class="feed-summary"><span class="ai-tag">✦ AI summary</span> ${esc(summary)}</p>
+      <p class="feed-summary"><span class="ai-tag">✦ AI summary</span> ${esc(summary).slice(0, 170)}${summary.length > 170 ? "…" : ""}</p>
       <div class="feed-foot">
         <span class="cite">${esc(c.citation)}</span>
         <span class="src-tag">BAILII</span>
@@ -504,7 +504,7 @@ function router() {
 }
 
 function syncNavActive(hash) {
-  document.querySelectorAll(".mainnav .nav-link, .mobile-nav .nav-link").forEach((a) => {
+  document.querySelectorAll(".mainnav .nav-link").forEach((a) => {
     a.classList.toggle("active", a.getAttribute("href") === hash);
   });
 }
@@ -541,20 +541,6 @@ document.addEventListener("keydown", (e) => {
     e.target.click();
   }
 });
-
-// Mobile nav toggle.
-const navToggle = document.getElementById("nav-toggle");
-const mobileNav = document.getElementById("mobile-nav");
-if (navToggle && mobileNav) {
-  navToggle.addEventListener("click", () => {
-    const open = mobileNav.hasAttribute("hidden");
-    if (open) mobileNav.removeAttribute("hidden"); else mobileNav.setAttribute("hidden", "");
-    navToggle.setAttribute("aria-expanded", String(open));
-  });
-  mobileNav.addEventListener("click", (e) => {
-    if (e.target.closest("a")) { mobileNav.setAttribute("hidden", ""); navToggle.setAttribute("aria-expanded", "false"); }
-  });
-}
 
 // ---- Top-bar chrome: "Updated …" status + Cloudflare Access identity --------
 function initChrome() {
