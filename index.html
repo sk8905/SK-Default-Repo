@@ -3,71 +3,116 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>kenneds7 — apps</title>
-  <meta name="description" content="Two zero-build static apps: Meridian Credit Intelligence and Lexalert English-law legal alerts." />
+  <title>Meridian — sign in</title>
+  <meta name="description" content="Meridian intelligence platform — sign in to access the Credit and Legal platforms." />
   <style>
-    :root { --ink:#131a2b; --muted:#6b7488; --line:#e4e7ef; --bg:#f6f7fb; }
+    :root { --brand:#1e3a8a; --brand-2:#2563eb; --ink:#131a2b; --muted:#6b7488; --line:#e4e7ef; }
     * { box-sizing: border-box; }
     body {
-      margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink);
+      margin: 0; min-height: 100vh; overflow-x: hidden;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      line-height: 1.5; display: flex; flex-direction: column; align-items: center;
-      justify-content: center; padding: 2rem 1.2rem; overflow-x: hidden;
+      color: var(--ink); line-height: 1.5;
+      background: linear-gradient(160deg, #1e3a8a 0%, #2563eb 55%, #1e40af 100%);
+      display: flex; align-items: center; justify-content: center; padding: 1.5rem;
     }
-    .wrap { width: 100%; max-width: 760px; }
-    header { text-align: center; margin-bottom: 2rem; }
-    h1 { font-size: clamp(1.5rem, 5vw, 2.1rem); margin: 0 0 .4rem; }
-    .sub { color: var(--muted); margin: 0; }
-    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
-    @media (max-width: 620px) { .cards { grid-template-columns: 1fr; } }
-    .app-card {
-      display: block; text-decoration: none; color: inherit; background: #fff;
-      border: 1px solid var(--line); border-radius: 16px; padding: 1.6rem;
-      box-shadow: 0 1px 3px rgba(16,24,40,.08); transition: transform .15s, box-shadow .15s;
-      border-top: 5px solid var(--accent);
+    .card {
+      width: 100%; max-width: 400px; background: #fff; border-radius: 18px;
+      box-shadow: 0 20px 50px rgba(8, 20, 60, .35); padding: 2.2rem 2rem; text-align: center;
     }
-    .app-card:hover, .app-card:focus-visible {
-      transform: translateY(-3px); box-shadow: 0 10px 28px rgba(16,24,40,.12); outline: none;
+    .logo {
+      width: 56px; height: 56px; border-radius: 15px; margin: 0 auto .9rem;
+      display: grid; place-items: center; font-size: 1.9rem; color: #fff;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
     }
-    .app-card.credit { --accent: #2563eb; }
-    .app-card.legal  { --accent: #1e3a8a; }
-    .badge {
-      display: inline-grid; place-items: center; width: 46px; height: 46px; border-radius: 12px;
-      font-size: 1.5rem; font-weight: 700; color: #fff; background: var(--accent); margin-bottom: .9rem;
+    .wordmark { font-size: 1.5rem; font-weight: 700; letter-spacing: .3px; }
+    .tagline { color: var(--muted); font-size: .82rem; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 1.6rem; }
+    .state-msg { color: var(--muted); font-size: .92rem; margin: 0 0 1.3rem; }
+    .who { font-size: .92rem; margin: 0 0 .3rem; color: var(--ink); }
+    .who strong { color: var(--brand); }
+    .btn {
+      display: block; width: 100%; padding: .8rem 1rem; margin: .55rem 0; border-radius: 11px;
+      font-size: .98rem; font-weight: 600; text-decoration: none; cursor: pointer; border: 1px solid transparent;
+      text-align: center;
     }
-    .app-card h2 { margin: 0 0 .35rem; font-size: 1.2rem; }
-    .app-card p { margin: 0 0 1rem; color: var(--muted); font-size: .9rem; }
-    .go { font-weight: 600; color: var(--accent); font-size: .9rem; }
-    .path { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .8rem; color: var(--muted); }
-    footer { margin-top: 2.2rem; color: var(--muted); font-size: .8rem; text-align: center; }
+    .btn.primary { background: var(--brand-2); color: #fff; }
+    .btn.primary:hover { background: #1d4ed8; }
+    .btn.secondary { background: #eef2fb; color: var(--brand); }
+    .btn.secondary:hover { background: #e2e9f8; }
+    .btn .sub { display: block; font-weight: 400; font-size: .76rem; opacity: .85; margin-top: .15rem; }
+    .divider { border: 0; border-top: 1px solid var(--line); margin: 1.4rem 0 1rem; }
+    .signout { display: inline-block; margin-top: .4rem; color: var(--muted); font-size: .84rem; }
+    .hint { color: var(--muted); font-size: .78rem; margin-top: 1.2rem; }
+    .hint a { color: var(--brand-2); }
+    .spinner {
+      width: 26px; height: 26px; border: 3px solid #dbe4f5; border-top-color: var(--brand-2);
+      border-radius: 50%; margin: .5rem auto 0; animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <h1>Apps</h1>
-      <p class="sub">Two independent zero-build static apps served from this domain.</p>
-    </header>
+  <main class="card">
+    <div class="logo" aria-hidden="true">◆</div>
+    <div class="wordmark">Meridian</div>
+    <p class="tagline">Intelligence Platform</p>
 
-    <main class="cards">
-      <a class="app-card credit" href="/credit/">
-        <span class="badge" aria-hidden="true">◆</span>
-        <h2>Meridian Credit Intelligence</h2>
-        <p>European private-credit deal &amp; fundraising intelligence — managers, funds, investors, mandates and league tables.</p>
-        <span class="go">Open Meridian →</span><br />
-        <span class="path">/credit/</span>
-      </a>
+    <!-- Checking state -->
+    <div id="loading">
+      <p class="state-msg">Checking your sign-in…</p>
+      <div class="spinner" role="status" aria-label="Loading"></div>
+    </div>
 
-      <a class="app-card legal" href="/legal/">
-        <span class="badge" aria-hidden="true">§</span>
-        <h2>Lexalert — English-law alerts</h2>
-        <p>Practical-Law-style legal &amp; case-law updates across banking, R&amp;I, corporate, funds regulatory and fund tax.</p>
-        <span class="go">Open Lexalert →</span><br />
-        <span class="path">/legal/</span>
-      </a>
-    </main>
+    <!-- Signed in -->
+    <div id="in" class="hidden">
+      <p class="who">Signed in as <strong id="email"></strong></p>
+      <p class="state-msg">Choose a platform to open.</p>
+      <a class="btn primary" href="/credit/">Enter Credit Intelligence<span class="sub">Private-credit deals &amp; fundraising</span></a>
+      <a class="btn secondary" href="/legal/">Enter Legal Alerts<span class="sub">English-law legal &amp; case-law updates</span></a>
+      <hr class="divider" />
+      <a class="signout" href="/cdn-cgi/access/logout">Sign out</a>
+    </div>
 
-    <footer>Demonstration prototypes — not legal or investment advice.</footer>
-  </div>
+    <!-- Signed out -->
+    <div id="out" class="hidden">
+      <p class="state-msg">Sign in to access the Credit and Legal platforms.</p>
+      <a class="btn primary" href="/api/login?to=/">Sign in</a>
+      <p class="hint">One sign-in unlocks both platforms. Authentication is handled by
+        Cloudflare Access. <a id="preview-toggle" href="#">Preview without signing in</a></p>
+      <div id="preview" class="hidden">
+        <hr class="divider" />
+        <a class="btn secondary" href="/credit/">Open Credit (preview)</a>
+        <a class="btn secondary" href="/legal/">Open Legal (preview)</a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const show = (id) => {
+      for (const s of ["loading", "in", "out"]) {
+        document.getElementById(s).classList.toggle("hidden", s !== id);
+      }
+    };
+    // Ask the Worker who we are. Behind Cloudflare Access this returns the
+    // verified email; otherwise (not configured / local preview) it fails and
+    // we show the sign-in prompt.
+    fetch("/api/me", { headers: { accept: "application/json" } })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((d) => {
+        if (d && d.email) {
+          document.getElementById("email").textContent = d.email;
+          show("in");
+        } else {
+          show("out");
+        }
+      })
+      .catch(() => show("out"));
+
+    document.getElementById("preview-toggle").addEventListener("click", (e) => {
+      e.preventDefault();
+      document.getElementById("preview").classList.toggle("hidden");
+    });
+  </script>
 </body>
 </html>

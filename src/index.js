@@ -59,10 +59,28 @@ async function handleWatchlist(request, env) {
   return json({ error: "method not allowed" }, 405);
 }
 
+// Return the signed-in identity (from the Access JWT) so the branded landing
+// page can greet the user and gate entry to both /credit/ and /legal/. When the
+// site is behind one Cloudflare Access application covering the whole host, a
+// single sign-in authenticates every path here.
+function handleMe(request) {
+  const email = identity(request);
+  if (!email) return json({ error: "unauthenticated" }, 401);
+  return json({ email });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === "/api/watchlist") return handleWatchlist(request, env);
+    if (url.pathname === "/api/me") return handleMe(request);
+    // Sign-in helper: hitting this behind Access triggers the Access login,
+    // then bounces the user to `to` (default the landing page).
+    if (url.pathname === "/api/login") {
+      const to = url.searchParams.get("to") || "/";
+      const dest = to.startsWith("/") ? to : "/";
+      return Response.redirect(new URL(dest, url.origin).toString(), 302);
+    }
     // Everything else: serve the static site.
     return env.ASSETS.fetch(request);
   },
