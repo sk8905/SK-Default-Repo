@@ -3,43 +3,71 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Meridian Credit Intelligence</title>
-  <meta name="description" content="European private credit deal &amp; fundraising intelligence — prototype" />
-  <link rel="stylesheet" href="css/styles.css?v=20260618-25" />
+  <title>kenneds7 — apps</title>
+  <meta name="description" content="Two zero-build static apps: Meridian Credit Intelligence and Lexalert English-law legal alerts." />
+  <style>
+    :root { --ink:#131a2b; --muted:#6b7488; --line:#e4e7ef; --bg:#f6f7fb; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.5; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 2rem 1.2rem; overflow-x: hidden;
+    }
+    .wrap { width: 100%; max-width: 760px; }
+    header { text-align: center; margin-bottom: 2rem; }
+    h1 { font-size: clamp(1.5rem, 5vw, 2.1rem); margin: 0 0 .4rem; }
+    .sub { color: var(--muted); margin: 0; }
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+    @media (max-width: 620px) { .cards { grid-template-columns: 1fr; } }
+    .app-card {
+      display: block; text-decoration: none; color: inherit; background: #fff;
+      border: 1px solid var(--line); border-radius: 16px; padding: 1.6rem;
+      box-shadow: 0 1px 3px rgba(16,24,40,.08); transition: transform .15s, box-shadow .15s;
+      border-top: 5px solid var(--accent);
+    }
+    .app-card:hover, .app-card:focus-visible {
+      transform: translateY(-3px); box-shadow: 0 10px 28px rgba(16,24,40,.12); outline: none;
+    }
+    .app-card.credit { --accent: #2563eb; }
+    .app-card.legal  { --accent: #1e3a8a; }
+    .badge {
+      display: inline-grid; place-items: center; width: 46px; height: 46px; border-radius: 12px;
+      font-size: 1.5rem; font-weight: 700; color: #fff; background: var(--accent); margin-bottom: .9rem;
+    }
+    .app-card h2 { margin: 0 0 .35rem; font-size: 1.2rem; }
+    .app-card p { margin: 0 0 1rem; color: var(--muted); font-size: .9rem; }
+    .go { font-weight: 600; color: var(--accent); font-size: .9rem; }
+    .path { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .8rem; color: var(--muted); }
+    footer { margin-top: 2.2rem; color: var(--muted); font-size: .8rem; text-align: center; }
+  </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <span class="logo">◆</span>
-      <div>
-        <strong>Meridian</strong>
-        <span class="brand-sub">Credit Intelligence</span>
-      </div>
-    </div>
-    <nav class="mainnav">
-      <a href="#/" class="nav-link">Dashboard</a>
-      <a href="#/deals" class="nav-link nav-primary">Deals</a>
-      <a href="#/intel" class="nav-link nav-primary">Fundraising</a>
-      <span class="nav-sep" aria-hidden="true"></span>
-      <a href="#/managers" class="nav-link">Managers</a>
-      <a href="#/funds" class="nav-link">Funds</a>
-      <a href="#/lps" class="nav-link">Investors</a>
-      <a href="#/mandates" class="nav-link">Mandates</a>
-      <a href="#/league" class="nav-link">League</a>
-      <a href="#/watchlist" class="nav-link">Watchlist <span id="wl-count" class="nav-badge"></span></a>
-    </nav>
-    <div class="topbar-right">
-      <div id="account-nav" class="account-nav" hidden></div>
-      <div id="data-status" class="data-status"></div>
-    </div>
-  </header>
+  <div class="wrap">
+    <header>
+      <h1>Apps</h1>
+      <p class="sub">Two independent zero-build static apps served from this domain.</p>
+    </header>
 
-  <main id="app" class="container"></main>
+    <main class="cards">
+      <a class="app-card credit" href="/credit/">
+        <span class="badge" aria-hidden="true">◆</span>
+        <h2>Meridian Credit Intelligence</h2>
+        <p>European private-credit deal &amp; fundraising intelligence — managers, funds, investors, mandates and league tables.</p>
+        <span class="go">Open Meridian →</span><br />
+        <span class="path">/credit/</span>
+      </a>
 
-  <footer class="footer">
-    <p>Meridian Credit Intelligence — demonstration prototype. Data compiled from <strong>manager &amp; investor press releases, regulatory/results disclosures and trade press</strong>. Figures are shown in € for consistency (several originally reported in USD/GBP, so are approximate), and items marked <span class="chip est">Est.</span> or noted "undisclosed" are proxies or not precisely disclosed. Verify against the cited sources before relying on any figure. See <code>docs/research-notes.md</code> for the sourcing trail.</p>
-  </footer>
+      <a class="app-card legal" href="/legal/">
+        <span class="badge" aria-hidden="true">§</span>
+        <h2>Lexalert — English-law alerts</h2>
+        <p>Practical-Law-style legal &amp; case-law updates across banking, R&amp;I, corporate, funds regulatory and fund tax.</p>
+        <span class="go">Open Lexalert →</span><br />
+        <span class="path">/legal/</span>
+      </a>
+    </main>
 
-  <script type="module" src="js/app.js?v=20260618-25"></script>
+    <footer>Demonstration prototypes — not legal or investment advice.</footer>
+  </div>
 </body>
 </html>

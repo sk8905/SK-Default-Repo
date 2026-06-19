@@ -45,12 +45,19 @@ and offline:
 - Charts are hand-rolled inline SVG (`js/charts.js`) — no charting library or CDN.
 - Hash-based client-side routing.
 
+This repo hosts **two** independent zero-build apps under one Cloudflare Worker:
+
 ```
-index.html        # shell + top navigation
-css/styles.css    # all styling
-js/data.js        # sample dataset (managers, funds, LPs, intelligence)
-js/charts.js      # inline-SVG bar / donut / line charts
-js/app.js         # router + all views
+index.html            # root landing page linking the two apps
+credit/               # Meridian Credit Intelligence  →  served at /credit/
+  index.html          #   shell + top navigation
+  css/styles.css      #   all styling
+  js/data.js          #   dataset (managers, funds, LPs, intelligence)
+  js/charts.js        #   inline-SVG bar / donut / line charts
+  js/app.js           #   router + all views
+legal/                # Lexalert English-law alerts    →  served at /legal/  (see legal/README.md)
+wrangler.jsonc        # Worker config (serves the whole repo as static assets)
+src/index.js          # Worker entry (static assets + /api/watchlist KV endpoint)
 ```
 
 ## Run it
@@ -60,7 +67,9 @@ Because it uses ES modules, open it via a local web server (not `file://`):
 ```bash
 # from the repo root:
 python3 -m http.server 8000
-# then visit http://localhost:8000
+# then visit http://localhost:8000        (landing page)
+#            http://localhost:8000/credit/ (Meridian)
+#            http://localhost:8000/legal/  (Lexalert)
 ```
 
 ## Extending toward a real platform
