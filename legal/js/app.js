@@ -14,10 +14,10 @@
 // =============================================================================
 
 import {
-  items, practiceAreas, firms, tiers, updateTypes,
+  items, cases, practiceAreas, firms, tiers, updateTypes,
   firmById, areaById, typeById, tierById, LAST_REVIEWED,
-} from "./data.js?v=20260618-1";
-import { barChart, donutChart, columnChart } from "./charts.js?v=20260619-1";
+} from "./data.js?v=20260619-2";
+import { donutChart, columnChart } from "./charts.js?v=20260619-1";
 
 const app = document.getElementById("app");
 
@@ -78,73 +78,85 @@ function areaChip(areaId) {
 }
 function tierLabel(tierId) { return (tierById[tierId] || {}).name || tierId; }
 
-function itemCard(it) {
+// A firm-alert as a list row (Meridian-style: meta column + body).
+function itemRow(it) {
   const firm = firmById[it.firm] || { name: it.firm, tier: "" };
   const type = (typeById[it.type] || {}).name || it.type;
   const saved = getSaved().has(it.id);
   const areasHtml = (it.areas || [it.area]).map(areaChip).join("");
-  return `<article class="card item-card">
-    <a class="card-link" href="#/item/${esc(it.id)}" aria-label="${esc(it.title)}">
-      <div class="card-top">
-        <div class="chips">${areasHtml}<span class="chip type">${esc(type)}</span>${isNew(it) ? '<span class="chip new">New</span>' : ""}</div>
-        <time class="card-date" datetime="${esc(it.date)}">${fmtDate(it.date)}</time>
-      </div>
-      <h3 class="card-title">${esc(it.title)}</h3>
-      <p class="card-summary">${esc(it.summary).slice(0, 220)}${it.summary.length > 220 ? "…" : ""}</p>
-      <div class="card-meta">
+  return `<div class="feed-row">
+    <div class="feed-meta">
+      <div class="chips">${areasHtml}</div>
+      <span class="feed-type">${esc(type)}</span>
+      <time class="feed-date" datetime="${esc(it.date)}">${fmtDate(it.date)}</time>
+      ${isNew(it) ? '<span class="chip new">New</span>' : ""}
+    </div>
+    <div class="feed-body">
+      <a class="feed-title" href="#/item/${esc(it.id)}">${esc(it.title)}</a>
+      <p class="feed-summary">${esc(it.summary).slice(0, 170)}${it.summary.length > 170 ? "…" : ""}</p>
+      <div class="feed-foot">
         <span class="firm">${esc(firm.name)}</span>
         <span class="tier tier-${esc(firm.tier)}">${esc(tierLabel(firm.tier))}</span>
         ${it.citation ? `<span class="cite">${esc(it.citation)}</span>` : ""}
+        <button class="save-btn ${saved ? "is-saved" : ""}" data-save="${esc(it.id)}"
+          aria-pressed="${saved}" title="${saved ? "Remove from saved" : "Save this update"}">${saved ? "★ Saved" : "☆ Save"}</button>
       </div>
-    </a>
-    <button class="save-btn ${saved ? "is-saved" : ""}" data-save="${esc(it.id)}"
-      aria-pressed="${saved}" title="${saved ? "Remove from saved" : "Save this update"}">
-      ${saved ? "★ Saved" : "☆ Save"}
-    </button>
-  </article>`;
+    </div>
+  </div>`;
+}
+
+// A BAILII judgment as a list row (links out to bailii.org).
+function caseRow(c) {
+  return `<div class="feed-row">
+    <div class="feed-meta">
+      <div class="chips">${areaChip(c.area)}</div>
+      <span class="feed-type">${esc(c.court)}</span>
+      <time class="feed-date" datetime="${esc(c.date)}">${fmtDate(c.date)}</time>
+    </div>
+    <div class="feed-body">
+      <a class="feed-title" href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">${esc(c.name)} ↗</a>
+      <p class="feed-summary">${esc(c.summary)}</p>
+      <div class="feed-foot">
+        <span class="cite">${esc(c.citation)}</span>
+        <span class="src-tag">BAILII</span>
+      </div>
+    </div>
+  </div>`;
 }
 
 // =============================================================================
 // VIEW: Dashboard (#/)
 // =============================================================================
 function viewDashboard() {
-  const sorted = [...items].sort(byDateDesc);
-  const total = items.length;
   const thisYear = new Date().getFullYear();
-  const ytd = items.filter((i) => Number(i.date.slice(0, 4)) === thisYear).length;
-  const newCount = items.filter(isNew).length;
 
-  // by practice area
-  const areaData = practiceAreas.map((a) => ({
-    label: a.short,
-    value: items.filter((i) => (i.areas || [i.area]).includes(a.id)).length,
-    color: a.color,
-    nav: { area: a.id },
-  }));
-  // by tier
+  // Five practice-area tiles: number of alerts dated THIS YEAR, click → filtered list.
+  const tiles = practiceAreas.map((a) => {
+    const n = items.filter((i) => Number(i.date.slice(0, 4)) === thisYear
+      && (i.areas || [i.area]).includes(a.id)).length;
+    return `<a class="kpi kpi-link" href="#/list?area=${a.id}" style="--c:${a.color}"
+      aria-label="${esc(a.name)}: ${n} alerts in ${thisYear}">
+      <span class="kpi-num">${n}</span>
+      <span class="kpi-label">${esc(a.name)}</span>
+      <span class="kpi-sub">alerts in ${thisYear}</span>
+    </a>`;
+  }).join("");
+
+  // Dashboard lists: law-firm alerts (left) and recent BAILII cases (right).
+  const firmList = [...items].sort(byDateDesc).slice(0, 8).map(itemRow).join("");
+  const caseListHtml = [...cases].sort(byDateDesc).slice(0, 8).map(caseRow).join("");
+
+  // Supporting charts: by source tier + by month.
   const tierData = tiers.map((t) => ({
     label: t.name,
     value: items.filter((i) => (firmById[i.firm] || {}).tier === t.id).length,
     nav: { tier: t.id },
   }));
-  // by month (last 8 distinct months present)
   const months = [...new Set(items.map((i) => ym(i.date)))].sort().slice(-8);
   const monthData = months.map((m) => ({
     label: MONTHS[Number(m.slice(5, 7)) - 1] + " " + m.slice(2, 4),
     value: items.filter((i) => ym(i.date) === m).length,
   }));
-
-  const latest = sorted.slice(0, 6).map(itemCard).join("");
-
-  const areaCards = practiceAreas.map((a) => {
-    const n = items.filter((i) => (i.areas || [i.area]).includes(a.id)).length;
-    const recent = items.filter((i) => (i.areas || [i.area]).includes(a.id)).sort(byDateDesc)[0];
-    return `<a class="area-card" href="#/list?area=${a.id}" style="--c:${a.color}">
-      <div class="area-card-head"><strong>${esc(a.name)}</strong><span class="area-count">${n}</span></div>
-      <p class="area-blurb">${esc(a.blurb)}</p>
-      ${recent ? `<span class="area-recent">Latest: ${esc(recent.title)}</span>` : ""}
-    </a>`;
-  }).join("");
 
   app.innerHTML = `
     <section class="page-head">
@@ -154,48 +166,28 @@ function viewDashboard() {
         <strong>funds regulatory</strong> and <strong>fund tax</strong> — curated from the public
         insights, know-how and legal-update pages of UK Magic Circle, UK Silver Circle and the
         London offices of US-elite firms.</p>
-      <div class="hero-actions">
-        <a class="btn primary" href="#/list">Browse all updates</a>
-        <a class="btn" href="#/list?saved=1">Saved updates</a>
-      </div>
     </section>
 
-    <section class="kpis" aria-label="Summary">
-      <div class="kpi"><span class="kpi-num">${total}</span><span class="kpi-label">Tracked alerts</span></div>
-      <div class="kpi"><span class="kpi-num">${practiceAreas.length}</span><span class="kpi-label">Practice areas</span></div>
-      <div class="kpi"><span class="kpi-num">${firms.length}</span><span class="kpi-label">Source firms</span></div>
-      <div class="kpi"><span class="kpi-num">${ytd}</span><span class="kpi-label">Dated ${thisYear}</span></div>
-      ${newCount ? `<div class="kpi accent"><span class="kpi-num">${newCount}</span><span class="kpi-label">New since last visit</span></div>` : ""}
-    </section>
+    <section class="kpis kpis-5" aria-label="Alerts this year by practice area">${tiles}</section>
 
-    <section class="grid-2">
-      <div class="panel">
-        <h2>Alerts by practice area</h2>
-        ${barChart(areaData, { width: 520 })}
-      </div>
-      <div class="panel">
-        <h2>By source tier</h2>
-        ${donutChart(tierData, { size: 200 })}
-      </div>
-    </section>
+    <div class="dash-cols">
+      <section class="card feed-card">
+        <div class="feed-head"><h2>Law-firm alerts</h2><a class="see-all" href="#/list">See all →</a></div>
+        <p class="feed-intro">Latest legal updates &amp; client alerts from the firms.</p>
+        <div class="feed">${firmList}</div>
+      </section>
+      <section class="card feed-card">
+        <div class="feed-head"><h2>Recent cases on BAILII</h2>
+          <a class="see-all" href="https://www.bailii.org/recent-decisions-ew.html" target="_blank" rel="noopener noreferrer">Browse BAILII ↗</a></div>
+        <p class="feed-intro">Latest English-law judgments, linked to bailii.org.</p>
+        <div class="feed">${caseListHtml}</div>
+      </section>
+    </div>
 
-    <section class="panel">
-      <h2>Publishing activity by month</h2>
-      ${columnChart(monthData, { width: 720, height: 200 })}
-    </section>
-
-    <section>
-      <h2 class="section-head">Browse by practice area</h2>
-      <div class="area-cards">${areaCards}</div>
-    </section>
-
-    <section>
-      <div class="section-head-row">
-        <h2 class="section-head">Latest updates</h2>
-        <a class="see-all" href="#/list">See all →</a>
-      </div>
-      <div class="cards">${latest}</div>
-    </section>
+    <div class="grid-2">
+      <section class="card"><h2>Alerts by source tier</h2>${donutChart(tierData, { size: 200 })}</section>
+      <section class="card"><h2>Publishing activity by month</h2>${columnChart(monthData, { width: 720, height: 200 })}</section>
+    </div>
 
     <p class="reviewed">Data last reviewed ${fmtDate(LAST_REVIEWED)}.</p>
   `;
@@ -262,7 +254,7 @@ function viewList() {
             value="${esc(filterState.q)}" aria-label="Search updates" autocomplete="off"/>
         </div>
         <div id="result-count" class="result-count" aria-live="polite"></div>
-        <div id="results" class="cards"></div>
+        <div id="results" class="feed"></div>
       </section>
     </div>
   `;
@@ -313,7 +305,7 @@ function renderResults() {
   const matched = items.filter(matchesFilters).sort(byDateDesc);
   countEl.textContent = `${matched.length} update${matched.length === 1 ? "" : "s"}`;
   results.innerHTML = matched.length
-    ? matched.map(itemCard).join("")
+    ? matched.map(itemRow).join("")
     : `<div class="empty">No updates match these filters.${filterState.saved ? " Save some updates with the ☆ button." : ""}</div>`;
 }
 
@@ -337,7 +329,7 @@ function viewItem(id) {
   // Related: same primary area, different item, newest first.
   const related = items
     .filter((x) => x.id !== it.id && (x.areas || [x.area]).some((a) => (it.areas || [it.area]).includes(a)))
-    .sort(byDateDesc).slice(0, 3).map(itemCard).join("");
+    .sort(byDateDesc).slice(0, 4).map(itemRow).join("");
 
   app.innerHTML = `
     <nav class="breadcrumb" aria-label="Breadcrumb">
@@ -382,7 +374,7 @@ function viewItem(id) {
 
     ${related ? `<section class="related">
       <h2 class="section-head">Related updates</h2>
-      <div class="cards">${related}</div>
+      <div class="feed">${related}</div>
     </section>` : ""}
   `;
 }
