@@ -179,11 +179,7 @@ function viewDashboard() {
   app.innerHTML = `
     <section class="page-head">
       <h1>Legal &amp; Case-Law Intelligence</h1>
-      <p class="lead">Practical-Law-style updates across <strong>banking</strong>,
-        <strong>restructuring &amp; insolvency</strong>, <strong>corporate</strong>,
-        <strong>funds regulatory</strong> and <strong>fund tax</strong> — curated from the public
-        insights, know-how and legal-update pages of UK Magic Circle, UK Silver Circle and the
-        London offices of US-elite firms.</p>
+      <p class="muted">Practical-Law-style English-law updates across banking, restructuring &amp; insolvency, corporate, funds regulatory and fund tax · curated from the insights &amp; know-how pages of UK Magic Circle, Silver Circle and US-elite London firms, plus recent BAILII judgments</p>
     </section>
 
     <section class="kpis kpis-5" aria-label="Alerts this year by practice area">${tiles}</section>
