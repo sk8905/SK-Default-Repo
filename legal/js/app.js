@@ -226,7 +226,7 @@ function viewDashboard() {
 // =============================================================================
 // VIEW: List (#/list) — multi-select filters + search
 // =============================================================================
-const filterState = { areas: [], tiers: [], types: [], firms: [], q: "", saved: false };
+const filterState = { areas: [], tiers: [], types: [], firms: [], years: [], q: "", saved: false };
 
 function parseHashQuery() {
   const h = location.hash.slice(1); // "/list?area=banking"
@@ -245,8 +245,11 @@ function viewList() {
   filterState.tiers = q.tier ? [q.tier] : [];
   filterState.types = q.type ? [q.type] : [];
   filterState.firms = q.firm ? [q.firm] : [];
+  filterState.years = q.year ? [q.year] : [];
   filterState.q = q.q || "";
   filterState.saved = q.saved === "1";
+
+  const years = [...new Set(items.map((i) => i.date.slice(0, 4)))].sort((a, b) => b.localeCompare(a));
 
   const checkboxGroup = (legend, name, opts) => `
     <fieldset class="filter-group">
@@ -274,6 +277,7 @@ function viewList() {
           <span>Saved only ★</span>
         </label>
         ${checkboxGroup("Practice area", "areas", practiceAreas.map((a) => ({ id: a.id, name: a.name })))}
+        ${checkboxGroup("Year", "years", years.map((y) => ({ id: y, name: y })))}
         ${checkboxGroup("Source tier", "tiers", tiers)}
         ${checkboxGroup("Type", "types", updateTypes)}
         ${checkboxGroup("Firm", "firms", firms.map((f) => ({ id: f.id, name: f.name })))}
@@ -303,7 +307,7 @@ function viewList() {
   search.addEventListener("input", () => { filterState.q = search.value; renderResults(); });
   app.querySelector("#clear-filters").addEventListener("click", () => {
     filterState.areas = []; filterState.tiers = []; filterState.types = []; filterState.firms = [];
-    filterState.saved = false; filterState.q = "";
+    filterState.years = []; filterState.saved = false; filterState.q = "";
     app.querySelectorAll('input[type="checkbox"]').forEach((c) => (c.checked = false));
     search.value = "";
     renderResults();
@@ -318,6 +322,7 @@ function matchesFilters(it) {
   if (filterState.tiers.length && !filterState.tiers.includes((firmById[it.firm] || {}).tier)) return false;
   if (filterState.types.length && !filterState.types.includes(it.type)) return false;
   if (filterState.firms.length && !filterState.firms.includes(it.firm)) return false;
+  if (filterState.years.length && !filterState.years.includes(it.date.slice(0, 4))) return false;
   if (filterState.saved && !getSaved().has(it.id)) return false;
   if (filterState.q.trim()) {
     const q = filterState.q.trim().toLowerCase();
@@ -342,7 +347,7 @@ function renderResults() {
 // =============================================================================
 // VIEW: Case law (#/cases) — all BAILII cases with AI-generated summaries
 // =============================================================================
-const caseFilter = { areas: [], courts: [], q: "" };
+const caseFilter = { areas: [], courts: [], years: [], q: "" };
 
 // Courts present in the data, in a sensible hierarchy order.
 const COURT_ORDER = ["Supreme Court", "Court of Appeal", "High Court (Ch)", "High Court (Comm)", "High Court (KB)", "High Court (QB)"];
@@ -352,9 +357,11 @@ function viewCases() {
   const q = parseHashQuery();
   caseFilter.areas = q.area ? [q.area] : [];
   caseFilter.courts = [];
+  caseFilter.years = q.year ? [q.year] : [];
   caseFilter.q = q.q || "";
 
   const courts = COURT_ORDER.filter((ct) => cases.some((c) => c.court === ct));
+  const years = [...new Set(cases.map((c) => c.date.slice(0, 4)))].sort((a, b) => b.localeCompare(a));
 
   const checkboxGroup = (legend, name, opts) => `
     <fieldset class="filter-group">
@@ -380,6 +387,7 @@ function viewCases() {
           <button id="clear-filters" class="link-btn" type="button">Clear all</button>
         </div>
         ${checkboxGroup("Practice area", "areas", practiceAreas.map((a) => ({ id: a.id, name: a.name })))}
+        ${checkboxGroup("Year", "years", years.map((y) => ({ id: y, name: y })))}
         ${checkboxGroup("Court", "courts", courts.map((ct) => ({ id: ct, name: ct })))}
       </aside>
       <section class="results-wrap">
@@ -402,7 +410,7 @@ function viewCases() {
   const search = app.querySelector("#case-search");
   search.addEventListener("input", () => { caseFilter.q = search.value; renderCaseResults(); });
   app.querySelector("#clear-filters").addEventListener("click", () => {
-    caseFilter.areas = []; caseFilter.courts = []; caseFilter.q = "";
+    caseFilter.areas = []; caseFilter.courts = []; caseFilter.years = []; caseFilter.q = "";
     app.querySelectorAll('input[type="checkbox"]').forEach((c) => (c.checked = false));
     search.value = "";
     renderCaseResults();
@@ -418,6 +426,7 @@ function renderCaseResults() {
   const matched = cases.filter((c) => {
     if (caseFilter.areas.length && !caseFilter.areas.includes(c.area)) return false;
     if (caseFilter.courts.length && !caseFilter.courts.includes(c.court)) return false;
+    if (caseFilter.years.length && !caseFilter.years.includes(c.date.slice(0, 4))) return false;
     if (caseFilter.q.trim()) {
       const hay = [c.name, c.citation, c.court, caseSummaries[c.id] || c.summary].join(" ").toLowerCase();
       if (!hay.includes(caseFilter.q.trim().toLowerCase())) return false;
