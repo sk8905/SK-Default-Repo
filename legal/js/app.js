@@ -14,9 +14,9 @@
 // =============================================================================
 
 import {
-  items, cases, practiceAreas, firms, tiers, updateTypes,
+  items, cases, caseSummaries, practiceAreas, firms, tiers, updateTypes,
   firmById, areaById, typeById, tierById, LAST_REVIEWED,
-} from "./data.js?v=20260619-6";
+} from "./data.js?v=20260619-7";
 import { donutChart, columnChart } from "./charts.js?v=20260619-1";
 
 const app = document.getElementById("app");
@@ -195,7 +195,7 @@ function viewDashboard() {
         <h2>Recent cases on BAILII</h2>
         <p class="muted small">Latest English-law judgments, linked to bailii.org.</p>
         <ul class="compact-list">${caseListHtml}</ul>
-        <div class="card-foot"><a href="https://www.bailii.org/recent-decisions-ew.html" target="_blank" rel="noopener noreferrer">Browse all on BAILII ↗</a></div>
+        <div class="card-foot"><a href="#/cases">View all case law →</a></div>
       </section>
     </div>
 
@@ -246,7 +246,7 @@ function viewList() {
 
   app.innerHTML = `
     <div class="list-head">
-      <h1>${filterState.saved ? "Saved updates" : "All updates"}</h1>
+      <h1>${filterState.saved ? "Saved alerts" : "Legal alerts"}</h1>
       <p class="muted">Filter by practice area, source tier, type or firm, or search the full text.</p>
     </div>
     <div class="list-layout">
@@ -322,6 +322,83 @@ function renderResults() {
   results.innerHTML = matched.length
     ? matched.map(itemRow).join("")
     : `<div class="empty">No updates match these filters.${filterState.saved ? " Save some updates with the ☆ button." : ""}</div>`;
+}
+
+// =============================================================================
+// VIEW: Case law (#/cases) — all BAILII cases with AI-generated summaries
+// =============================================================================
+const caseFilter = { area: "", q: "" };
+
+function caseCard(c) {
+  const a = areaById[c.area];
+  const summary = caseSummaries[c.id] || c.summary || "";
+  return `<article class="case-card" style="--c:${a ? a.color : "var(--primary)"}">
+    <div class="case-card-top">
+      ${areaChip(c.area)}
+      <span class="case-court">${esc(c.court)}</span>
+      <time class="case-date" datetime="${esc(c.date)}">${fmtDate(c.date)}</time>
+    </div>
+    <h3 class="case-name">
+      <a href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">${esc(c.name)}</a>
+      <span class="case-cite">${esc(c.citation)}</span>
+    </h3>
+    <div class="ai-summary">
+      <span class="ai-badge">✦ AI summary</span>
+      <p>${esc(summary)}</p>
+    </div>
+    <a class="case-link" href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">Read the judgment on BAILII ↗</a>
+  </article>`;
+}
+
+function viewCases() {
+  const q = parseHashQuery();
+  caseFilter.area = q.area || "";
+  caseFilter.q = q.q || "";
+
+  const pills = [{ id: "", name: "All areas" }, ...practiceAreas.map((a) => ({ id: a.id, name: a.short }))]
+    .map((p) => `<button class="pill ${caseFilter.area === p.id ? "is-on" : ""}" type="button" data-area-pill="${esc(p.id)}">${esc(p.name)}</button>`).join("");
+
+  app.innerHTML = `
+    <section class="page-head">
+      <h1>Case law</h1>
+      <p class="muted">English-law judgments from the Supreme Court, Court of Appeal (Civil Division) and the
+        High Court (Chancery, Commercial &amp; King's/Queen's Bench), newest first. Each carries an
+        AI-generated summary for orientation — always read the judgment on BAILII before relying on it.</p>
+    </section>
+    <div class="case-controls">
+      <div class="pills" role="group" aria-label="Filter by practice area">${pills}</div>
+      <input id="case-search" type="search" placeholder="Search cases, citations…"
+        value="${esc(caseFilter.q)}" aria-label="Search case law" autocomplete="off" />
+    </div>
+    <div id="case-count" class="result-count" aria-live="polite"></div>
+    <div id="case-results" class="case-grid"></div>
+  `;
+
+  app.querySelectorAll("[data-area-pill]").forEach((b) => b.addEventListener("click", () => {
+    caseFilter.area = b.getAttribute("data-area-pill");
+    app.querySelectorAll("[data-area-pill]").forEach((x) => x.classList.toggle("is-on", x === b));
+    renderCaseResults();
+  }));
+  const search = app.querySelector("#case-search");
+  search.addEventListener("input", () => { caseFilter.q = search.value; renderCaseResults(); });
+
+  renderCaseResults();
+}
+
+function renderCaseResults() {
+  const el = document.getElementById("case-results");
+  const countEl = document.getElementById("case-count");
+  if (!el) return;
+  const matched = cases.filter((c) => {
+    if (caseFilter.area && c.area !== caseFilter.area) return false;
+    if (caseFilter.q.trim()) {
+      const hay = [c.name, c.citation, c.court, caseSummaries[c.id] || c.summary].join(" ").toLowerCase();
+      if (!hay.includes(caseFilter.q.trim().toLowerCase())) return false;
+    }
+    return true;
+  }).sort(byDateDesc);
+  countEl.textContent = `${matched.length} case${matched.length === 1 ? "" : "s"}`;
+  el.innerHTML = matched.length ? matched.map(caseCard).join("") : `<div class="empty">No cases match.</div>`;
 }
 
 // =============================================================================
@@ -404,6 +481,7 @@ function router() {
 
   if (path === "/" || path === "") viewDashboard();
   else if (path === "/list") viewList();
+  else if (path === "/cases") viewCases();
   else if (path.startsWith("/item/")) viewItem(decodeURIComponent(path.slice("/item/".length)));
   else viewDashboard();
 
