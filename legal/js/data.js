@@ -15,7 +15,7 @@
 // `LAST_REVIEWED` whenever you refresh the data.
 // =============================================================================
 
-export const LAST_REVIEWED = "2026-06-20";
+export const LAST_REVIEWED = "2026-06-21";
 
 // ---- Practice areas ---------------------------------------------------------
 export const practiceAreas = [
@@ -1005,6 +1005,21 @@ export const items = [
     ],
     tags: ["FCA", "market abuse", "penalties", "CP26/19", "derivatives", "MiFIR", "trading obligation", "tokenisation", "EBA", "stress test"],
     url: "https://www.slaughterandmay.com/insights/financial-regulation-weekly-bulletin/financial-regulation-weekly-bulletin-18-june-2026/",
+  },
+  {
+    id: "u133", title: "Song v Smith: Court of Appeal on fiduciary duty and unfair prejudice after joint-venture termination",
+    area: "corporate", areas: ["corporate"], type: "update", firm: "macfarlanes",
+    date: "2026-06-19", jurisdiction: "England & Wales",
+    court: "Court of Appeal", citation: "[2026] EWCA Civ 719",
+    summary: "Zacaroli LJ, in Song v Smith [2026] EWCA Civ 719 (handed down 9 June 2026), allowed the shareholders' unfair-prejudice appeal in part, clarifying that a director may pursue genuinely new business opportunities for his own account after a quasi-partnership joint venture has terminated without that constituting unfair prejudice — but cannot divert existing JV opportunities for personal gain even after the venture ends. The Court also stressed that relief is of limited utility where the petitioner's shares have no positive value in the relevant alternative (e.g. insolvent liquidation). Macfarlanes' Corporate Law Update for 13–19 June 2026 additionally covers Companies House's third ECCTA 2023 progress report on mandatory director and PSC identity verification, and the Money Laundering and Terrorist Financing (Amendment) Regulations 2026 expanding the Trust Registration Service to further offshore trusts from 30 June 2026.",
+    points: [
+      "Post-termination fiduciary duty: a director cannot divert existing JV opportunities for personal gain even after the venture formally ends.",
+      "Genuinely new post-termination business opportunities do not found unfair-prejudice relief, even if they fall within the old JV scope.",
+      "Unfair-prejudice relief is of limited value where the petitioner's shares would have no positive value in the relevant alternative.",
+      "TRS expanded from 30 June 2026 to additional offshore trusts; Companies House third ECCTA 2023 progress report spotlights mandatory ID verification for directors and PSCs.",
+    ],
+    tags: ["unfair prejudice", "fiduciary duty", "joint venture", "directors' duties", "Song v Smith", "ECCTA", "trust registration service", "corporate"],
+    url: "https://www.macfarlanes.com/insights/102n4r8/corporate-law-update-13-19-june/",
   },
 ];
 
