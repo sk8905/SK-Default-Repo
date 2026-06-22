@@ -16,8 +16,8 @@
 import {
   items, cases, caseSummaries, practiceAreas, firms, tiers, updateTypes,
   firmById, areaById, typeById, tierById, LAST_REVIEWED,
-} from "./data.js?v=20260622-1";
-import { donutChart, columnChart } from "./charts.js?v=20260622-1";
+} from "./data.js?v=20260622-2";
+import { donutChart, columnChart } from "./charts.js?v=20260622-2";
 
 const app = document.getElementById("app");
 
@@ -190,7 +190,7 @@ function viewDashboard() {
   const monthData = months.map((m) => ({
     label: MONTHS[Number(m.slice(5, 7)) - 1] + " " + m.slice(2, 4),
     value: items.filter((i) => ym(i.date) === m).length,
-    nav: { year: m.slice(0, 4) },
+    nav: { month: m },
   }));
 
   app.innerHTML = `
@@ -218,7 +218,7 @@ function viewDashboard() {
 
     <div class="grid-2">
       <section class="card"><h2>Alerts by source tier</h2><p class="muted small">Click a tier to see its alerts.</p>${donutChart(tierData, { size: 200 })}</section>
-      <section class="card"><h2>Publishing activity by month</h2><p class="muted small">Click a month to see that year's alerts.</p>${columnChart(monthData, { width: 720, height: 200 })}</section>
+      <section class="card"><h2>Publishing activity by month</h2><p class="muted small">Click a month to see that month's alerts.</p>${columnChart(monthData, { width: 720, height: 200 })}</section>
     </div>
 
     <p class="reviewed">Data last reviewed ${fmtDate(LAST_REVIEWED)}.</p>
@@ -228,7 +228,7 @@ function viewDashboard() {
 // =============================================================================
 // VIEW: List (#/list) — multi-select filters + search
 // =============================================================================
-const filterState = { areas: [], tiers: [], types: [], firms: [], years: [], q: "", saved: false };
+const filterState = { areas: [], tiers: [], types: [], firms: [], years: [], months: [], q: "", saved: false };
 
 function parseHashQuery() {
   const h = location.hash.slice(1); // "/list?area=banking"
@@ -248,10 +248,13 @@ function viewList() {
   filterState.types = q.type ? [q.type] : [];
   filterState.firms = q.firm ? [q.firm] : [];
   filterState.years = q.year ? [q.year] : [];
+  filterState.months = q.month ? [q.month] : [];
   filterState.q = q.q || "";
   filterState.saved = q.saved === "1";
 
   const years = [...new Set(items.map((i) => i.date.slice(0, 4)))].sort((a, b) => b.localeCompare(a));
+  const monthOpts = [...new Set(items.map((i) => ym(i.date)))].sort((a, b) => b.localeCompare(a))
+    .map((m) => ({ id: m, name: MONTHS[Number(m.slice(5, 7)) - 1] + " " + m.slice(0, 4) }));
 
   const checkboxGroup = (legend, name, opts) => `
     <fieldset class="filter-group">
@@ -276,6 +279,7 @@ function viewList() {
         </div>
         ${checkboxGroup("Practice area", "areas", practiceAreas.map((a) => ({ id: a.id, name: a.name })))}
         ${checkboxGroup("Year", "years", years.map((y) => ({ id: y, name: y })))}
+        ${checkboxGroup("Month", "months", monthOpts)}
         ${checkboxGroup("Source tier", "tiers", tiers)}
         ${checkboxGroup("Type", "types", updateTypes)}
         ${checkboxGroup("Firm", "firms", firms.map((f) => ({ id: f.id, name: f.name })))}
@@ -303,7 +307,7 @@ function viewList() {
   search.addEventListener("input", () => { filterState.q = search.value; renderResults(); });
   app.querySelector("#clear-filters").addEventListener("click", () => {
     filterState.areas = []; filterState.tiers = []; filterState.types = []; filterState.firms = [];
-    filterState.years = []; filterState.saved = false; filterState.q = "";
+    filterState.years = []; filterState.months = []; filterState.saved = false; filterState.q = "";
     app.querySelectorAll('input[type="checkbox"]').forEach((c) => (c.checked = false));
     search.value = "";
     renderResults();
@@ -319,6 +323,7 @@ function matchesFilters(it) {
   if (filterState.types.length && !filterState.types.includes(it.type)) return false;
   if (filterState.firms.length && !filterState.firms.includes(it.firm)) return false;
   if (filterState.years.length && !filterState.years.includes(it.date.slice(0, 4))) return false;
+  if (filterState.months.length && !filterState.months.includes(ym(it.date))) return false;
   if (filterState.saved && !getSaved().has(it.id)) return false;
   if (filterState.q.trim()) {
     const q = filterState.q.trim().toLowerCase();
@@ -545,19 +550,20 @@ document.addEventListener("click", (e) => {
     if (filterState.saved && document.getElementById("results")) renderResults();
     return;
   }
-  const navEl = e.target.closest("[data-area],[data-tier],[data-year]");
+  const navEl = e.target.closest("[data-area],[data-tier],[data-year],[data-month]");
   if (navEl) {
     const params = new URLSearchParams();
     if (navEl.dataset.area) params.set("area", navEl.dataset.area);
     if (navEl.dataset.tier) params.set("tier", navEl.dataset.tier);
     if (navEl.dataset.year) params.set("year", navEl.dataset.year);
+    if (navEl.dataset.month) params.set("month", navEl.dataset.month);
     location.hash = "#/list?" + params.toString();
   }
 });
 
 // Keyboard activation for chart drill-down elements.
 document.addEventListener("keydown", (e) => {
-  if ((e.key === "Enter" || e.key === " ") && e.target.matches?.("[data-area],[data-tier],[data-year]")) {
+  if ((e.key === "Enter" || e.key === " ") && e.target.matches?.("[data-area],[data-tier],[data-year],[data-month]")) {
     e.preventDefault();
     e.target.click();
   }
