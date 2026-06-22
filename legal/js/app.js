@@ -16,8 +16,8 @@
 import {
   items, cases, caseSummaries, practiceAreas, firms, tiers, updateTypes,
   firmById, areaById, typeById, tierById, LAST_REVIEWED,
-} from "./data.js?v=20260622-4";
-import { donutChart, columnChart } from "./charts.js?v=20260622-4";
+} from "./data.js?v=20260622-5";
+import { donutChart, columnChart } from "./charts.js?v=20260622-5";
 
 const app = document.getElementById("app");
 
@@ -192,8 +192,8 @@ function viewDashboard() {
 
   app.innerHTML = `
     <section class="page-head">
-      <h1>Legal &amp; Case-Law Intelligence</h1>
-      <p class="muted">Practical-Law-style English-law updates across banking, restructuring &amp; insolvency, corporate, funds regulatory and fund tax · curated from the insights &amp; know-how pages of UK Magic Circle, Silver Circle and US-elite London firms, plus recent BAILII judgments</p>
+      <h1>Legal Intelligence</h1>
+      <p class="muted">English-law updates curated from UK Magic Circle, Silver Circle and US-elite London firms, plus recent BAILII judgments</p>
     </section>
 
     <section class="kpis kpis-5" aria-label="Alerts this year by practice area">${tiles}</section>
@@ -287,7 +287,7 @@ function viewList() {
             value="${esc(filterState.q)}" aria-label="Search updates" autocomplete="off"/>
         </div>
         <div id="result-count" class="result-count" aria-live="polite"></div>
-        <div id="results" class="feed"></div>
+        <section class="card"><div id="results" class="feed"></div></section>
       </section>
     </div>
   `;
@@ -394,7 +394,7 @@ function viewCases() {
             value="${esc(caseFilter.q)}" aria-label="Search case law" autocomplete="off"/>
         </div>
         <div id="case-count" class="result-count" aria-live="polite"></div>
-        <div id="case-results" class="feed"></div>
+        <section class="card"><div id="case-results" class="feed"></div></section>
       </section>
     </div>
   `;

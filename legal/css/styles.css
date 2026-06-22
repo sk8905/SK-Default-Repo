@@ -275,7 +275,7 @@ a.compact-head:hover { color: var(--primary); }
   letter-spacing: 1px; margin: 1rem 0 .1rem; padding-bottom: .35rem; border-bottom: 2px solid var(--line);
 }
 .year-group:first-child .year-head { margin-top: .25rem; }
-.empty { background: var(--surface); border: 1px dashed var(--line); border-radius: var(--radius); padding: 2rem; text-align: center; color: var(--muted); grid-column: 1 / -1; }
+.empty { padding: 2rem; text-align: center; color: var(--muted); }
 
 /* ---- Detail ---- */
 .breadcrumb { font-size: .82rem; color: var(--muted); margin-bottom: 1rem; }
