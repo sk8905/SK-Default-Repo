@@ -98,7 +98,7 @@ img, svg { max-width: 100%; }
 /* ---- Page head ---- */
 .page-head { margin-bottom: 1.25rem; }
 .page-head h1 { color: var(--ink); }
-.lead { font-size: .98rem; color: var(--ink-soft); margin: 0 0 1rem; max-width: 80ch; }
+.lead { font-size: .98rem; color: var(--ink-soft); margin: 0 0 1rem; }
 .lead strong { color: var(--ink); }
 .hero-actions { display: flex; gap: .6rem; flex-wrap: wrap; }
 .btn {
@@ -135,14 +135,14 @@ img, svg { max-width: 100%; }
 /* ---- Feed / list rows (Meridian-style) ---- */
 .feed-row { display: flex; gap: 1rem; padding: .8rem 0; border-bottom: 1px solid var(--line); }
 .feed-row:last-child { border-bottom: 0; }
-.feed-meta { display: flex; flex-direction: column; align-items: flex-start; gap: .3rem; width: 8.5rem; flex-shrink: 0; }
+.feed-meta { display: flex; flex-direction: column; align-items: flex-start; gap: .3rem; width: 10rem; flex-shrink: 0; }
 .feed-meta .chips { gap: .25rem; }
 .feed-type { font-size: .7rem; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); font-weight: 700; }
-.feed-date { font-size: .76rem; color: var(--muted); }
+.feed-date { font-size: .8rem; color: var(--muted); }
 .feed-body { min-width: 0; flex: 1; }
 .feed-title { font-weight: 600; color: var(--ink); display: inline-block; margin-bottom: .15rem; overflow-wrap: anywhere; }
 a.feed-title:hover { color: var(--primary); }
-.feed-summary { margin: .1rem 0 .4rem; font-size: .84rem; color: var(--ink-soft); }
+.feed-summary { margin: .1rem 0 .4rem; font-size: .8rem; color: var(--ink-soft); }
 .feed-foot { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; font-size: .76rem; }
 .src-tag { font-size: .66rem; font-weight: 700; letter-spacing: .4px; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: .02rem .35rem; }
 
@@ -201,7 +201,7 @@ a.feed-title:hover { color: var(--primary); }
 .feature-card { border-top: 3px solid var(--accent); }
 .card-foot { margin-top: .75rem; padding-top: .6rem; border-top: 1px solid var(--line); font-size: .85rem; font-weight: 600; }
 .small { font-size: .8rem; }
-.compact-list { list-style: none; margin: .4rem 0 0; padding: 0; }
+.compact-list { list-style: none; margin: .25rem 0 0; padding: 0; }
 .compact-item { padding: .5rem 0; border-bottom: 1px solid var(--line); }
 .compact-item:last-child { border-bottom: none; }
 .compact-head { font-weight: 600; color: var(--ink); overflow-wrap: anywhere; text-decoration: none; }
