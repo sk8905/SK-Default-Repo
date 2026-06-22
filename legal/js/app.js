@@ -16,8 +16,8 @@
 import {
   items, cases, caseSummaries, practiceAreas, firms, tiers, updateTypes,
   firmById, areaById, typeById, tierById, LAST_REVIEWED,
-} from "./data.js?v=20260622-5";
-import { donutChart, columnChart } from "./charts.js?v=20260622-5";
+} from "./data.js?v=20260622-6";
+import { donutChart, columnChart } from "./charts.js?v=20260622-6";
 
 const app = document.getElementById("app");
 
@@ -567,6 +567,63 @@ document.addEventListener("keydown", (e) => {
 });
 
 // ---- Top-bar chrome: "Updated …" status + Cloudflare Access identity --------
+// ---- Notifications bell: feed items new since the bell was last opened ------
+// In the topbar (outside #app) so it persists across every tab. "New" is the set
+// of current item ids not yet acknowledged (localStorage).
+const NOTIF_KEY = "meridian.legal.notifSeen";
+function notifItems() {
+  const out = [];
+  items.forEach((it) => out.push({ id: "u:" + it.id, date: it.date || "", kind: (typeById[it.type] || {}).name || it.type, title: it.title, href: "#/item/" + it.id }));
+  cases.forEach((c) => out.push({ id: "c:" + c.id, date: c.date || "", kind: c.court || "Case", title: c.name, href: c.url, ext: true }));
+  return out.sort((a, b) => String(b.date).localeCompare(String(a.date)));
+}
+function closeNotif() {
+  const p = document.getElementById("notif-panel"), b = document.getElementById("notif-bell");
+  if (p) p.setAttribute("hidden", "");
+  if (b) b.setAttribute("aria-expanded", "false");
+}
+function renderNotifications() {
+  const wrap = document.getElementById("notif");
+  if (!wrap) return;
+  const all = notifItems();
+  const allIds = all.map((x) => x.id);
+  let seen;
+  try { seen = JSON.parse(localStorage.getItem(NOTIF_KEY) || "null"); } catch { seen = null; }
+  const firstVisit = !Array.isArray(seen);
+  const seenSet = new Set(firstVisit ? allIds : seen);
+  if (firstVisit) { try { localStorage.setItem(NOTIF_KEY, JSON.stringify(allIds)); } catch {} }
+  const fresh = firstVisit ? [] : all.filter((x) => !seenSet.has(x.id));
+  const n = fresh.length;
+  const list = (n ? fresh : all).slice(0, 12);
+  wrap.innerHTML = `
+    <button type="button" class="notif-bell" id="notif-bell" aria-haspopup="true" aria-expanded="false" aria-label="Notifications${n ? ` — ${n} new` : ""}">
+      <span class="notif-ico" aria-hidden="true">🔔</span>${n ? `<span class="notif-badge">${n > 9 ? "9+" : n}</span>` : ""}
+    </button>
+    <div class="notif-panel" id="notif-panel" role="menu" hidden>
+      <div class="notif-head">${n ? `${n} new update${n > 1 ? "s" : ""}` : "No new updates"} <span class="muted small">· updated ${esc(fmtDate(LAST_REVIEWED))}</span></div>
+      <ul class="notif-list">
+        ${list.length ? list.map((x) => `<li class="notif-item${(n && fresh.includes(x)) ? " is-new" : ""}">
+          <a href="${esc(x.href)}" ${x.ext ? 'target="_blank" rel="noopener noreferrer"' : ""} class="notif-link">${esc(x.title)}${x.ext ? " ↗" : ""}</a>
+          <div class="notif-meta muted small">${esc(x.kind)}${x.date ? ` · ${esc(fmtDate(x.date))}` : ""}</div>
+        </li>`).join("") : '<li class="notif-empty muted small">Nothing yet.</li>'}
+      </ul>
+    </div>`;
+  const bell = document.getElementById("notif-bell");
+  const panel = document.getElementById("notif-panel");
+  bell.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (panel.hasAttribute("hidden")) {
+      panel.removeAttribute("hidden"); bell.setAttribute("aria-expanded", "true");
+      try { localStorage.setItem(NOTIF_KEY, JSON.stringify(allIds)); } catch {}
+      const badge = bell.querySelector(".notif-badge"); if (badge) badge.remove();
+    } else { closeNotif(); }
+  });
+}
+document.addEventListener("click", (e) => {
+  if (!e.target.closest("#notif")) closeNotif();
+});
+window.addEventListener("hashchange", closeNotif);
+
 function initChrome() {
   const status = document.getElementById("data-status");
   if (status) {
@@ -592,5 +649,6 @@ function initChrome() {
 
 window.addEventListener("hashchange", router);
 initChrome();
+renderNotifications();
 router();
 markVisitedSoon();

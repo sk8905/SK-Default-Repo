@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260622-3";
+} from "./data.js?v=20260622-4";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260622-3";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260622-4";
 
 const app = document.getElementById("app");
 
@@ -213,7 +213,70 @@ function renderAccountNav() {
     el.hidden = true;
   }
 }
-// Pull the cloud watchlist on startup. Server is the source of truth across
+// ---- Notifications bell: feed items new since the bell was last opened ------
+// Lives in the topbar (outside #app), so it persists across every tab. "New" is
+// detected by diffing current item ids against the set last acknowledged
+// (localStorage) — robust regardless of publication dates.
+const NOTIF_KEY = "meridian.credit.notifSeen";
+function notifItems() {
+  const out = [];
+  deals.forEach((d) => out.push({ id: "d:" + d.id, date: d.date || "", kind: d.type, title: d.headline, href: "#/deals", goto: "deals:" + d.id }));
+  intel.forEach((i) => out.push({ id: "i:" + i.id, date: i.date || "", kind: i.type, title: i.headline, href: "#/intel", goto: "intel:" + i.id }));
+  managers.forEach((m) => (m.webNews || []).forEach((w) => out.push({ id: "w:" + (w.url || w.title), date: w.date || "", kind: "News", title: w.title, href: "#/manager/" + m.id })));
+  return out.sort((a, b) => String(b.date).localeCompare(String(a.date)));
+}
+function closeNotif() {
+  const p = document.getElementById("notif-panel"), b = document.getElementById("notif-bell");
+  if (p) p.setAttribute("hidden", "");
+  if (b) b.setAttribute("aria-expanded", "false");
+}
+function renderNotifications() {
+  const wrap = document.getElementById("notif");
+  if (!wrap) return;
+  const all = notifItems();
+  const allIds = all.map((x) => x.id);
+  let seen;
+  try { seen = JSON.parse(localStorage.getItem(NOTIF_KEY) || "null"); } catch { seen = null; }
+  const firstVisit = !Array.isArray(seen);
+  const seenSet = new Set(firstVisit ? allIds : seen);
+  if (firstVisit) { try { localStorage.setItem(NOTIF_KEY, JSON.stringify(allIds)); } catch {} }
+  const fresh = firstVisit ? [] : all.filter((x) => !seenSet.has(x.id));
+  const n = fresh.length;
+  const list = (n ? fresh : all).slice(0, 12);
+  wrap.innerHTML = `
+    <button type="button" class="notif-bell" id="notif-bell" aria-haspopup="true" aria-expanded="false" aria-label="Notifications${n ? ` — ${n} new` : ""}">
+      <span class="notif-ico" aria-hidden="true">🔔</span>${n ? `<span class="notif-badge">${n > 9 ? "9+" : n}</span>` : ""}
+    </button>
+    <div class="notif-panel" id="notif-panel" role="menu" hidden>
+      <div class="notif-head">${n ? `${n} new update${n > 1 ? "s" : ""}` : "No new updates"} <span class="muted small">· updated ${esc(fmtDate(DATA_UPDATED))}</span></div>
+      <ul class="notif-list">
+        ${list.length ? list.map((x) => `<li class="notif-item${(n && fresh.includes(x)) ? " is-new" : ""}">
+          <a href="${x.href}" ${x.goto ? `data-goto="${esc(x.goto)}"` : ""} class="notif-link">${esc(x.title)}</a>
+          <div class="notif-meta muted small">${esc(x.kind)}${x.date ? ` · ${esc(fmtDate(x.date))}` : ""}</div>
+        </li>`).join("") : '<li class="notif-empty muted small">Nothing yet.</li>'}
+      </ul>
+    </div>`;
+  const bell = document.getElementById("notif-bell");
+  const panel = document.getElementById("notif-panel");
+  bell.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (panel.hasAttribute("hidden")) {
+      panel.removeAttribute("hidden"); bell.setAttribute("aria-expanded", "true");
+      try { localStorage.setItem(NOTIF_KEY, JSON.stringify(allIds)); } catch {}
+      const badge = bell.querySelector(".notif-badge"); if (badge) badge.remove();
+    } else { closeNotif(); }
+  });
+  panel.addEventListener("click", (e) => {
+    const a = e.target.closest("[data-goto]");
+    if (a) { const [view, id] = a.getAttribute("data-goto").split(":"); pendingFocus = { view, id }; }
+  });
+}
+// Close the panel on outside-click and on navigation.
+document.addEventListener("click", (e) => {
+  if (!e.target.closest("#notif")) closeNotif();
+});
+window.addEventListener("hashchange", closeNotif);
+
 // devices; if the server is empty but this device has items, migrate them up.
 async function initWatchlistSync() {
   let r;
@@ -382,7 +445,7 @@ function viewDashboard() {
 
   app.innerHTML = `
     <div class="page-head">
-      <h1>Credit Deal Intelligence</h1>
+      <h1>Credit Intelligence</h1>
       <p class="muted">European private credit deal flow &amp; market intelligence, with fundraising as a secondary lens · real data compiled from public sources (mid-2026)</p>
     </div>
     <div class="kpi-grid">
@@ -1353,4 +1416,5 @@ window.addEventListener("hashchange", router);
 window.addEventListener("DOMContentLoaded", router);
 router();
 renderDataStatus();
+renderNotifications();
 initWatchlistSync();
