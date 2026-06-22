@@ -16,8 +16,8 @@
 import {
   items, cases, caseSummaries, practiceAreas, firms, tiers, updateTypes,
   firmById, areaById, typeById, tierById, LAST_REVIEWED,
-} from "./data.js?v=20260622-7";
-import { donutChart, columnChart } from "./charts.js?v=20260622-7";
+} from "./data.js?v=20260622-8";
+import { donutChart, columnChart } from "./charts.js?v=20260622-8";
 
 const app = document.getElementById("app");
 
@@ -585,7 +585,7 @@ const NOTIF_KEY = "meridian.legal.notifSeen";
 function notifItems() {
   const out = [];
   items.forEach((it) => out.push({ id: "u:" + it.id, date: it.date || "", kind: (typeById[it.type] || {}).name || it.type, title: it.title, href: "#/item/" + it.id }));
-  cases.forEach((c) => out.push({ id: "c:" + c.id, date: c.date || "", kind: c.court || "Case", title: c.name, href: c.url, ext: true }));
+  cases.forEach((c) => out.push({ id: "c:" + c.id, date: c.date || "", kind: c.court || "Case", title: c.name, href: "#/cases?case=" + c.id }));
   return out.sort((a, b) => String(b.date).localeCompare(String(a.date)));
 }
 function closeNotif() {
