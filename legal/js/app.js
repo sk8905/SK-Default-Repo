@@ -16,8 +16,8 @@
 import {
   items, cases, caseSummaries, practiceAreas, firms, tiers, updateTypes,
   firmById, areaById, typeById, tierById, LAST_REVIEWED,
-} from "./data.js?v=20260622-12";
-import { donutChart, columnChart } from "./charts.js?v=20260622-12";
+} from "./data.js?v=20260622-13";
+import { donutChart, columnChart } from "./charts.js?v=20260622-13";
 
 const app = document.getElementById("app");
 
@@ -289,7 +289,7 @@ function viewList() {
 
   app.innerHTML = `
     <div class="list-head">
-      <h1>${filterState.saved ? "Saved alerts" : "Legal alerts"}</h1>
+      <h1>${filterState.saved ? "Saved items" : "Legal alerts"}</h1>
       <p class="muted">Filter by practice area, source tier, type or firm, or search the full text.</p>
     </div>
     <div class="list-layout">
@@ -356,15 +356,38 @@ function matchesFilters(it) {
   return true;
 }
 
+// Does a case pass the sidebar filters? Cases share area / year / month / search;
+// the alert-only facets (tier/type/firm) exclude cases when active.
+function caseMatchesFilters(c) {
+  if (filterState.areas.length && !filterState.areas.includes(c.area)) return false;
+  if (filterState.tiers.length || filterState.types.length || filterState.firms.length) return false;
+  if (filterState.years.length && !filterState.years.includes(c.date.slice(0, 4))) return false;
+  if (filterState.months.length && !filterState.months.includes(ym(c.date))) return false;
+  if (filterState.q.trim()) {
+    const q = filterState.q.trim().toLowerCase();
+    const hay = [c.name, c.citation, c.court, caseSummaries[c.id] || c.summary].join(" ").toLowerCase();
+    if (!hay.includes(q)) return false;
+  }
+  return true;
+}
+
 function renderResults() {
   const results = document.getElementById("results");
   const countEl = document.getElementById("result-count");
   if (!results) return;
-  const matched = items.filter(matchesFilters).sort(byDateDesc);
-  countEl.textContent = `${matched.length} update${matched.length === 1 ? "" : "s"}`;
-  results.innerHTML = matched.length
-    ? byYear(matched, itemRow)
-    : `<div class="empty">No updates match these filters.${filterState.saved ? " Save some updates with the ☆ button." : ""}</div>`;
+  let rows = items.filter(matchesFilters).map((it) => ({ ...it, _kind: "item" }));
+  // In the "Saved" view, also surface saved case-law judgments alongside alerts.
+  if (filterState.saved) {
+    const savedSet = getSaved();
+    rows = rows.concat(cases.filter((c) => savedSet.has(c.id) && caseMatchesFilters(c)).map((c) => ({ ...c, _kind: "case" })));
+  }
+  rows.sort(byDateDesc);
+  const n = rows.length;
+  const noun = filterState.saved ? "saved item" : "update";
+  countEl.textContent = `${n} ${noun}${n === 1 ? "" : "s"}`;
+  results.innerHTML = n
+    ? byYear(rows, (x) => (x._kind === "case" ? caseRow(x) : itemRow(x)))
+    : `<div class="empty">No ${noun}s match these filters.${filterState.saved ? " Save items with the ☆ button." : ""}</div>`;
 }
 
 // =============================================================================
