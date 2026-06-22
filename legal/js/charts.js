@@ -82,8 +82,12 @@ export function columnChart(data, { width = 560, height = 200 } = {}) {
     const h = (d.value / max) * plotH;
     const x = left + i * slot + (slot - barW) / 2;
     const y = top + plotH - h;
-    return `<g><rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(1, h).toFixed(1)}" rx="3" fill="#0d9488"><title>${esc(d.label)}: ${d.value}</title></rect>
-      <text x="${(x + barW / 2).toFixed(1)}" y="${height - 9}" text-anchor="middle" class="chart-axis">${esc(d.label)}</text></g>`;
+    const inner = `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(1, h).toFixed(1)}" rx="3" fill="#0d9488"><title>${esc(d.label)}: ${d.value}</title></rect>
+      <text x="${(x + barW / 2).toFixed(1)}" y="${height - 9}" text-anchor="middle" class="chart-axis">${esc(d.label)}</text>`;
+    if (!d.nav) return `<g>${inner}</g>`;
+    // Transparent full-height hit area so the whole column is clickable.
+    const hit = `<rect x="${(left + i * slot).toFixed(1)}" y="${top}" width="${slot.toFixed(1)}" height="${plotH}" fill="transparent"/>`;
+    return `<g class="col clickable" tabindex="0" role="link" aria-label="${esc(d.label)}: ${d.value}" ${navAttrs(d.nav)}>${hit}${inner}</g>`;
   }).join("");
   return `<svg viewBox="0 0 ${width} ${height}" class="chart" role="img" aria-label="Alerts over time">${gridY}${cols}</svg>`;
 }

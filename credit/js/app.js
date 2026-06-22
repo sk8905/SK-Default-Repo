@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260622-1";
+} from "./data.js?v=20260622-2";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260622-1";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260622-2";
 
 const app = document.getElementById("app");
 
@@ -934,20 +934,24 @@ function viewIntel() {
 
   app.innerHTML = `
     <div class="page-head"><h1>Fundraising Intelligence</h1><p class="muted">${rows.length} of ${intel.length} items · European private credit capital formation</p></div>
-    <div class="grid-2">
-      <section class="card"><h2>Capital raised by strategy <span class="muted">(€bn)</span></h2>${byStrategy.length ? barChart(byStrategy, { unit: "€", width: 540 }) : '<p class="muted small">No data.</p>'}</section>
-      <section class="card"><h2>Capital sought by strategy <span class="muted">(€bn · disclosed targets, funds in market)</span></h2>${bySought.length ? barChart(bySought, { unit: "€", width: 540 }) : '<p class="muted small">No disclosed target sizes for funds currently in market.</p>'}</section>
-      <section class="card"><h2>Capital raised by geography <span class="muted">(€bn)</span></h2>${byGeo.length ? barChart(byGeo, { unit: "€", width: 540 }) : '<p class="muted small">No data.</p>'}</section>
-      <section class="card"><h2>Fundraising momentum <span class="muted">(closes / quarter · past 5 years)</span></h2><p class="muted small">Click a quarter to see the funds that reached a first/final close in it.</p>${lineChart(trend, { width: 540, height: 240 })}</section>
-    </div>
-    <div class="filters">
-      <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Keyword…" value="${esc(f.q)}"></label>
-      ${multiFilter("intel:type", "Type", [...new Set(intel.map((i) => i.type))].sort(), f.type)}
-      ${multiFilter("intel:year", "Year", [...new Set(intel.map((i) => yearOf(i.date)).filter(Boolean))].sort((a, b) => b.localeCompare(a)), f.year)}
-    </div>
-    <section class="card">
-      ${rows.length ? byYear(rows, intelRow) : '<p class="empty">No intelligence items match these filters.</p>'}
-    </section>`;
+    <div class="split-3070">
+      <div class="split-left">
+        <section class="card"><h2>Capital raised by strategy <span class="muted">(€bn)</span></h2>${byStrategy.length ? barChart(byStrategy, { unit: "€", width: 540 }) : '<p class="muted small">No data.</p>'}</section>
+        <section class="card"><h2>Capital sought by strategy <span class="muted">(€bn · disclosed targets, funds in market)</span></h2>${bySought.length ? barChart(bySought, { unit: "€", width: 540 }) : '<p class="muted small">No disclosed target sizes for funds currently in market.</p>'}</section>
+        <section class="card"><h2>Capital raised by geography <span class="muted">(€bn)</span></h2>${byGeo.length ? barChart(byGeo, { unit: "€", width: 540 }) : '<p class="muted small">No data.</p>'}</section>
+        <section class="card"><h2>Fundraising momentum <span class="muted">(closes / quarter · past 5 years)</span></h2><p class="muted small">Click a quarter to see the funds that reached a first/final close in it.</p>${lineChart(trend, { width: 540, height: 240 })}</section>
+      </div>
+      <div class="split-right">
+        <div class="filters">
+          <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Keyword…" value="${esc(f.q)}"></label>
+          ${multiFilter("intel:type", "Type", [...new Set(intel.map((i) => i.type))].sort(), f.type)}
+          ${multiFilter("intel:year", "Year", [...new Set(intel.map((i) => yearOf(i.date)).filter(Boolean))].sort((a, b) => b.localeCompare(a)), f.year)}
+        </div>
+        <section class="card">
+          ${rows.length ? byYear(rows, intelRow) : '<p class="empty">No intelligence items match these filters.</p>'}
+        </section>
+      </div>
+    </div>`;
   wireFilters("intel");
   applyPendingFocus("intel");
 }
@@ -1005,31 +1009,35 @@ function viewDeals() {
 
   app.innerHTML = `
     <div class="page-head"><h1>Deal Activity</h1><p class="muted">${rows.length} of ${deals.length} transactions · investments, exits, refinancings, restructurings &amp; distress</p></div>
-    <div class="grid-2">
-      <section class="card">
-        <h2>Deal activity by quarter</h2>
-        <p class="muted small">Deal transactions per quarter. Drag either handle to set the date range (up to 10 years); click any quarter to filter the feed.</p>
-        <div class="trend-controls">
-          <div class="range-readout"><strong id="trend-start-lbl">${esc(dQuarters[tStart])}</strong> <span class="muted">→</span> <strong id="trend-end-lbl">${esc(dQuarters[tEnd])}</strong></div>
-          <div class="range-slider">
-            <div class="range-track"></div>
-            <div class="range-fill" id="trend-fill" style="left:${(tStart / (NQ - 1)) * 100}%; width:${((tEnd - tStart) / (NQ - 1)) * 100}%"></div>
-            <input type="range" id="trend-start" min="0" max="${NQ - 1}" value="${tStart}" aria-label="Range start quarter">
-            <input type="range" id="trend-end" min="0" max="${NQ - 1}" value="${tEnd}" aria-label="Range end quarter">
+    <div class="split-3070">
+      <div class="split-left">
+        <section class="card">
+          <h2>Deal activity by quarter</h2>
+          <p class="muted small">Deal transactions per quarter. Drag either handle to set the date range (up to 10 years); click any quarter to filter the feed.</p>
+          <div class="trend-controls">
+            <div class="range-readout"><strong id="trend-start-lbl">${esc(dQuarters[tStart])}</strong> <span class="muted">→</span> <strong id="trend-end-lbl">${esc(dQuarters[tEnd])}</strong></div>
+            <div class="range-slider">
+              <div class="range-track"></div>
+              <div class="range-fill" id="trend-fill" style="left:${(tStart / (NQ - 1)) * 100}%; width:${((tEnd - tStart) / (NQ - 1)) * 100}%"></div>
+              <input type="range" id="trend-start" min="0" max="${NQ - 1}" value="${tStart}" aria-label="Range start quarter">
+              <input type="range" id="trend-end" min="0" max="${NQ - 1}" value="${tEnd}" aria-label="Range end quarter">
+            </div>
           </div>
+          <div id="trend-chart">${lineChart(buildTrend(tStart, tEnd), { width: 560, height: 300 })}</div>
+        </section>
+        <section class="card"><h2>Most active managers <span class="muted">(by deal count)</span></h2>${byDealManager.length ? barChart(byDealManager, { width: 560 }) : '<p class="muted small">No deals tracked.</p>'}</section>
+      </div>
+      <div class="split-right">
+        <div class="filters">
+          <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Company, manager…" value="${esc(f.q)}"></label>
+          ${multiFilter("deals:type", "Type", [...new Set(deals.map((d) => d.type))].sort(), f.type)}
+          ${multiFilter("deals:year", "Year", [...new Set(deals.map((d) => yearOf(d.date)).filter(Boolean))].sort((a, b) => b.localeCompare(a)), f.year)}
         </div>
-        <div id="trend-chart">${lineChart(buildTrend(tStart, tEnd), { width: 560, height: 300 })}</div>
-      </section>
-      <section class="card"><h2>Most active managers <span class="muted">(by deal count)</span></h2>${byDealManager.length ? barChart(byDealManager, { width: 560 }) : '<p class="muted small">No deals tracked.</p>'}</section>
-    </div>
-    <div class="filters">
-      <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Company, manager…" value="${esc(f.q)}"></label>
-      ${multiFilter("deals:type", "Type", [...new Set(deals.map((d) => d.type))].sort(), f.type)}
-      ${multiFilter("deals:year", "Year", [...new Set(deals.map((d) => yearOf(d.date)).filter(Boolean))].sort((a, b) => b.localeCompare(a)), f.year)}
-    </div>
-    <section class="card">
-      ${rows.length ? byYear(rows, dealRow) : '<p class="empty">No deal items match these filters.</p>'}
-    </section>`;
+        <section class="card">
+          ${rows.length ? byYear(rows, dealRow) : '<p class="empty">No deal items match these filters.</p>'}
+        </section>
+      </div>
+    </div>`;
   wireFilters("deals");
 
   // Wire the quarterly range sliders (re-render only the chart on drag).

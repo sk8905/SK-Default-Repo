@@ -16,8 +16,8 @@
 import {
   items, cases, caseSummaries, practiceAreas, firms, tiers, updateTypes,
   firmById, areaById, typeById, tierById, LAST_REVIEWED,
-} from "./data.js?v=20260621-1";
-import { donutChart, columnChart } from "./charts.js?v=20260621-1";
+} from "./data.js?v=20260622-1";
+import { donutChart, columnChart } from "./charts.js?v=20260622-1";
 
 const app = document.getElementById("app");
 
@@ -190,6 +190,7 @@ function viewDashboard() {
   const monthData = months.map((m) => ({
     label: MONTHS[Number(m.slice(5, 7)) - 1] + " " + m.slice(2, 4),
     value: items.filter((i) => ym(i.date) === m).length,
+    nav: { year: m.slice(0, 4) },
   }));
 
   app.innerHTML = `
@@ -216,8 +217,8 @@ function viewDashboard() {
     </div>
 
     <div class="grid-2">
-      <section class="card"><h2>Alerts by source tier</h2>${donutChart(tierData, { size: 200 })}</section>
-      <section class="card"><h2>Publishing activity by month</h2>${columnChart(monthData, { width: 720, height: 200 })}</section>
+      <section class="card"><h2>Alerts by source tier</h2><p class="muted small">Click a tier to see its alerts.</p>${donutChart(tierData, { size: 200 })}</section>
+      <section class="card"><h2>Publishing activity by month</h2><p class="muted small">Click a month to see that year's alerts.</p>${columnChart(monthData, { width: 720, height: 200 })}</section>
     </div>
 
     <p class="reviewed">Data last reviewed ${fmtDate(LAST_REVIEWED)}.</p>
@@ -544,18 +545,19 @@ document.addEventListener("click", (e) => {
     if (filterState.saved && document.getElementById("results")) renderResults();
     return;
   }
-  const navEl = e.target.closest("[data-area],[data-tier]");
+  const navEl = e.target.closest("[data-area],[data-tier],[data-year]");
   if (navEl) {
     const params = new URLSearchParams();
     if (navEl.dataset.area) params.set("area", navEl.dataset.area);
     if (navEl.dataset.tier) params.set("tier", navEl.dataset.tier);
+    if (navEl.dataset.year) params.set("year", navEl.dataset.year);
     location.hash = "#/list?" + params.toString();
   }
 });
 
 // Keyboard activation for chart drill-down elements.
 document.addEventListener("keydown", (e) => {
-  if ((e.key === "Enter" || e.key === " ") && e.target.matches?.("[data-area],[data-tier]")) {
+  if ((e.key === "Enter" || e.key === " ") && e.target.matches?.("[data-area],[data-tier],[data-year]")) {
     e.preventDefault();
     e.target.click();
   }

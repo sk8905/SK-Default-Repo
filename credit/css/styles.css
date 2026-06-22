@@ -77,6 +77,10 @@ h3 { font-size: 1rem; margin: 0; }
 .page-head { margin-bottom: 1.25rem; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
+/* Feed pages: charts in a 30% left margin, feed in the 70% right column. */
+.split-3070 { display: grid; grid-template-columns: 3fr 7fr; gap: 1rem; align-items: start; }
+.split-3070 .split-left { display: flex; flex-direction: column; gap: 1rem; }
+.split-3070 .split-left .chart { width: 100%; height: auto; }
 .card {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 1.1rem 1.25rem; margin-bottom: 1rem; box-shadow: var(--shadow);
@@ -335,6 +339,7 @@ a.intel-head:hover { color: var(--primary); }
 /* ---------- responsive ---------- */
 @media (max-width: 900px) {
   .grid-2 { grid-template-columns: 1fr; }
+  .split-3070 { grid-template-columns: 1fr; }
   .grid-3 { grid-template-columns: 1fr; }
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .card-grid { grid-template-columns: 1fr; }
