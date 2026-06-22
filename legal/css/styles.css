@@ -305,6 +305,9 @@ a.compact-head:hover { color: var(--primary); }
 }
 .year-group:first-child .year-head { margin-top: .25rem; }
 .empty { padding: 2rem; text-align: center; color: var(--muted); }
+/* Deep-link highlight when arriving at a specific case from the dashboard */
+.feed-row.flash { animation: rowflash 2.2s ease-out; }
+@keyframes rowflash { 0% { background: #ccfbf1; } 100% { background: transparent; } }
 
 /* ---- Detail ---- */
 .breadcrumb { font-size: .82rem; color: var(--muted); margin-bottom: 1rem; }

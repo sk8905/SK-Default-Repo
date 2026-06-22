@@ -16,8 +16,8 @@
 import {
   items, cases, caseSummaries, practiceAreas, firms, tiers, updateTypes,
   firmById, areaById, typeById, tierById, LAST_REVIEWED,
-} from "./data.js?v=20260622-6";
-import { donutChart, columnChart } from "./charts.js?v=20260622-6";
+} from "./data.js?v=20260622-7";
+import { donutChart, columnChart } from "./charts.js?v=20260622-7";
 
 const app = document.getElementById("app");
 
@@ -130,7 +130,7 @@ function caseRow(c) {
       <a class="feed-title" href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">${esc(c.name)} ↗</a>
       <p class="feed-summary"><span class="ai-tag">✦ AI summary</span> ${esc(summary)}</p>
       <div class="feed-foot">
-        <span>${esc(c.court)}</span> · <span class="cite">${esc(c.citation)}</span> · <span class="src-tag">BAILII</span>
+        <span>${esc(c.court)}</span> · <span class="cite">${esc(c.citation)}</span> · <a href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">View judgment on BAILII ↗</a>
       </div>
     </div>
   </div>`;
@@ -150,7 +150,7 @@ function itemCompact(it) {
 }
 function caseCompact(c) {
   return `<li class="compact-item">
-    <a class="compact-head" href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">${esc(c.name)} ↗</a>
+    <a class="compact-head" href="#/cases?case=${esc(c.id)}">${esc(c.name)}</a>
     <div class="compact-meta muted small">${fmtDate(c.date)} · ${esc(c.court)} · ${esc(c.citation)}</div>
   </li>`;
 }
@@ -415,6 +415,17 @@ function viewCases() {
   });
 
   renderCaseResults();
+
+  // Deep-link from the dashboard "Recent cases" list: scroll to & flash the case.
+  const focusId = parseHashQuery().case;
+  if (focusId) {
+    const el = document.getElementById("row-" + focusId);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.classList.add("flash");
+      setTimeout(() => el.classList.remove("flash"), 2200);
+    }
+  }
 }
 
 function renderCaseResults() {
