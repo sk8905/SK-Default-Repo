@@ -45,9 +45,14 @@ the source of truth for the prompt.
   - Credit: `css/styles.css?v=` & `js/app.js?v=` in `credit/index.html`; the
     `./data.js?v=` & `./charts.js?v=` imports in `credit/js/app.js`.
   - Legal: the same four under `legal/`.
-  Bump BOTH apps' four tokens on EVERY run (since `LAST_CHECKED` always changes —
-  see below), to today's date with the next sequence (if they already show today's
-  date, increment; else start at 1). The two apps keep independent sequence numbers.
+  **RULE: whenever you change an app's `data.js` at all, you MUST advance that app's
+  four tokens to a value not already present in its files (increment the sequence if
+  it already shows today's date, else start the day at -1).** Leaving them unchanged
+  ships a data change that never goes live (a real bug seen on 2026-06-23 run 2,
+  where a credit webNews was added but credit's tokens stayed at -2). Because
+  `LAST_CHECKED` changes every run, BOTH apps' tokens move on every run. Before
+  committing, `git diff --stat` MUST show `index.html` and `js/app.js` changed for
+  every app whose `data.js` changed. The two apps keep independent sequence numbers.
 - **Freshness scalars.**
   - Always set `LAST_CHECKED` in BOTH `credit/js/data.js` and `legal/js/data.js`
     to today on EVERY run — this is the "Last refresh" date shown in each topbar,

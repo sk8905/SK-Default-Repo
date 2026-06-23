@@ -16,8 +16,8 @@
 import {
   items, cases, caseSummaries, practiceAreas, firms, tiers, updateTypes,
   firmById, areaById, typeById, tierById, LAST_REVIEWED, LAST_CHECKED,
-} from "./data.js?v=20260623-3";
-import { donutChart, columnChart } from "./charts.js?v=20260623-3";
+} from "./data.js?v=20260623-4";
+import { donutChart, columnChart } from "./charts.js?v=20260623-4";
 
 const app = document.getElementById("app");
 
@@ -678,7 +678,7 @@ function initChrome() {
   if (status) {
     const latest = [...items].sort(byDateDesc)[0];
     status.textContent = `Last refresh ${fmtDate(LAST_CHECKED)}`
-      + (latest ? ` · latest update ${fmtDate(latest.date)}` : "");
+      + (latest ? ` · latest item ${fmtDate(latest.date)}` : "");
     status.title = `Routine last ran ${fmtDate(LAST_CHECKED)}; data last changed ${fmtDate(LAST_REVIEWED)}`;
   }
   // Same pattern as the Meridian app / landing page: behind Cloudflare Access
