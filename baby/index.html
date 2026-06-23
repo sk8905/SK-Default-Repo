@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Little Steps — baby development tracker</title>
+<meta name="description" content="A private, offline-first tracker for your baby's development, sleep, feeding, milk, weaning, vaccinations and health checks — grounded in UK, Irish and French guidance." />
+<style>
+  :root{
+    --bg:#f6f8fb; --card:#ffffff; --ink:#1f2733; --muted:#6b7488; --line:#e6e9f0;
+    --brand:#3b7a8c; --brand-2:#5aa6b6; --accent:#e98a7a; --accent-2:#f3b8ab;
+    --green:#2f9e6f; --amber:#d99311; --red:#d6584c; --soft:#eef5f7;
+    --uk:#2557a7; --ie:#1c8a4e; --fr:#5b54c4;
+    --radius:16px; --shadow:0 6px 20px rgba(30,50,90,.08);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink); background:var(--bg); line-height:1.5; -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--brand)}
+  h1,h2,h3{margin:0 0 .4em; line-height:1.25}
+  h2{font-size:1.35rem}
+  h3{font-size:1.05rem}
+  .wrap{max-width:1040px; margin:0 auto; padding:0 1rem 4rem}
+  /* Header */
+  header.top{
+    background:linear-gradient(135deg,var(--brand) 0%,var(--brand-2) 100%);
+    color:#fff; padding:1.1rem 1rem .9rem;
+  }
+  .top-inner{max-width:1040px; margin:0 auto; display:flex; align-items:center; gap:.8rem; flex-wrap:wrap}
+  .logo{width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:1.5rem}
+  .brandname{font-weight:700;font-size:1.25rem;letter-spacing:.2px}
+  .brandsub{font-size:.74rem;text-transform:uppercase;letter-spacing:1.3px;opacity:.85}
+  .babychip{margin-left:auto;background:rgba(255,255,255,.16);border-radius:999px;padding:.35rem .8rem;font-size:.85rem;display:flex;gap:.5rem;align-items:center}
+  .babychip b{font-weight:600}
+  /* Nav */
+  nav.tabs{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px solid var(--line);box-shadow:0 2px 8px rgba(30,50,90,.04)}
+  .tabs-inner{max-width:1040px;margin:0 auto;display:flex;gap:.1rem;overflow-x:auto;padding:0 .4rem}
+  .tabs button{
+    border:0;background:none;padding:.85rem .8rem;font-size:.9rem;color:var(--muted);cursor:pointer;
+    white-space:nowrap;border-bottom:3px solid transparent;font-weight:500;font-family:inherit
+  }
+  .tabs button:hover{color:var(--ink)}
+  .tabs button.active{color:var(--brand);border-bottom-color:var(--brand);font-weight:600}
+  /* Cards */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:1.2rem;margin:1rem 0}
+  .card.tight{padding:1rem}
+  .grid{display:grid;gap:1rem}
+  @media(min-width:680px){.grid.two{grid-template-columns:1fr 1fr}.grid.three{grid-template-columns:1fr 1fr 1fr}}
+  .muted{color:var(--muted)}
+  .small{font-size:.85rem}
+  .tiny{font-size:.78rem}
+  /* Buttons + inputs */
+  button.btn,a.btn{display:inline-flex;align-items:center;gap:.4rem;border:1px solid var(--brand);background:var(--brand);color:#fff;border-radius:10px;padding:.5rem .9rem;font-size:.9rem;font-weight:600;cursor:pointer;text-decoration:none;font-family:inherit}
+  button.btn:hover,a.btn:hover{background:#33697a}
+  button.btn.ghost,a.btn.ghost{background:#fff;color:var(--brand)}
+  button.btn.ghost:hover{background:var(--soft)}
+  button.btn.danger{background:#fff;color:var(--red);border-color:var(--red)}
+  button.btn.danger:hover{background:#fdeceb}
+  button.btn.small,a.btn.small{padding:.32rem .6rem;font-size:.8rem}
+  input,select,textarea{font-family:inherit;font-size:.92rem;padding:.5rem .6rem;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);width:100%}
+  input[type=checkbox]{width:auto}
+  label.fld{display:block;margin:.5rem 0}
+  label.fld .lbl{font-size:.8rem;color:var(--muted);font-weight:600;display:block;margin-bottom:.2rem}
+  .row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:flex-end}
+  .row > *{flex:1;min-width:120px}
+  /* Status pills */
+  .pill{display:inline-block;padding:.16rem .55rem;border-radius:999px;font-size:.74rem;font-weight:600}
+  .pill.done{background:#e6f5ee;color:var(--green)}
+  .pill.due{background:#fdf1dc;color:var(--amber)}
+  .pill.over{background:#fce9e7;color:var(--red)}
+  .pill.up{background:#eef0f4;color:var(--muted)}
+  .pill.uk{background:#e7eefa;color:var(--uk)}
+  .pill.ie{background:#e3f5ea;color:var(--ie)}
+  .pill.fr{background:#ecebfb;color:var(--fr)}
+  /* Schedule rows */
+  .sched{display:flex;gap:.8rem;align-items:flex-start;padding:.7rem 0;border-top:1px solid var(--line)}
+  .sched:first-child{border-top:0}
+  .sched .when{min-width:96px;font-weight:600;font-size:.86rem}
+  .sched .body{flex:1}
+  .sched .ctl{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
+  .vlist{margin:.3rem 0 0;padding:0;list-style:none;font-size:.9rem}
+  .vlist li{padding:.1rem 0 .1rem 1.1rem;position:relative}
+  .vlist li:before{content:"•";position:absolute;left:.2rem;color:var(--brand-2)}
+  /* banners */
+  .banner{border-radius:12px;padding:.8rem 1rem;font-size:.88rem;display:flex;gap:.6rem;align-items:flex-start}
+  .banner.warn{background:#fff7e8;border:1px solid #f3dca0;color:#7a5a12}
+  .banner.info{background:var(--soft);border:1px solid #cfe3e8;color:#225863}
+  .banner .ic{font-size:1.1rem;line-height:1}
+  /* tables */
+  table{width:100%;border-collapse:collapse;font-size:.88rem}
+  th,td{text-align:left;padding:.5rem .5rem;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:.76rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+  /* KPI */
+  .kpi{display:flex;flex-direction:column;gap:.15rem}
+  .kpi .v{font-size:1.7rem;font-weight:700;color:var(--brand)}
+  .kpi .l{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  .logitem{display:flex;gap:.6rem;align-items:center;padding:.5rem 0;border-top:1px solid var(--line);font-size:.9rem}
+  .logitem:first-child{border-top:0}
+  .logitem .x{margin-left:auto}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{border:0;background:#fff;padding:.4rem .7rem;font-size:.84rem;cursor:pointer;font-family:inherit;color:var(--muted)}
+  .seg button.on{background:var(--brand);color:#fff}
+  .flag{color:var(--red);font-weight:600}
+  details.acc{border:1px solid var(--line);border-radius:12px;margin:.6rem 0;overflow:hidden;background:#fff}
+  details.acc>summary{cursor:pointer;padding:.7rem .9rem;font-weight:600;list-style:none}
+  details.acc>summary::-webkit-details-marker{display:none}
+  details.acc>summary:before{content:"▸ ";color:var(--brand-2)}
+  details.acc[open]>summary:before{content:"▾ "}
+  details.acc .inner{padding:0 .9rem .8rem}
+  .srcs a{display:inline-block;margin:.15rem .5rem .15rem 0;font-size:.82rem}
+  .country-tag{font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.5px}
+  .country-tag.uk{color:var(--uk)} .country-tag.ie{color:var(--ie)} .country-tag.fr{color:var(--fr)}
+  footer.foot{max-width:1040px;margin:2rem auto 0;padding:1rem;color:var(--muted);font-size:.8rem;text-align:center}
+  .hidden{display:none}
+  .empty{color:var(--muted);font-style:italic;padding:.6rem 0}
+  svg .axis{stroke:var(--line);stroke-width:1}
+  svg .grid{stroke:#eef1f6;stroke-width:1}
+  svg text{font-size:10px;fill:var(--muted)}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div class="logo" aria-hidden="true">👣</div>
+    <div>
+      <div class="brandname">Little Steps</div>
+      <div class="brandsub">Baby development tracker</div>
+    </div>
+    <div class="babychip" id="babychip"></div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="tabs-inner" id="tabs"></div>
+</nav>
+
+<main class="wrap" id="view"></main>
+
+<footer class="foot">
+  <p><strong>Little Steps</strong> is a private, offline-first tool. All data stays in this browser.
+  It is an information aid, <strong>not medical advice</strong>. Always follow your GP, health visitor, PHN or paediatrician.</p>
+</footer>
+
+<script>
+"use strict";
+/* ============================================================
+   Little Steps — single-file baby development tracker.
+   Zero build, no dependencies, no server. Data in localStorage.
+   Guidance grounded in UK (NHS/gov.uk), Irish (HSE) and French
+   (ameli/sante.gouv/HAS) sources — see the "Guides & sources" tab.
+   ============================================================ */
+
+const KEY = "littlesteps.v1";
+
+/* ---------- State ---------- */
+const DEFAULT_STATE = {
+  baby: {
+    name: "Baby",
+    dob: "2025-06-05",        // early June 2025 (editable)
+    sex: "",                  // 'male' | 'female' | ''
+    term: "term",             // 'term' | 'preterm'
+    weeksEarly: 0,
+    feeding: "mixed",         // breast | formula | mixed
+    vitD: "uk"                // which country's vitamin-D rule to show: uk | ie | fr
+  },
+  settings: { primary: "uk", show: { uk: true, ie: true, fr: true } },
+  done: { vax: {}, checks: {}, milestones: {} },
+  allergens: {},              // id -> {date, outcome}
+  logs: { feeds: [], sleeps: [], growth: [] },
+  meta: { created: Date.now() }
+};
+
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(!raw) return structuredClone(DEFAULT_STATE);
+    const s = JSON.parse(raw);
+    // shallow-merge to tolerate older saves
+    return deepMerge(structuredClone(DEFAULT_STATE), s);
+  }catch(e){ return structuredClone(DEFAULT_STATE); }
+}
+function deepMerge(base, over){
+  for(const k in over){
+    if(over[k] && typeof over[k]==="object" && !Array.isArray(over[k]) && typeof base[k]==="object" && !Array.isArray(base[k])){
+      deepMerge(base[k], over[k]);
+    } else { base[k] = over[k]; }
+  }
+  return base;
+}
+let state = load();
+function save(){ localStorage.setItem(KEY, JSON.stringify(state)); renderChip(); }
+
+/* ---------- Date helpers ---------- */
+const DAY = 86400000;
+function parseDate(s){ const d = new Date(s+"T00:00:00"); return isNaN(d)?null:d; }
+function dob(){ return parseDate(state.baby.dob) || new Date(); }
+function addDays(d, n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
+function addWeeks(d, n){ return addDays(d, n*7); }
+function addMonths(d, n){ const x=new Date(d); const day=x.getDate(); x.setMonth(x.getMonth()+n); if(x.getDate()<day) x.setDate(0); return x; }
+function dueDate(at){
+  let d = dob();
+  if(at.weeks!=null) d = addWeeks(d, at.weeks);
+  if(at.months!=null) d = addMonths(d, at.months);
+  if(at.days!=null) d = addDays(d, at.days);
+  if(at.years!=null) d = addMonths(d, at.years*12);
+  return d;
+}
+function isoDay(d){ return d.toISOString().slice(0,10); }
+function fmtDate(d){ if(typeof d==="string") d=parseDate(d); if(!d) return "—";
+  return d.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}); }
+function today(){ const n=new Date(); return new Date(n.getFullYear(),n.getMonth(),n.getDate()); }
+
+function ageParts(from=today()){
+  const b = dob();
+  let months = (from.getFullYear()-b.getFullYear())*12 + (from.getMonth()-b.getMonth());
+  if(from.getDate() < b.getDate()) months--;
+  const lastMonthDate = addMonths(b, months);
+  const days = Math.round((from - lastMonthDate)/DAY);
+  const totalDays = Math.round((from - b)/DAY);
+  const weeks = Math.floor(totalDays/7);
+  return { months, days, weeks, totalDays };
+}
+function ageLabel(){
+  const a = ageParts();
+  if(a.totalDays < 0) return "not born yet";
+  if(a.weeks < 13) return `${a.weeks} week${a.weeks===1?"":"s"} old`;
+  const m = a.months, d = a.days;
+  return `${m} month${m===1?"":"s"}${d?`, ${d} day${d===1?"":"s"}`:""} old`;
+}
+function ageMonthsFloat(date){ return (date - dob())/(DAY*30.4375); }
+
+/* status of a scheduled item vs today */
+function statusFor(due, doneDate){
+  if(doneDate) return {k:"done", label:"Done "+fmtDate(doneDate)};
+  const t = today();
+  const diff = Math.round((due - t)/DAY);
+  if(diff < -14) return {k:"over", label:"Overdue"};
+  if(diff < 0)   return {k:"over", label:"Due now"};
+  if(diff <= 42) return {k:"due", label:diff===0?"Due today":`Due in ${diff} day${diff===1?"":"s"}`};
+  return {k:"up", label:"From "+fmtDate(due)};
+}
+
+/* ============================================================
+   GUIDANCE DATA (sourced — see Guides tab for links)
+   ============================================================ */
+
+/* ---- Vaccination schedules ---- */
+const VAX = {
+  uk: {
+    label:"UK (NHS / UKHSA)", cls:"uk",
+    note:"Schedule for babies born on/after 1 July 2024 (the routine schedule from Jan 2026), which covers a June 2025 baby. Hib/MenC at 1 year was discontinued for children turning 1 on/after 1 July 2025.",
+    items:[
+      {id:"uk-8w", at:{weeks:8}, when:"8 weeks", v:["6-in-1 (DTaP/IPV/Hib/HepB) — 1st","MenB — 1st","Rotavirus (oral) — 1st"]},
+      {id:"uk-12w", at:{weeks:12}, when:"12 weeks", v:["6-in-1 — 2nd","MenB — 2nd","Rotavirus (oral) — 2nd"]},
+      {id:"uk-16w", at:{weeks:16}, when:"16 weeks", v:["6-in-1 — 3rd","Pneumococcal (PCV) — 1st"]},
+      {id:"uk-12m", at:{months:12}, when:"12 months", v:["MMR — 1st","MenB — booster (3rd)","Pneumococcal (PCV) — booster"]},
+      {id:"uk-18m", at:{months:18}, when:"18 months", v:["6-in-1 — 4th","MMR/MMRV — 2nd"], badge:"new from Jan 2026"},
+      {id:"uk-3y4m", at:{months:40}, when:"3 yrs 4 mths", v:["4-in-1 pre-school booster (DTaP/IPV)","MMRV final dose (some cohorts)"]},
+      {id:"uk-flu", at:{months:24}, when:"~2–3 yrs+", v:["Children's nasal-spray flu — every winter"], recurring:true}
+    ]
+  },
+  ie: {
+    label:"Ireland (HSE / immunisation.ie)", cls:"ie",
+    note:"Schedule for babies born on/after 1 October 2024 (covers a June 2025 baby): adds a 4th 6-in-1 at 13 months and chickenpox at 12 months; MenC is given separately. Infant doses are given by your GP.",
+    items:[
+      {id:"ie-2m", at:{months:2}, when:"2 months", v:["6-in-1","PCV13","MenB","Rotavirus (oral)"]},
+      {id:"ie-4m", at:{months:4}, when:"4 months", v:["6-in-1","MenC","Rotavirus (oral)"]},
+      {id:"ie-6m", at:{months:6}, when:"6 months", v:["6-in-1","PCV13","MenB"]},
+      {id:"ie-12m", at:{months:12}, when:"12 months", v:["MMR","MenB","Chickenpox (varicella)"]},
+      {id:"ie-13m", at:{months:13}, when:"13 months", v:["6-in-1 — 4th dose","MenC","PCV13"]},
+      {id:"ie-45y", at:{months:52}, when:"4–5 yrs (Junior Infants)", v:["4-in-1 booster","MMR — 2nd (MMRV)"]}
+    ]
+  },
+  fr: {
+    label:"France (calendrier vaccinal / ameli)", cls:"fr",
+    note:"Calendrier for children born from 1 Jan 2023 (covers a June 2025 baby). Several infant vaccines are legally mandatory in France. MenB and MenACWY became mandatory in 2025.",
+    items:[
+      {id:"fr-2m", at:{months:2}, when:"2 mois", v:["Hexavalent (DTP-coq-Hib-HepB) — 1","Pneumocoque (PCV) — 1","Rotavirus (oral) — recommended"]},
+      {id:"fr-3m", at:{months:3}, when:"3 mois", v:["Méningocoque B — 1"]},
+      {id:"fr-4m", at:{months:4}, when:"4 mois", v:["Hexavalent — 2","Pneumocoque — 2"]},
+      {id:"fr-5m", at:{months:5}, when:"5 mois", v:["Méningocoque B — 2"]},
+      {id:"fr-6m", at:{months:6}, when:"6 mois", v:["Méningocoque ACWY — 1"]},
+      {id:"fr-11m", at:{months:11}, when:"11 mois", v:["Hexavalent — booster","Pneumocoque — booster"]},
+      {id:"fr-12m", at:{months:12}, when:"12 mois", v:["ROR (MMR) — 1","Méningocoque B — 3","Méningocoque ACWY — 2"]},
+      {id:"fr-1618m", at:{months:17}, when:"16–18 mois", v:["ROR (MMR) — 2"]},
+      {id:"fr-6y", at:{months:72}, when:"6 ans", v:["DTP-coqueluche — booster"]}
+    ]
+  }
+};
+
+/* ---- Health / development checks ---- */
+const CHECKS = {
+  uk: {
+    label:"UK — Health Visitor reviews (Red Book)", cls:"uk",
+    items:[
+      {id:"uk-newbirth", at:{days:12}, when:"10–14 days", t:"New birth review", d:"Health visitor home visit; feeding, weight, wellbeing."},
+      {id:"uk-6w", at:{weeks:6}, when:"6–8 weeks", t:"6–8 week check (GP)", d:"Baby's physical exam (heart, hips, eyes, testes) + mum's postnatal check."},
+      {id:"uk-9m", at:{months:10}, when:"9–12 months", t:"9–12 month review", d:"Development, language, diet, safety. ASQ-3 questionnaire sent beforehand."},
+      {id:"uk-2y", at:{months:27}, when:"2–2½ years", t:"2-year review (often 27 mths)", d:"Development check, often with the nursery/childminder. ASQ-3 again."}
+    ]
+  },
+  ie: {
+    label:"Ireland — PHN / GP checks (mychild.ie)", cls:"ie",
+    items:[
+      {id:"ie-nb", at:{days:3}, when:"~72 hours", t:"PHN newborn visit", d:"Public Health Nurse visits at home after hospital discharge."},
+      {id:"ie-2w", at:{weeks:2}, when:"2 weeks", t:"Newborn GP check", d:"GP examination."},
+      {id:"ie-6w", at:{weeks:6}, when:"6 weeks", t:"6-week baby check (GP)", d:"Baby check + maternal 6-week check."},
+      {id:"ie-3m", at:{months:3}, when:"3 months", t:"PHN developmental assessment", d:"Usually at the health centre."},
+      {id:"ie-79m", at:{months:8}, when:"7–9 months", t:"PHN developmental check", d:"Physical, social, behaviour; hearing/vision observed."},
+      {id:"ie-2y", at:{months:22}, when:"18–24 months", t:"Developmental check", d:"Alongside the 12/13-month vaccines period; age-2 review under GP Visit Card."}
+    ]
+  },
+  fr: {
+    label:"France — 20 examens obligatoires (carnet de santé)", cls:"fr",
+    items:[
+      {id:"fr-8d", at:{days:8}, when:"8th day", t:"Examen + certificat de santé", d:"Compulsory; generates a health certificate sent to the PMI.", cert:true},
+      {id:"fr-2w", at:{weeks:2}, when:"2nd week", t:"Examen obligatoire", d:""},
+      {id:"fr-1m", at:{months:1}, when:"1 mois", t:"Examen obligatoire", d:""},
+      {id:"fr-2m", at:{months:2}, when:"2 mois", t:"Examen obligatoire", d:""},
+      {id:"fr-3m", at:{months:3}, when:"3 mois", t:"Examen obligatoire", d:""},
+      {id:"fr-4m", at:{months:4}, when:"4 mois", t:"Examen obligatoire", d:""},
+      {id:"fr-5m", at:{months:5}, when:"5 mois", t:"Examen obligatoire", d:""},
+      {id:"fr-8m", at:{months:8}, when:"8 mois", t:"Examen obligatoire", d:""},
+      {id:"fr-9m", at:{months:9}, when:"9th month", t:"Examen + certificat de santé", d:"Compulsory; generates a health certificate.", cert:true},
+      {id:"fr-11m", at:{months:11}, when:"11 mois", t:"Examen obligatoire", d:""},
+      {id:"fr-12m", at:{months:12}, when:"12 mois", t:"Examen obligatoire", d:""},
+      {id:"fr-1618m", at:{months:17}, when:"16–18 mois", t:"Examen obligatoire", d:""},
+      {id:"fr-24m", at:{months:24}, when:"24th month", t:"Examen + certificat de santé", d:"Compulsory; generates a health certificate.", cert:true}
+    ]
+  }
+};
+
+/* ---- Developmental milestones (NHS-based, with red flags) ---- */
+const MILESTONES = [
+  {band:"6–8 weeks", m:6, items:[
+    {id:"ms-smile", t:"First social smile"},
+    {id:"ms-watch", t:"Watches your face, follows with eyes"},
+    {id:"ms-coo", t:"Makes cooing sounds"}
+  ], flags:["No response to loud sounds","Not focusing on or following a face"]},
+  {band:"3–4 months", m:14, items:[
+    {id:"ms-head", t:"Holds head steady when upright"},
+    {id:"ms-laugh", t:"Laughs, chuckles"},
+    {id:"ms-reach", t:"Reaches for objects"},
+    {id:"ms-pushup", t:"Pushes up on arms during tummy time"}
+  ], flags:["Cannot hold head steady","Not smiling at people","Not reaching for things"]},
+  {band:"6 months", m:26, items:[
+    {id:"ms-roll", t:"Rolls over both ways"},
+    {id:"ms-sitS", t:"Sits with support"},
+    {id:"ms-babble", t:"Babbles (ba-ba, ma-ma sounds)"},
+    {id:"ms-mouth", t:"Brings objects to mouth"}
+  ], flags:["Very stiff or very floppy","Not turning to sounds","Not bringing things to mouth"]},
+  {band:"9 months", m:39, items:[
+    {id:"ms-sitU", t:"Sits without support"},
+    {id:"ms-name", t:"Responds to own name"},
+    {id:"ms-pass", t:"Passes objects hand to hand"},
+    {id:"ms-strange", t:"Shows stranger awareness"}
+  ], flags:["Not sitting with support","No babbling","Not responding to own name","Loss of skills already gained"]},
+  {band:"12 months", m:52, items:[
+    {id:"ms-stand", t:"Pulls to stand / cruises furniture"},
+    {id:"ms-pincer", t:"Pincer grasp (thumb + finger)"},
+    {id:"ms-wave", t:"Waves bye-bye, points"},
+    {id:"ms-word", t:"Says 1–2 words with meaning"}
+  ], flags:["Not weight-bearing on legs","No gestures (waving/pointing)","No single words","Not crawling/moving"]},
+  {band:"18 months", m:78, items:[
+    {id:"ms-walk", t:"Walks independently"},
+    {id:"ms-words", t:"Several single words"},
+    {id:"ms-point", t:"Points to show you things"},
+    {id:"ms-spoon", t:"Tries to use a spoon"}
+  ], flags:["Not walking","Fewer than ~6 words","Not pointing to show interest"]},
+  {band:"2 years", m:104, items:[
+    {id:"ms-run", t:"Runs, climbs"},
+    {id:"ms-2word", t:"Joins 2 words ('more milk')"},
+    {id:"ms-follow", t:"Follows simple instructions"},
+    {id:"ms-play", t:"Pretend play begins"}
+  ], flags:["No 2-word phrases","Not following simple instructions","Loss of skills"]}
+];
+
+/* ---- Allergens to introduce during weaning ---- */
+const ALLERGENS = [
+  {id:"al-peanut", t:"Peanut", note:"As smooth peanut butter / thinned paste — never whole."},
+  {id:"al-egg", t:"Hen's egg", note:"Well-cooked. Try ~3 times in a week."},
+  {id:"al-milk", t:"Cow's milk (dairy)", note:"In food (yoghurt, cheese); not as a main drink before 1."},
+  {id:"al-wheat", t:"Wheat / gluten", note:"Can introduce 4–12 months."},
+  {id:"al-fish", t:"Fish", note:"Cooked; avoid shark/swordfish/marlin (mercury)."},
+  {id:"al-shellfish", t:"Shellfish / crustaceans", note:"Well-cooked only."},
+  {id:"al-soya", t:"Soya", note:""},
+  {id:"al-sesame", t:"Sesame", note:"As houmous / tahini spread."},
+  {id:"al-treenut", t:"Tree nuts", note:"Finely ground or as smooth butters — never whole."},
+  {id:"al-celery", t:"Celery", note:""},
+  {id:"al-mustard", t:"Mustard", note:""},
+  {id:"al-fishmoll", t:"Molluscs", note:"e.g. mussels — well-cooked."},
+  {id:"al-lupin", t:"Lupin", note:"In some flours/baked goods."},
+  {id:"al-sulph", t:"Sulphites", note:"In some dried fruits."}
+];
+const ALLERGEN_OUTCOMES = ["Not yet","Tolerated well","Mild reaction","Reaction — told GP"];
+
+/* ---- Sleep norms (NHS) ---- */
+const SLEEP_NORMS = [
+  {age:"0–3 months", total:"14–17 hrs / 24h", naps:"Short bouts, day & night; rarely >3h at a stretch"},
+  {age:"4–6 months", total:"12–16 hrs", naps:"3 naps; longer nights start"},
+  {age:"7–12 months", total:"12–16 hrs", naps:"2 naps; ~9–12h overnight (often a feed)"},
+  {age:"1–2 years", total:"11–14 hrs", naps:"Moving from 2 naps to 1 (~1–3h)"}
+];
+
+/* ---- WHO 50th-centile weight-for-age (kg), guide line only ---- */
+const WHO50 = {
+  male:[3.3,4.5,5.6,6.4,7.0,7.5,7.9,8.3,8.6,8.9,9.2,9.4,9.6,9.9,10.1,10.3,10.5,10.7,10.9,11.1,11.3,11.5,11.8,12.0,12.2],
+  female:[3.2,4.2,5.1,5.8,6.4,6.9,7.3,7.6,7.9,8.2,8.5,8.7,8.9,9.2,9.4,9.6,9.8,10.0,10.2,10.4,10.6,10.9,11.1,11.3,11.5]
+};
+
+/* ============================================================
+   RENDERING
+   ============================================================ */
+const TABS = [
+  {id:"home", label:"🏠 Today"},
+  {id:"milestones", label:"⭐ Milestones"},
+  {id:"feeding", label:"🍼 Feeding & milk"},
+  {id:"sleep", label:"😴 Sleep"},
+  {id:"growth", label:"📈 Growth"},
+  {id:"vax", label:"💉 Vaccinations"},
+  {id:"checks", label:"🩺 Health checks"},
+  {id:"childcare", label:"🏫 Nursery & school"},
+  {id:"guides", label:"📚 Guides & sources"},
+  {id:"data", label:"⚙️ Settings & data"}
+];
+let view = "home";
+
+function renderChip(){
+  const c = document.getElementById("babychip");
+  c.innerHTML = `<b>${esc(state.baby.name||"Baby")}</b><span>· ${ageLabel()}</span>`;
+}
+function renderTabs(){
+  const el = document.getElementById("tabs");
+  el.innerHTML = TABS.map(t=>`<button data-tab="${t.id}" class="${t.id===view?"active":""}">${t.label}</button>`).join("");
+  el.querySelectorAll("button").forEach(b=>b.onclick=()=>{ view=b.dataset.tab; render(); window.scrollTo(0,0); });
+}
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
+
+function render(){
+  renderTabs(); renderChip();
+  const v = document.getElementById("view");
+  v.innerHTML = ({
+    home:viewHome, milestones:viewMilestones, feeding:viewFeeding, sleep:viewSleep,
+    growth:viewGrowth, vax:viewVax, checks:viewChecks, childcare:viewChildcare,
+    guides:viewGuides, data:viewData
+  }[view]||viewHome)();
+  // attach view-specific handlers
+  ({home:bindHome, feeding:bindFeeding, sleep:bindSleep, growth:bindGrowth,
+    vax:bindSched, checks:bindSched, milestones:bindMilestones, data:bindData}[view]||(()=>{}))();
+}
+
+const disclaimer = `<div class="banner warn"><span class="ic">ℹ️</span><div><strong>Not medical advice.</strong> Ages and schedules are general guides from public UK, Irish &amp; French sources and can change. Your baby is unique — always confirm with your GP, health visitor, PHN or paediatrician, and your Red Book / carnet de santé.</div></div>`;
+
+/* ---------- TODAY / HOME ---------- */
+function upcomingItems(){
+  const out = [];
+  const cc = state.settings.show;
+  const primary = state.settings.primary;
+  // vaccines (primary country only, to avoid double counting)
+  VAX[primary].items.forEach(it=>{
+    if(it.recurring) return;
+    const due = dueDate(it.at);
+    const st = statusFor(due, state.done.vax[it.id]);
+    if(st.k!=="done") out.push({type:"💉 Vaccine", when:it.when, due, st, label:it.v.join(", "), cls:VAX[primary].cls});
+  });
+  CHECKS[primary].items.forEach(it=>{
+    const due = dueDate(it.at);
+    const st = statusFor(due, state.done.checks[it.id]);
+    if(st.k!=="done") out.push({type:"🩺 Check", when:it.when, due, st, label:it.t, cls:CHECKS[primary].cls});
+  });
+  out.sort((a,b)=>a.due-b.due);
+  return out;
+}
+function viewHome(){
+  const a = ageParts();
+  const up = upcomingItems();
+  const overdue = up.filter(x=>x.st.k==="over");
+  const soon = up.filter(x=>x.st.k==="due");
+  const next = up.filter(x=>x.st.k==="up").slice(0,3);
+  const feeds = state.logs.feeds.filter(f=> f.t && (Date.now()-new Date(f.t).getTime()) < DAY).length;
+  const lastFeed = state.logs.feeds[0];
+  const msDone = Object.keys(state.done.milestones).length;
+  return `
+  ${disclaimer}
+  <div class="grid three">
+    <div class="card tight"><div class="kpi"><span class="v">${a.totalDays<0?"—":(a.weeks<13?a.weeks+"w":a.months+"m")}</span><span class="l">${a.totalDays<0?"not born":"Age ("+ageLabel()+")"}</span></div></div>
+    <div class="card tight"><div class="kpi"><span class="v">${feeds}</span><span class="l">Feeds logged today</span></div></div>
+    <div class="card tight"><div class="kpi"><span class="v">${msDone}</span><span class="l">Milestones ticked</span></div></div>
+  </div>
+
+  ${overdue.length?`<div class="card"><h3>⚠️ Overdue / due now</h3>${overdue.map(rowUp).join("")}</div>`:""}
+
+  <div class="card">
+    <h3>Coming up <span class="muted small">· based on ${VAX[state.settings.primary].cls.toUpperCase()} schedule</span></h3>
+    ${soon.length?soon.map(rowUp).join(""):`<div class="empty">Nothing due in the next 6 weeks.</div>`}
+    ${next.length?`<h4 class="muted small" style="margin:.8rem 0 .2rem">Later</h4>${next.map(rowUp).join("")}`:""}
+  </div>
+
+  <div class="card">
+    <h3>Quick log</h3>
+    <div class="row">
+      <button class="btn ghost" data-quick="feed">🍼 Log a feed</button>
+      <button class="btn ghost" data-quick="sleep">😴 Log sleep</button>
+      <button class="btn ghost" data-quick="growth">📈 Log weight</button>
+    </div>
+    ${lastFeed?`<p class="small muted" style="margin-top:.7rem">Last feed: ${esc(feedSummary(lastFeed))} · ${timeAgo(lastFeed.t)}</p>`:""}
+  </div>
+
+  <div class="card">
+    <h3>This month for your family</h3>
+    ${monthTips(a.months)}
+  </div>`;
+}
+function rowUp(x){
+  return `<div class="logitem">
+    <span class="pill ${x.st.k}">${x.st.label}</span>
+    <div><strong>${x.type}</strong> · ${esc(x.label)}<br><span class="small muted">${x.when} · ${fmtDate(x.due)}</span></div>
+  </div>`;
+}
+function bindHome(){
+  document.querySelectorAll("[data-quick]").forEach(b=>b.onclick=()=>{
+    view = ({feed:"feeding",sleep:"sleep",growth:"growth"})[b.dataset.quick]; render();
+  });
+}
+function monthTips(m){
+  const tips = [];
+  if(m<1) tips.push("Vitamin D from birth (see Feeding tab for your country's dose), back-to-sleep every time, and your first health checks are due.");
+  if(m>=1&&m<2) tips.push("First vaccines are coming at 8 weeks (UK) / 2 months (IE/FR). Lots of feeding and short sleep cycles is normal.");
+  if(m>=2&&m<4) tips.push("Watch for the first social smile and cooing. Tummy time builds head control.");
+  if(m>=4&&m<6) tips.push("Signs of weaning readiness appear — sitting with support, head control, hand-eye-mouth coordination. Don't start solids before 17 weeks.");
+  if(m>=5&&m<7) tips.push("Around 6 months: start solids and introduce the common allergens one at a time (see Feeding → Allergens). Keep milk as the main drink.");
+  if(m>=7&&m<10) tips.push("Three meals a day build up alongside milk. Cups instead of bottles encouraged. 7–9 month development check (IE) / on track for the 9–12 month review (UK).");
+  if(m>=10&&m<12) tips.push("Down to ~3 milk feeds. Finger foods and self-feeding. UK funded childcare for working parents can start the term after 9 months — check eligibility.");
+  if(m>=12&&m<15) tips.push("Whole cows' milk can be the main drink now (min ~350 ml/day or 2 dairy servings). 12-month vaccines and MMR. First words may appear.");
+  if(m>=15&&m<19) tips.push("18-month UK vaccines (4th 6-in-1 + 2nd MMR). Walking and several words are common.");
+  if(m>=19) tips.push("Approaching the 2-year review. Two-word phrases, running and pretend play emerge.");
+  if(!tips.length) tips.push("Keep logging feeds, sleep and growth — patterns over time matter more than any single day.");
+  return `<ul class="vlist">${tips.map(t=>`<li>${t}</li>`).join("")}</ul>`;
+}
+
+/* ---------- MILESTONES ---------- */
+function viewMilestones(){
+  const aM = ageParts().totalDays/30.4375;
+  return `${disclaimer}
+  <div class="card"><h2>Development milestones</h2>
+  <p class="small muted">Tick what you've seen. Ranges are wide and normal — these are typical, not deadlines. The <span class="flag">red-flag</span> notes are when it's worth a chat with your health visitor / GP / PHN. Loss of any skill already gained always warrants advice.</p></div>
+  ${MILESTONES.map(band=>{
+    const near = Math.abs(aM*4.345 - band.m) < 26;  // highlight current-ish band
+    return `<details class="acc" ${near?"open":""}>
+      <summary>${band.band} ${bandProgress(band)}</summary>
+      <div class="inner">
+        ${band.items.map(it=>`<label class="logitem" style="cursor:pointer">
+          <input type="checkbox" data-ms="${it.id}" ${state.done.milestones[it.id]?"checked":""}/>
+          <span>${esc(it.t)}</span>
+        </label>`).join("")}
+        <div class="banner info" style="margin-top:.7rem"><span class="ic">🚩</span><div><strong>Talk to a professional if:</strong> ${band.flags.map(esc).join("; ")}.</div></div>
+      </div>
+    </details>`;
+  }).join("")}`;
+}
+function bandProgress(band){
+  const n = band.items.filter(i=>state.done.milestones[i.id]).length;
+  return `<span class="pill ${n===band.items.length?"done":"up"}" style="float:right">${n}/${band.items.length}</span>`;
+}
+function bindMilestones(){
+  document.querySelectorAll("[data-ms]").forEach(cb=>cb.onchange=()=>{
+    const id=cb.dataset.ms;
+    if(cb.checked) state.done.milestones[id]=isoDay(today()); else delete state.done.milestones[id];
+    save(); // don't re-render (keeps accordions open)
+    const sum=cb.closest("details").querySelector("summary");
+    const band=MILESTONES.find(b=>b.items.some(i=>i.id===id));
+    sum.querySelector(".pill").outerHTML = bandProgress(band).match(/<span.*span>/)[0];
+  });
+}
+
+/* ---------- FEEDING & MILK ---------- */
+function vitDText(){
+  const f = state.baby.feeding;
+  const which = state.baby.vitD;
+  if(which==="fr") return `<strong>France:</strong> a prescribed vitamin-D medicine (e.g. ZYMAD/ADRIGYL) from birth, typically <strong>400–1000 IU/day</strong> (often ~800 IU; higher for breastfed/preterm/darker skin). France doses higher than UK/IE — don't double up if also following UK advice.`;
+  if(which==="ie") return `<strong>Ireland (HSE):</strong> <strong>5 µg (200 IU) vitamin D3 daily from birth to 12 months</strong> for all babies, <em>unless</em> taking more than 300 ml of formula a day (formula is fortified).`;
+  return `<strong>UK (NHS):</strong> breastfed babies <strong>8.5–10 µg (340–400 IU) daily from birth</strong>. Formula-fed: not needed if taking ≥500 ml/day; if less, give 8.5–10 µg. From age 1: 10 µg/day.`;
+}
+function viewFeeding(){
+  const recent = state.logs.feeds.slice(0,12);
+  const introduced = ALLERGENS.filter(a=>state.allergens[a.id]&&state.allergens[a.id].outcome&&state.allergens[a.id].outcome!=="Not yet").length;
+  return `${disclaimer}
+  <div class="card">
+    <h2>Log a feed</h2>
+    <div class="seg" id="feedtype">
+      ${["Breast","Bottle","Solids"].map((t,i)=>`<button data-ft="${t}" class="${i===0?"on":""}">${t}</button>`).join("")}
+    </div>
+    <div class="row" style="margin-top:.7rem">
+      <label class="fld" style="flex:2"><span class="lbl">When</span><input type="datetime-local" id="f-when"/></label>
+      <label class="fld" id="f-amtwrap"><span class="lbl">Amount (ml)</span><input type="number" id="f-amt" min="0" step="10" placeholder="e.g. 120"/></label>
+      <label class="fld" id="f-sidewrap" style="display:none"><span class="lbl">Side / mins</span><input type="text" id="f-side" placeholder="L 10m / R 8m"/></label>
+    </div>
+    <label class="fld"><span class="lbl">Notes (optional)</span><input type="text" id="f-note" placeholder="e.g. brought up a little, took peanut"/></label>
+    <button class="btn" id="f-add">Add feed</button>
+  </div>
+
+  <div class="card">
+    <h3>Recent feeds</h3>
+    ${recent.length?recent.map(feedRow).join(""):`<div class="empty">No feeds logged yet.</div>`}
+  </div>
+
+  <div class="card">
+    <h3>💧 Vitamin D</h3>
+    <p class="small">Showing: choose your country in Settings. <span class="seg" id="vitdseg">${["uk","ie","fr"].map(c=>`<button data-vd="${c}" class="${state.baby.vitD===c?"on":""}">${c.toUpperCase()}</button>`).join("")}</span></p>
+    <p>${vitDText()}</p>
+    <p class="tiny muted">Three different national doses — if you follow more than one country's advice, give only one source of vitamin D to avoid under- or over-dosing. Confirm with your GP/PHN.</p>
+  </div>
+
+  <div class="card">
+    <h3>🍼 Milk — what's typical</h3>
+    <ul class="vlist">
+      <li><strong>0–6 months:</strong> milk is the only food. Formula guide ≈ <strong>150–200 ml per kg per day</strong> split across feeds; newborns feed 8+ times/24h. Breastfeed responsively (on demand).</li>
+      <li><strong>~6 months:</strong> start solids <em>alongside</em> milk — milk stays the main drink.</li>
+      <li><strong>10–12 months:</strong> about <strong>3 milk feeds a day</strong> plus 3 meals.</li>
+      <li><strong>From 12 months:</strong> whole cows' milk can be the main drink — aim for <strong>~350 ml/day or 2 dairy servings</strong>. "Follow-on"/"toddler" milks aren't needed. Breastfeeding can continue as long as you both like.</li>
+    </ul>
+    <p class="tiny muted">FR note: in France a "lait de croissance" (growth milk) is commonly used to ~3 years instead of plain cows' milk.</p>
+  </div>
+
+  <div class="card">
+    <h2>🥄 Weaning & allergens <span class="pill ${introduced?"done":"up"}">${introduced}/${ALLERGENS.length} introduced</span></h2>
+    <div class="banner info"><span class="ic">⏱️</span><div><strong>When:</strong> around <strong>6 months</strong> (UK/IE) — France allows a 4–6 month window. Never before 17 weeks. Signs of readiness: sits with support &amp; steady head; hand-eye-mouth coordination; can swallow food.</div></div>
+    <p class="small" style="margin-top:.6rem"><strong>Introduce the common allergens one at a time, from the start of weaning</strong> — delaying them can <em>increase</em> allergy risk. Watch each for a few days. Tick them off as you go:</p>
+    <table><thead><tr><th>Allergen</th><th>Introduced</th><th>Outcome</th></tr></thead><tbody>
+      ${ALLERGENS.map(al=>{
+        const rec=state.allergens[al.id]||{};
+        return `<tr>
+          <td><strong>${esc(al.t)}</strong>${al.note?`<br><span class="tiny muted">${esc(al.note)}</span>`:""}</td>
+          <td><input type="date" data-aldate="${al.id}" value="${rec.date||""}" style="max-width:150px"/></td>
+          <td><select data-alout="${al.id}" style="max-width:170px">${ALLERGEN_OUTCOMES.map(o=>`<option ${rec.outcome===o?"selected":""}>${o}</option>`).join("")}</select></td>
+        </tr>`;
+      }).join("")}
+    </tbody></table>
+    <h4 style="margin:.9rem 0 .3rem">Foods to avoid</h4>
+    <ul class="vlist">
+      <li><strong>Honey</strong> — none before 12 months (botulism risk).</li>
+      <li><strong>Added salt</strong> — none (avoid stock cubes, gravies, salty/processed foods).</li>
+      <li><strong>Added sugar</strong> &amp; sugary drinks — avoid.</li>
+      <li><strong>Whole nuts &amp; whole grapes</strong> — choking risk; nuts only ground/as butter; cut grapes/cherry tomatoes lengthways. No whole nuts before age 5.</li>
+      <li><strong>Shark, swordfish, marlin</strong> — avoid (mercury); limit oily fish.</li>
+      <li>Raw/undercooked egg unless British Lion (UK) marked; unpasteurised cheeses; rice drinks as a milk substitute under 5.</li>
+      <li><strong>Never leave baby alone while eating.</strong></li>
+    </ul>
+  </div>`;
+}
+function feedRow(f){
+  return `<div class="logitem">
+    <span class="pill up">${esc(f.type)}</span>
+    <div>${esc(feedSummary(f))}<br><span class="tiny muted">${fmtDateTime(f.t)} · ${timeAgo(f.t)}</span></div>
+    <button class="btn ghost small x" data-delfeed="${f.id}">✕</button>
+  </div>`;
+}
+function feedSummary(f){
+  if(f.type==="Bottle") return `Bottle ${f.amt?f.amt+" ml":""}${f.note?" · "+f.note:""}`;
+  if(f.type==="Breast") return `Breast ${f.side||""}${f.note?" · "+f.note:""}`;
+  return `Solids ${f.note?"· "+f.note:""}`;
+}
+function bindFeeding(){
+  const now=new Date(); now.setMinutes(now.getMinutes()-now.getTimezoneOffset());
+  const w=document.getElementById("f-when"); if(w) w.value=now.toISOString().slice(0,16);
+  let ftype="Breast";
+  // default to Bottle if formula-leaning
+  if(state.baby.feeding==="formula") ftype="Bottle";
+  document.querySelectorAll("#feedtype [data-ft]").forEach(b=>{
+    if(b.dataset.ft===ftype) b.classList.add("on"); else b.classList.remove("on");
+    b.onclick=()=>{ ftype=b.dataset.ft;
+      document.querySelectorAll("#feedtype [data-ft]").forEach(x=>x.classList.toggle("on",x===b));
+      document.getElementById("f-amtwrap").style.display = ftype==="Bottle"?"block":"none";
+      document.getElementById("f-sidewrap").style.display = ftype==="Breast"?"block":"none";
+    };
+  });
+  document.getElementById("f-amtwrap").style.display = ftype==="Bottle"?"block":"none";
+  document.getElementById("f-sidewrap").style.display = ftype==="Breast"?"block":"none";
+  document.getElementById("f-add").onclick=()=>{
+    const t=document.getElementById("f-when").value||new Date().toISOString();
+    const feed={id:uid(),type:ftype,t,amt:+document.getElementById("f-amt").value||null,
+      side:document.getElementById("f-side").value||"",note:document.getElementById("f-note").value||""};
+    state.logs.feeds.unshift(feed); state.logs.feeds.sort((a,b)=>new Date(b.t)-new Date(a.t));
+    save(); render();
+  };
+  document.querySelectorAll("[data-delfeed]").forEach(b=>b.onclick=()=>{
+    state.logs.feeds=state.logs.feeds.filter(f=>f.id!==b.dataset.delfeed); save(); render();
+  });
+  document.querySelectorAll("[data-aldate]").forEach(i=>i.onchange=()=>{
+    const id=i.dataset.aldate; state.allergens[id]=state.allergens[id]||{}; state.allergens[id].date=i.value; save();
+  });
+  document.querySelectorAll("[data-alout]").forEach(s=>s.onchange=()=>{
+    const id=s.dataset.alout; state.allergens[id]=state.allergens[id]||{}; state.allergens[id].outcome=s.value; save();
+  });
+  document.querySelectorAll("#vitdseg [data-vd]").forEach(b=>b.onclick=()=>{ state.baby.vitD=b.dataset.vd; save(); render(); });
+}
+
+/* ---------- SLEEP ---------- */
+function viewSleep(){
+  const recent = state.logs.sleeps.slice(0,12);
+  const today24 = state.logs.sleeps.filter(s=>s.start && (Date.now()-new Date(s.start).getTime())<DAY);
+  const mins = today24.reduce((a,s)=>a+(s.mins||0),0);
+  return `${disclaimer}
+  <div class="grid two">
+    <div class="card"><h2>Log sleep</h2>
+      <div class="row">
+        <label class="fld"><span class="lbl">Start</span><input type="datetime-local" id="s-start"/></label>
+        <label class="fld"><span class="lbl">End</span><input type="datetime-local" id="s-end"/></label>
+      </div>
+      <label class="fld"><span class="lbl">Notes</span><input type="text" id="s-note" placeholder="nap / night / settled well"/></label>
+      <button class="btn" id="s-add">Add sleep</button>
+      <p class="small muted" style="margin-top:.6rem">Logged in last 24h: <strong>${(mins/60).toFixed(1)} h</strong> across ${today24.length} sleeps.</p>
+    </div>
+    <div class="card"><h3>What's typical (NHS)</h3>
+      <table><thead><tr><th>Age</th><th>Total / 24h</th><th>Naps</th></tr></thead><tbody>
+        ${SLEEP_NORMS.map(n=>`<tr><td>${n.age}</td><td>${n.total}</td><td class="small">${n.naps}</td></tr>`).join("")}
+      </tbody></table>
+      <p class="tiny muted">Wide variation is normal — these are averages, not targets.</p>
+    </div>
+  </div>
+  <div class="card"><h3>Recent sleeps</h3>
+    ${recent.length?recent.map(sleepRow).join(""):`<div class="empty">No sleeps logged yet.</div>`}
+  </div>
+  <div class="card"><h3>🛏️ Safe sleep — reducing SIDS / MIN risk</h3>
+    <p class="tiny muted">Consistent across UK (Lullaby Trust/NHS), Irish (HSE) and French (ameli) guidance.</p>
+    <ul class="vlist">
+      <li><strong>Back to sleep</strong>, every sleep, day and night.</li>
+      <li><strong>Own clear, firm, flat</strong> sleep space (cot/Moses basket) — no pillows, duvets, bumpers or soft toys. A baby sleeping bag beats loose covers.</li>
+      <li><strong>Room-share</strong> (baby in your room, own cot) for at least the first 6 months. "Feet to foot" of the cot.</li>
+      <li><strong>Room 16–20°C</strong>; don't let baby overheat.</li>
+      <li><strong>Smoke-free</strong> always. Never sleep with baby on a sofa or armchair.</li>
+      <li>Breastfeeding lowers risk; if bed-sharing, follow safer co-sleeping advice (never if smoking, recent alcohol/drugs, or prematurity/low birth weight).</li>
+    </ul>
+  </div>`;
+}
+function sleepRow(s){
+  return `<div class="logitem"><span class="pill up">${(s.mins/60).toFixed(1)}h</span>
+    <div>${fmtDateTime(s.start)} → ${s.end?new Date(s.end).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}):"?"}${s.note?" · "+esc(s.note):""}</div>
+    <button class="btn ghost small x" data-delsleep="${s.id}">✕</button></div>`;
+}
+function bindSleep(){
+  document.getElementById("s-add").onclick=()=>{
+    const start=document.getElementById("s-start").value, end=document.getElementById("s-end").value;
+    if(!start){ alert("Add a start time"); return; }
+    let mins=0; if(end) mins=Math.max(0,Math.round((new Date(end)-new Date(start))/60000));
+    state.logs.sleeps.unshift({id:uid(),start,end,mins,note:document.getElementById("s-note").value||""});
+    state.logs.sleeps.sort((a,b)=>new Date(b.start)-new Date(a.start));
+    save(); render();
+  };
+  document.querySelectorAll("[data-delsleep]").forEach(b=>b.onclick=()=>{
+    state.logs.sleeps=state.logs.sleeps.filter(s=>s.id!==b.dataset.delsleep); save(); render();
+  });
+}
+
+/* ---------- GROWTH ---------- */
+function viewGrowth(){
+  const g=[...state.logs.growth].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  return `${disclaimer}
+  <div class="card"><h2>Log a measurement</h2>
+    <div class="row">
+      <label class="fld"><span class="lbl">Date</span><input type="date" id="g-date" value="${isoDay(today())}"/></label>
+      <label class="fld"><span class="lbl">Weight (kg)</span><input type="number" id="g-w" step="0.01" min="0" placeholder="e.g. 7.4"/></label>
+      <label class="fld"><span class="lbl">Length (cm)</span><input type="number" id="g-l" step="0.1" min="0" placeholder="e.g. 66"/></label>
+      <label class="fld"><span class="lbl">Head (cm)</span><input type="number" id="g-h" step="0.1" min="0" placeholder="e.g. 43"/></label>
+    </div>
+    <button class="btn" id="g-add">Add measurement</button>
+  </div>
+  <div class="card"><h3>Weight chart</h3>
+    ${state.baby.sex?growthChart(g):`<div class="banner info"><span class="ic">⚙️</span><div>Set your baby's sex in <a href="#" id="g-tosettings">Settings</a> to show the WHO reference line.</div></div>`+(g.length?growthChart(g):"")}
+    <p class="tiny muted">Grey line = WHO 50th-centile weight-for-age (a guide only, not the full Red Book / carnet chart). What matters is your baby tracking steadily along their own line — not the exact centile. A sustained drop across 2 centile spaces, a plateau, or crossing upwards is worth raising with your health visitor/GP.</p>
+  </div>
+  <div class="card"><h3>Measurements</h3>
+    ${g.length?`<table><thead><tr><th>Date</th><th>Age</th><th>Weight</th><th>Length</th><th>Head</th><th></th></tr></thead><tbody>
+      ${g.slice().reverse().map(m=>`<tr><td>${fmtDate(m.date)}</td><td class="small">${growthAge(m.date)}</td><td>${m.w?m.w+" kg":"—"}</td><td>${m.l?m.l+" cm":"—"}</td><td>${m.h?m.h+" cm":"—"}</td><td><button class="btn ghost small" data-delg="${m.id}">✕</button></td></tr>`).join("")}
+    </tbody></table>`:`<div class="empty">No measurements yet.</div>`}
+  </div>
+  <div class="banner info"><span class="ic">📖</span><div>England records growth in the <strong>UK-WHO charts</strong> in your Red Book; Ireland in the PHN records; France in the <strong>carnet de santé</strong>. Newborns can lose up to ~10% of birth weight in the first days and usually regain it by ~2 weeks — more than 10% loss warrants a feeding review.</div></div>`;
+}
+function growthAge(date){
+  const d=parseDate(date); if(!d) return "";
+  const months=(d-dob())/(DAY*30.4375);
+  if(months<0) return "—";
+  if(months<3) return Math.round((d-dob())/DAY/7)+"w";
+  return months.toFixed(1)+"m";
+}
+function growthChart(g){
+  const W=620,H=300,pad=36;
+  const maxM=24, maxW=15;
+  const x=m=>pad+(m/maxM)*(W-pad*2);
+  const y=w=>H-pad-(w/maxW)*(H-pad*2);
+  const ref=WHO50[state.baby.sex||"male"];
+  const refPts=ref.map((w,m)=>`${x(m)},${y(w)}`).join(" ");
+  const pts=g.filter(m=>m.w).map(m=>({mx:ageMonthsFloat(parseDate(m.date)),w:m.w})).filter(p=>p.mx>=0&&p.mx<=maxM);
+  const babyPts=pts.map(p=>`${x(p.mx)},${y(p.w)}`).join(" ");
+  let grid="";
+  for(let w=0;w<=maxW;w+=3){ grid+=`<line class="grid" x1="${pad}" y1="${y(w)}" x2="${W-pad}" y2="${y(w)}"/><text x="4" y="${y(w)+3}">${w}kg</text>`; }
+  for(let m=0;m<=maxM;m+=3){ grid+=`<line class="grid" x1="${x(m)}" y1="${pad}" x2="${x(m)}" y2="${H-pad}"/><text x="${x(m)-6}" y="${H-pad+14}">${m}m</text>`; }
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Weight chart">
+    ${grid}
+    <polyline fill="none" stroke="#b9c2d0" stroke-width="2" stroke-dasharray="5 4" points="${refPts}"/>
+    ${babyPts?`<polyline fill="none" stroke="var(--accent)" stroke-width="2.5" points="${babyPts}"/>`:""}
+    ${pts.map(p=>`<circle cx="${x(p.mx)}" cy="${y(p.w)}" r="4" fill="var(--accent)"/>`).join("")}
+  </svg>`;
+}
+function bindGrowth(){
+  const a=document.getElementById("g-add");
+  if(a) a.onclick=()=>{
+    const w=+document.getElementById("g-w").value||null, l=+document.getElementById("g-l").value||null, h=+document.getElementById("g-h").value||null;
+    if(!w&&!l&&!h){ alert("Enter at least one measurement"); return; }
+    state.logs.growth.push({id:uid(),date:document.getElementById("g-date").value,w,l,h});
+    save(); render();
+  };
+  document.querySelectorAll("[data-delg]").forEach(b=>b.onclick=()=>{
+    state.logs.growth=state.logs.growth.filter(m=>m.id!==b.dataset.delg); save(); render();
+  });
+  const ts=document.getElementById("g-tosettings"); if(ts) ts.onclick=(e)=>{e.preventDefault(); view="data"; render();};
+}
+
+/* ---------- VACCINATIONS ---------- */
+function viewVax(){ return scheduleView("vax", VAX, "Vaccinations", state.done.vax); }
+function viewChecks(){ return scheduleView("checks", CHECKS, "Health & development checks", state.done.checks); }
+function scheduleView(kind, DATA, title, doneMap){
+  const primary=state.settings.primary;
+  const order=[primary, ...["uk","ie","fr"].filter(c=>c!==primary)];
+  return `${disclaimer}
+  <div class="card"><h2>${title}</h2>
+  <p class="small muted">Dates are computed from your baby's date of birth (${fmtDate(state.baby.dob)}). Your home country (${primary.toUpperCase()}) is shown first; the others are reference, since you're an Irish–French family in the UK. Tick items off as they're done.</p>
+  <p class="tiny muted">${kind==="vax"?"⚠️ Vaccine schedules differ by country and are not interchangeable — your GP must reconcile the Red Book / carnet de santé if records cross borders. Don't re-dose based on another country's calendar.":""}</p>
+  </div>
+  ${order.filter(c=>state.settings.show[c]).map(c=>{
+    const D=DATA[c];
+    return `<div class="card">
+      <h3><span class="country-tag ${c}">${c.toUpperCase()}</span> · ${esc(D.label)} ${c===primary?'<span class="pill done">home</span>':'<span class="pill up">reference</span>'}</h3>
+      <p class="tiny muted">${esc(D.note||"")}</p>
+      ${D.items.map(it=>{
+        const due=dueDate(it.at); const done=doneMap[it.id]; const st=statusFor(due,done);
+        return `<div class="sched">
+          <div class="when">${it.when}<br><span class="tiny muted">${fmtDate(due)}</span></div>
+          <div class="body">
+            ${it.v?`<ul class="vlist">${it.v.map(v=>`<li>${esc(v)}</li>`).join("")}</ul>`:`<strong>${esc(it.t)}</strong>${it.d?`<div class="small muted">${esc(it.d)}</div>`:""}`}
+            ${it.badge?`<span class="pill due">${it.badge}</span> `:""}${it.cert?`<span class="pill fr">certificat</span>`:""}
+          </div>
+          <div class="ctl">
+            <span class="pill ${st.k}">${st.label}</span>
+            <label class="tiny" style="display:flex;gap:.3rem;align-items:center"><input type="checkbox" data-done="${kind}:${it.id}" ${done?"checked":""}/> done</label>
+            <input type="date" data-donedate="${kind}:${it.id}" value="${done||isoDay(due)}" style="max-width:140px"/>
+          </div>
+        </div>`;
+      }).join("")}
+    </div>`;
+  }).join("")}`;
+}
+function bindSched(){
+  const map = view==="vax"?state.done.vax:state.done.checks;
+  document.querySelectorAll("[data-done]").forEach(cb=>cb.onchange=()=>{
+    const [,id]=cb.dataset.done.split(":");
+    const dateEl=document.querySelector(`[data-donedate="${cb.dataset.done}"]`);
+    if(cb.checked) map[id]=dateEl.value||isoDay(today()); else delete map[id];
+    save(); render();
+  });
+  document.querySelectorAll("[data-donedate]").forEach(d=>d.onchange=()=>{
+    const [,id]=d.dataset.donedate.split(":");
+    if(map[id]!==undefined){ map[id]=d.value; save(); }
+  });
+}
+
+/* ---------- NURSERY & SCHOOL ---------- */
+function ukSchoolStart(){
+  // Reception starts the September after the 4th birthday (1 Sep–31 Aug cohort)
+  const b=dob(); const fourth=addMonths(b,48);
+  let yr=fourth.getFullYear(); if(fourth.getMonth()>8 || (fourth.getMonth()===8 && fourth.getDate()>1)) yr++;
+  // if 4th birthday is on/after 1 Sep, Reception is the following year's September
+  // Cohort cutoff: child must be 4 by 31 Aug to start that Sept.
+  const start = (b.getMonth()<=7)? // born Jan-Aug -> Reception in Sept of year they turn 4 ... compute precisely below
+    null:null;
+  // precise: academic year runs 1 Sep – 31 Aug. Reception September = first Sep where child is >=4 by 31 Aug.
+  let sepYear=b.getFullYear()+4;
+  // child turns 4 in (b.month). If born Sep-Dec, they are not 4 by 31 Aug of (birthYear+4), so +1.
+  if(b.getMonth()>=8) sepYear=b.getFullYear()+5;
+  return sepYear;
+}
+function isSummerBorn(){ const m=dob().getMonth(); return m>=3 && m<=7; } // Apr–Aug
+function viewChildcare(){
+  const b=dob();
+  const ninemo=addMonths(b,9);
+  const termAfter9 = nextTermStart(ninemo);
+  const sep=ukSchoolStart();
+  const recStart=new Date(sep,8,1);
+  return `${disclaimer}
+  <div class="card"><h2>🏫 Nursery, childcare & school</h2>
+  <p class="small muted">You live in England, so UK rules drive the practical timeline; Irish &amp; French systems are noted for reference.</p></div>
+
+  <div class="card">
+    <h3><span class="country-tag uk">UK</span> Funded childcare (England, working parents)</h3>
+    <ul class="vlist">
+      <li><strong>From the term after your baby turns 9 months</strong> (≈ ${fmtDate(termAfter9)}): eligible working parents get <strong>30 funded hours/week</strong> (term-time; can stretch over 52 weeks at fewer hours/week). Apply from when baby is ~23 weeks old.</li>
+      <li><strong>All</strong> 3–4 year-olds get a <strong>universal 15 hours</strong> (not income-tested) from the term after their 3rd birthday.</li>
+      <li><strong>Tax-Free Childcare:</strong> government adds £2 per £8 you pay in, up to £2,000/year per child.</li>
+      <li>Eligibility (funded 30h): each parent earns ≥ ~16h/week at minimum wage and under £100k adjusted net income.</li>
+    </ul>
+    <p class="tiny muted">Check the latest at childcarechoices.gov.uk and gov.uk/free-childcare-if-working — rates and rules change.</p>
+  </div>
+
+  <div class="card">
+    <h3><span class="country-tag uk">UK</span> Starting school (England)</h3>
+    <ul class="vlist">
+      <li>Reception starts the <strong>September after the 4th birthday</strong> (1 Sep–31 Aug cohort). For ${esc(state.baby.name||"your baby")} (born ${fmtDate(b)}): <strong>Reception ≈ September ${sep}</strong> (apply the preceding autumn, by ~15 Jan ${sep}).</li>
+      <li><strong>Compulsory</strong> school age is the term after the 5th birthday.</li>
+      ${isSummerBorn()?`<li><span class="flag">Summer-born (Apr–Aug):</span> you can request to <strong>defer</strong> within the year, or <strong>delay a full year</strong> to start Reception (not Year 1) in September ${sep+1} aged 5 — decided case-by-case by the admission authority. Worth researching early.</li>`:""}
+    </ul>
+  </div>
+
+  <div class="grid two">
+    <div class="card"><h3><span class="country-tag ie">IE</span> Ireland</h3>
+      <ul class="vlist">
+        <li><strong>ECCE</strong> free pre-school: 3 hrs/day, term-time, from ~2 yrs 8 months until starting primary.</li>
+        <li><strong>NCS</strong> subsidy helps with younger childcare costs.</li>
+        <li>Primary "Junior Infants" usually starts at age 4–5 (most start at 5). Childcare via crèche or childminder.</li>
+      </ul>
+    </div>
+    <div class="card"><h3><span class="country-tag fr">FR</span> France</h3>
+      <ul class="vlist">
+        <li><strong>Modes de garde:</strong> crèche, assistante maternelle (agréée), or garde à domicile — subsidised via CAF's <strong>CMG</strong>.</li>
+        <li><strong>École maternelle</strong> is compulsory from <strong>age 3</strong> (since 2019).</li>
+        <li><strong>1000 premiers jours</strong> national programme supports the first ~2 years (info, "Maisons des 1000 premiers jours").</li>
+      </ul>
+    </div>
+  </div>`;
+}
+function nextTermStart(d){
+  // English funded-hours terms begin 1 Sep, 1 Jan, 1 Apr
+  const y=d.getFullYear();
+  const cands=[new Date(y,0,1),new Date(y,3,1),new Date(y,8,1),new Date(y+1,0,1)];
+  return cands.find(c=>c>=d) || cands[cands.length-1];
+}
+
+/* ---------- GUIDES & SOURCES ---------- */
+function viewGuides(){
+  return `${disclaimer}
+  <div class="card"><h2>How the three countries differ</h2>
+  <p class="small">You're an Irish–French couple raising a baby in the UK. Practical care follows UK (NHS) services, but it helps to know where Irish and French guidance diverge — especially if grandparents or doctors abroad advise differently.</p>
+  <table><thead><tr><th>Topic</th><th class="country-tag uk">UK</th><th class="country-tag ie">Ireland</th><th class="country-tag fr">France</th></tr></thead><tbody>
+    <tr><td><strong>Vitamin D</strong></td><td>8.5–10 µg (340–400 IU); breastfed from birth; formula-fed not if ≥500 ml/day</td><td>5 µg (200 IU) daily 0–12m for all, unless &gt;300 ml formula/day</td><td>Prescribed medicine, 400–1000+ IU/day (often ~800) — highest of the three</td></tr>
+    <tr><td><strong>Vaccines</strong></td><td>Recommended; 8/12/16 wk, 12 &amp; 18 mth</td><td>Recommended; 2/4/6/12/13 mth (GP-given); chickenpox at 12m</td><td>Largely <strong>mandatory</strong>; 2/3/4/5/6/11/12 mth; MenB+ACWY mandatory 2025</td></tr>
+    <tr><td><strong>Checks</strong></td><td>Health-visitor reviews + 6–8 wk GP check</td><td>PHN visits + free GP (Under-8s card); ages 2 &amp; 5</td><td>20 mandatory exams; certificates at 8 days, 9 &amp; 24 months</td></tr>
+    <tr><td><strong>Weaning</strong></td><td>Around 6 months</td><td>Around 6 months (not before 17 wks)</td><td>4–6 month window</td></tr>
+    <tr><td><strong>Chickenpox jab</strong></td><td>Being added (MMRV from 2026)</td><td>Yes, at 12 months</td><td>Not routine</td></tr>
+    <tr><td><strong>Records</strong></td><td>Red Book (PCHR)</td><td>PHN records / mychild.ie</td><td>Carnet de santé</td></tr>
+    <tr><td><strong>School</strong></td><td>Reception ~age 4 (Sep cutoff)</td><td>Junior Infants ~age 4–5</td><td>Maternelle compulsory from 3</td></tr>
+  </tbody></table>
+  <div class="banner warn" style="margin-top:.8rem"><span class="ic">⚠️</span><div>Because doses and schedules genuinely differ, pick <strong>one</strong> approach per item (usually your UK GP's) and don't stack advice — e.g. don't give two vitamin-D products. Keep both the UK Red Book and any carnet de santé updated.</div></div>
+  </div>
+
+  <div class="card"><h2>Sources</h2>
+  <p class="small muted">Researched from official public-health sources (your local clinician's advice always takes precedence). Key references:</p>
+  <h4>🇬🇧 United Kingdom</h4><div class="srcs">
+    <a href="https://www.gov.uk/government/publications/the-complete-routine-immunisation-schedule" target="_blank" rel="noopener">UKHSA routine immunisation schedule</a>
+    <a href="https://www.nhs.uk/vaccinations/nhs-vaccinations-and-when-to-have-them/" target="_blank" rel="noopener">NHS vaccinations timeline</a>
+    <a href="https://www.nhs.uk/baby/babys-development/height-weight-and-reviews/baby-reviews/" target="_blank" rel="noopener">NHS baby reviews</a>
+    <a href="https://www.nhs.uk/baby/weaning-and-feeding/babys-first-solid-foods/" target="_blank" rel="noopener">NHS weaning</a>
+    <a href="https://www.nhs.uk/best-start-in-life/baby/baby-basics/caring-for-your-baby/vitamins-for-babies/" target="_blank" rel="noopener">NHS vitamins for babies</a>
+    <a href="https://www.lullabytrust.org.uk/baby-safety/safer-sleep-information/safer-sleep-overview/" target="_blank" rel="noopener">Lullaby Trust safer sleep</a>
+    <a href="https://www.gov.uk/schools-admissions/school-starting-age" target="_blank" rel="noopener">School starting age</a>
+    <a href="https://www.childcarechoices.gov.uk/" target="_blank" rel="noopener">Childcare Choices (funded hours)</a>
+  </div>
+  <h4>🇮🇪 Ireland</h4><div class="srcs">
+    <a href="https://www2.hse.ie/babies-children/vaccines-your-child/" target="_blank" rel="noopener">HSE childhood vaccines</a>
+    <a href="https://www2.hse.ie/babies-children/checks-milestones/health-checks/health-development-checks/" target="_blank" rel="noopener">HSE health & development checks</a>
+    <a href="https://www2.hse.ie/babies-children/weaning-eating/weaning/how-to-start/" target="_blank" rel="noopener">HSE weaning</a>
+    <a href="https://www2.hse.ie/babies-children/weaning-eating/nutrition-baby/vitamin-d/" target="_blank" rel="noopener">HSE vitamin D</a>
+    <a href="https://www2.hse.ie/conditions/cot-death/" target="_blank" rel="noopener">HSE safe sleep</a>
+    <a href="https://www2.hse.ie/services/schemes-allowances/gp-visit-cards/under-8s/" target="_blank" rel="noopener">Under-8s GP visit card</a>
+  </div>
+  <h4>🇫🇷 France</h4><div class="srcs">
+    <a href="https://www.ameli.fr/assure/sante/themes/vaccination/vaccins-obligatoires" target="_blank" rel="noopener">ameli — vaccins obligatoires</a>
+    <a href="https://sante.gouv.fr/IMG/pdf/calendrier_vaccinal-octobre2025.pdf" target="_blank" rel="noopener">Calendrier vaccinal 2025 (PDF)</a>
+    <a href="https://www.ameli.fr/assure/sante/themes/suivi-medical-de-l-enfant-et-de-l-adolescent/enfant-et-adolescent-20-examens-de-suivi-medical" target="_blank" rel="noopener">ameli — 20 examens de suivi</a>
+    <a href="https://www.1000-premiers-jours.fr/fr/lalimentation-de-4-6-mois-le-debut-de-la-diversification" target="_blank" rel="noopener">1000 premiers jours — diversification</a>
+    <a href="https://www.mpedia.fr/art-vitamine/" target="_blank" rel="noopener">mpédia — vitamine D</a>
+    <a href="https://www.ameli.fr/assure/sante/bons-gestes/bebe/coucher-bebe" target="_blank" rel="noopener">ameli — coucher bébé</a>
+    <a href="https://www.1000-premiers-jours.fr/" target="_blank" rel="noopener">1000 premiers jours</a>
+  </div>
+  <p class="tiny muted" style="margin-top:.8rem">Schedules verified against these sources around June 2026. National calendars are updated periodically — re-check the official pages before acting on dates.</p>
+  </div>`;
+}
+
+/* ---------- SETTINGS & DATA ---------- */
+function viewData(){
+  const b=state.baby;
+  return `${disclaimer}
+  <div class="card"><h2>Baby profile</h2>
+    <div class="row">
+      <label class="fld"><span class="lbl">Name</span><input id="p-name" value="${esc(b.name)}"/></label>
+      <label class="fld"><span class="lbl">Date of birth</span><input type="date" id="p-dob" value="${b.dob}"/></label>
+      <label class="fld"><span class="lbl">Sex (for growth ref)</span><select id="p-sex"><option value="">—</option><option value="female" ${b.sex==="female"?"selected":""}>Girl</option><option value="male" ${b.sex==="male"?"selected":""}>Boy</option></select></label>
+    </div>
+    <div class="row">
+      <label class="fld"><span class="lbl">Feeding</span><select id="p-feed">${["mixed","breast","formula"].map(f=>`<option value="${f}" ${b.feeding===f?"selected":""}>${f[0].toUpperCase()+f.slice(1)}</option>`).join("")}</select></label>
+      <label class="fld"><span class="lbl">Vitamin D guidance</span><select id="p-vitd">${["uk","ie","fr"].map(c=>`<option value="${c}" ${b.vitD===c?"selected":""}>${c.toUpperCase()}</option>`).join("")}</select></label>
+      <label class="fld"><span class="lbl">Born</span><select id="p-term"><option value="term" ${b.term==="term"?"selected":""}>At/near term</option><option value="preterm" ${b.term==="preterm"?"selected":""}>Premature</option></select></label>
+    </div>
+    <button class="btn" id="p-save">Save profile</button>
+  </div>
+
+  <div class="card"><h3>Which countries to show</h3>
+    <p class="small muted">Your home country leads schedules &amp; "Today". The others appear as reference.</p>
+    <label class="fld"><span class="lbl">Home country</span><select id="s-primary">${[["uk","United Kingdom"],["ie","Ireland"],["fr","France"]].map(([c,n])=>`<option value="${c}" ${state.settings.primary===c?"selected":""}>${n}</option>`).join("")}</select></label>
+    <div class="row">
+      ${[["uk","UK"],["ie","Ireland"],["fr","France"]].map(([c,n])=>`<label class="tiny" style="flex:0 0 auto;display:flex;gap:.3rem;align-items:center"><input type="checkbox" data-show="${c}" ${state.settings.show[c]?"checked":""}/> Show ${n}</label>`).join("")}
+    </div>
+  </div>
+
+  <div class="card"><h3>Your data</h3>
+    <p class="small">Everything lives only in this browser (localStorage) — nothing is sent anywhere. Export a backup, or move it to another device/browser.</p>
+    <div class="row">
+      <button class="btn ghost" id="d-export">⬇️ Export backup (JSON)</button>
+      <button class="btn ghost" id="d-import">⬆️ Import backup</button>
+      <input type="file" id="d-file" accept="application/json" class="hidden"/>
+      <button class="btn danger" id="d-reset">🗑️ Reset all data</button>
+    </div>
+    <p class="tiny muted" style="margin-top:.6rem">Tip: this is a single HTML file — you can also keep a copy on a USB stick or host it on any static host (GitHub Pages, Netlify). It works fully offline.</p>
+  </div>
+
+  <div class="card"><h3>About</h3>
+    <p class="small">Little Steps is a personal, offline tool grounded in UK, Irish &amp; French public-health guidance (see Guides &amp; sources). It does not replace professional advice. Created ${new Date(state.meta.created).toLocaleDateString("en-GB")}.</p>
+  </div>`;
+}
+function bindData(){
+  document.getElementById("p-save").onclick=()=>{
+    state.baby.name=document.getElementById("p-name").value||"Baby";
+    state.baby.dob=document.getElementById("p-dob").value||state.baby.dob;
+    state.baby.sex=document.getElementById("p-sex").value;
+    state.baby.feeding=document.getElementById("p-feed").value;
+    state.baby.vitD=document.getElementById("p-vitd").value;
+    state.baby.term=document.getElementById("p-term").value;
+    save(); render();
+  };
+  document.getElementById("s-primary").onchange=e=>{ state.settings.primary=e.target.value; state.baby.vitD=e.target.value; save(); render(); };
+  document.querySelectorAll("[data-show]").forEach(c=>c.onchange=()=>{ state.settings.show[c.dataset.show]=c.checked; save(); });
+  document.getElementById("d-export").onclick=()=>{
+    const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(blob); const a=document.createElement("a");
+    a.href=url; a.download=`little-steps-${state.baby.name||"baby"}-${isoDay(today())}.json`; a.click(); URL.revokeObjectURL(url);
+  };
+  document.getElementById("d-import").onclick=()=>document.getElementById("d-file").click();
+  document.getElementById("d-file").onchange=e=>{
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader(); r.onload=()=>{ try{
+      const incoming=JSON.parse(r.result);
+      if(!incoming.baby) throw new Error("Not a Little Steps backup");
+      if(confirm("Replace all current data with this backup?")){ state=deepMerge(structuredClone(DEFAULT_STATE),incoming); save(); render(); }
+    }catch(err){ alert("Could not import: "+err.message); } };
+    r.readAsText(f);
+  };
+  document.getElementById("d-reset").onclick=()=>{
+    if(confirm("Delete ALL data and start fresh? This cannot be undone (export a backup first).")){
+      localStorage.removeItem(KEY); state=load(); view="home"; render();
+    }
+  };
+}
+
+/* ---------- misc helpers ---------- */
+function uid(){ return Math.random().toString(36).slice(2,9); }
+function fmtDateTime(t){ if(!t) return "—"; const d=new Date(t); return d.toLocaleDateString("en-GB",{day:"numeric",month:"short"})+" "+d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}); }
+function timeAgo(t){ if(!t) return ""; const diff=Date.now()-new Date(t).getTime(); const h=Math.floor(diff/3600000); if(h<1) return Math.max(0,Math.floor(diff/60000))+" min ago"; if(h<24) return h+"h ago"; return Math.floor(h/24)+"d ago"; }
+
+/* ---------- boot ---------- */
+render();
+</script>
+</body>
+</html>
