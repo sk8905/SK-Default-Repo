@@ -15,7 +15,7 @@
 // `LAST_REVIEWED` whenever you refresh the data.
 // =============================================================================
 
-export const LAST_REVIEWED = "2026-06-21";
+export const LAST_REVIEWED = "2026-06-23";
 
 // ---- Practice areas ---------------------------------------------------------
 export const practiceAreas = [
@@ -1020,6 +1020,20 @@ export const items = [
     ],
     tags: ["unfair prejudice", "fiduciary duty", "joint venture", "directors' duties", "Song v Smith", "ECCTA", "trust registration service", "corporate"],
     url: "https://www.macfarlanes.com/insights/102n4r8/corporate-law-update-13-19-june/",
+  },
+  {
+    id: "u134", title: "Bank of England publishes policy statement and draft rules for UK systemic stablecoins",
+    area: "banking", areas: ["banking", "fundsreg"], type: "update", firm: "linklaters",
+    date: "2026-06-22", jurisdiction: "England & Wales",
+    summary: "On 20 June 2026 the Bank of England published its policy statement and draft Code of Practice (consultation closes 22 September 2026) setting out the proposed regulatory regime for sterling-denominated systemic stablecoins, revising several positions from its November 2025 consultation. Key changes: issuers may now hold up to 70% of backing assets in short-term UK gilts (raised from 60%), with a notification requirement if deposits fall below 25% for five consecutive business days; individual and corporate holding limits are scrapped in favour of a temporary aggregate issuance cap of £40 billion per stablecoin product, to be reviewed periodically and eventually removed; and the Bank will introduce a new backstop liquidity facility allowing eligible issuers to borrow against gilts to meet redemptions at par where private market channels are unavailable. Overseas issuers crossing the systemic threshold must establish a UK subsidiary; the PRA's ban on retail bank stablecoin issuance is maintained.",
+    points: [
+      "Gilt-backing ceiling raised to 70% of reserves (from 60%); a notification obligation triggers if deposits fall below 25% of backing assets for five consecutive business days.",
+      "Individual and corporate holding limits scrapped and replaced by a temporary £40 bn aggregate issuance cap per stablecoin product, subject to periodic BoE review.",
+      "New backstop liquidity facility: eligible issuers may borrow against UK gilts from the Bank to fund redemptions at par where private market channels fail.",
+      "Consultation on the draft Code of Practice closes 22 September 2026; the Bank aims to finalise its rules before end-2026.",
+    ],
+    tags: ["stablecoins", "Bank of England", "systemic stablecoins", "digital assets", "payments", "financial stability", "PRA", "FCA"],
+    url: "https://financialregulation.linklaters.com/post/102n4ye/bank-of-england-updates-its-policy-for-uk-systemic-stablecoins",
   },
 ];
 
