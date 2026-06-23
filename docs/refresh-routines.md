@@ -1,10 +1,11 @@
 # Auto-refresh routine (Claude Routines)
 
-A **single** routine keeps both Meridian platforms current. It is scheduled to run
-**twice a day (06:00 and 12:00)** and does a **full refresh of both apps** — Credit
-(deals, fundraising, mandates/launches, manager website news) and Legal (legal
-alerts and case law). It replaces the previous separate Credit-daily,
-Credit-weekly and Legal-daily routines.
+**Two identical routines** keep both Meridian platforms current — one scheduled at
+**06:00** and one at **12:00** (Claude Routines runs a single schedule per routine,
+so create two routines that both use the prompt below). Each does a **full refresh
+of both apps** — Credit (deals, fundraising, mandates/launches, manager website
+news) and Legal (legal alerts and case law). Together they replace the previous
+separate Credit-daily, Credit-weekly and Legal-daily routines.
 
 Keep this file in sync with the routine prompt pasted into the Routines UI — it is
 the source of truth for the prompt.
@@ -18,8 +19,9 @@ the source of truth for the prompt.
 
 - **Sync first.** Always start from the latest `main`: `git fetch origin`, then
   `git checkout -B claude/affectionate-einstein-9hhzga origin/main`.
-- **Window.** Add items published since the last run — roughly the last 12 hours
-  (use the last 24 if unsure). Verify each item's EXACT publication date from the
+- **Window.** Add items published since the last run. The two runs are ~6h
+  (06:00→12:00) and ~18h (12:00→06:00) apart, so look back ~24 hours to be safe —
+  dedup removes any overlap. Verify each item's EXACT publication date from the
   source; never invent a URL, date, figure or quote. Dedupe every candidate by URL
   and normalised headline/citation against the data already in the file.
 - **IDs.** For every array, COMPUTE the current maximum id in the file and use the
@@ -56,15 +58,15 @@ the source of truth for the prompt.
 
 ## The routine prompt
 
-> Do a full twice-daily refresh of BOTH Meridian platforms — Credit and Legal —
-> and publish the changes live. Follow the invariants in
-> `docs/refresh-routines.md`. The repo has `credit/` and `legal/` apps and deploys
-> from `main`.
+> Do a full refresh of BOTH Meridian platforms — Credit and Legal — and publish
+> the changes live. (This routine runs twice a day, at 06:00 and 12:00.) Follow the
+> invariants in `docs/refresh-routines.md`. The repo has `credit/` and `legal/`
+> apps and deploys from `main`.
 >
 > 1. SYNC: `git fetch origin`, then
 >    `git checkout -B claude/affectionate-einstein-9hhzga origin/main`. Do all work
->    on this branch. Add only items published since the last run (~last 12h, last
->    24h if unsure). Verify every date from the source; never invent URLs, dates,
+>    on this branch. Add only items published since the last run (look back ~24h;
+>    dedup removes overlap). Verify every date from the source; never invent URLs, dates,
 >    figures or quotes; dedupe against what's already in each file. For every array
 >    compute the current max id and use the next integer.
 >
