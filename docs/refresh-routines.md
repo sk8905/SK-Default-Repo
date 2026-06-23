@@ -25,6 +25,14 @@ the source of truth for the prompt.
   dedup removes any overlap. Verify each item's EXACT publication date from the
   source; never invent a URL, date, figure or quote. Dedupe every candidate by URL
   and normalised headline/citation against the data already in the file.
+- **Historical depth (not just current-year).** The ~24h window only governs
+  which *newly surfaced* items a run hunts for — it is NOT a floor on an item's
+  own date. A genuine news/deal/intelligence/fund item is in-scope even when it
+  predates the current year: backfill historical items dated as far back as
+  **2016 (inclusive)** rather than discarding them for being "old" (the dataset
+  already spans many years). Never bump or round an item to a recent date to make
+  it fit — always record its real publication/event date, verified from the
+  source, and dedupe as usual.
 - **IDs.** For every array, COMPUTE the current maximum id in the file and use the
   next integer — never trust a number quoted here. Applies to all id series:
   Credit `deals` (d…), `intel` (i…), `managers` (m…), `funds` (f…); Legal `items`
