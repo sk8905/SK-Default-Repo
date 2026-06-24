@@ -445,10 +445,9 @@ a.compact-head:hover { color: var(--primary); }
 .rx-title-line { display: flex; align-items: baseline; gap: .45rem; flex-wrap: wrap; }
 .rx-name { color: var(--ink); }
 .rx-summary:hover .rx-name { color: var(--primary); }
-.rx-caret { margin-left: auto; color: var(--primary); font-weight: 600; font-size: .78rem; white-space: nowrap; flex-shrink: 0; }
-.rx-caret::after { content: "Show details ▾"; }
-.rx-det[open] .rx-caret::after { content: "Hide ▴"; }
-.rx-summary:hover .rx-caret { text-decoration: underline; }
+/* Save button lives on the summary line (replacing the old caret), pushed right.
+   It must not inherit the .save-btn block margins meant for the footer layout. */
+.rx-save { margin: 0 0 0 auto; align-self: center; flex-shrink: 0; padding: .15rem .55rem; font-size: .72rem; }
 .rx-compact { display: block; font-size: .8rem; color: var(--muted); margin-top: .25rem; }
 .rx-expand { margin-top: .7rem; padding-top: .6rem; border-top: 1px dashed var(--line); line-height: 1.5; }
 .rx-expand .feed-summary { margin: .1rem 0 .55rem; line-height: 1.55; }

@@ -611,8 +611,9 @@ function rxRow(r) {
   ].filter(Boolean).join(" · ");
   const compact = [r.court ? esc(r.court) : "", r.citation ? `<span class="cite">${esc(r.citation)}</span>` : "", r.sector ? esc(r.sector) : ""].filter(Boolean).join(" · ");
   // Collapsed by default — the COMPANY NAME (inside <summary>) is the expand/
-  // collapse toggle. Expanding reveals debt/creditors/advisers/features and the
-  // firm-analysis / judgment links.
+  // collapse toggle. The Save button sits on the summary line (always visible);
+  // clicking it saves without toggling (the global handler calls preventDefault).
+  // Expanding reveals debt/creditors/advisers/features and the firm/judgment links.
   return `<div class="feed-row rx-row" id="row-${esc(r.id)}">
     <div class="feed-meta">
       <div class="chips"><span class="chip rx-type rx-${esc(r.type)}" title="${esc(typeFull)}">${r.type === "scheme" ? "Scheme" : "Plan"}</span></div>
@@ -624,16 +625,14 @@ function rxRow(r) {
           <span class="rx-title-line">
             <span class="feed-title rx-name">${esc(r.company)}</span>
             <span class="chip rx-out rx-out-${rxOutcomeClass(r.outcome)}" title="${esc(r.outcome)}">${esc(rxOutcomeShort(r.outcome))}</span>
-            <span class="rx-caret" aria-hidden="true"></span>
+            <button class="save-btn rx-save ${saved ? "is-saved" : ""}" data-save="${esc(r.id)}"
+              aria-pressed="${saved}" title="${saved ? "Remove from saved" : "Save this matter"}">${saved ? "★ Saved" : "☆ Save"}</button>
           </span>
           ${compact ? `<span class="rx-compact">${compact}</span>` : ""}
         </summary>
         <div class="rx-expand">
           ${lines}
-          <div class="feed-foot">
-            ${foot}${foot ? " · " : ""}<button class="save-btn ${saved ? "is-saved" : ""}" data-save="${esc(r.id)}"
-              aria-pressed="${saved}" title="${saved ? "Remove from saved" : "Save this matter"}">${saved ? "★ Saved" : "☆ Save"}</button>
-          </div>
+          ${foot ? `<div class="feed-foot">${foot}</div>` : ""}
         </div>
       </details>
     </div>
