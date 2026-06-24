@@ -16,8 +16,8 @@
 import {
   items, cases, caseSummaries, practiceAreas, firms, tiers, updateTypes,
   firmById, areaById, typeById, tierById, LAST_REVIEWED, LAST_CHECKED,
-} from "./data.js?v=20260624-1";
-import { donutChart, columnChart } from "./charts.js?v=20260624-1";
+} from "./data.js?v=20260624-2";
+import { donutChart, columnChart } from "./charts.js?v=20260624-2";
 
 const app = document.getElementById("app");
 
@@ -649,7 +649,7 @@ function renderNotifications() {
       <span class="notif-ico" aria-hidden="true">🔔</span>${n ? `<span class="notif-badge">${n > 9 ? "9+" : n}</span>` : ""}
     </button>
     <div class="notif-panel" id="notif-panel" role="menu" hidden>
-      <div class="notif-head">${n ? `${n} new update${n > 1 ? "s" : ""}` : "No new updates"} <span class="muted small">· updated ${esc(fmtDate(LAST_REVIEWED))}</span></div>
+      <div class="notif-head">${n ? `${n} new update${n > 1 ? "s" : ""}` : "No new updates"} <span class="muted small">· checked ${esc(fmtDate(LAST_CHECKED))}</span></div>
       <ul class="notif-list">
         ${list.length ? list.map((x) => `<li class="notif-item${(n && fresh.includes(x)) ? " is-new" : ""}">
           <a href="${esc(x.href)}" ${x.ext ? 'target="_blank" rel="noopener noreferrer"' : ""} class="notif-link">${esc(x.title)}${x.ext ? " ↗" : ""}</a>

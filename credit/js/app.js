@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260623-5";
+} from "./data.js?v=20260624-1";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260623-5";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260624-1";
 
 const app = document.getElementById("app");
 
@@ -245,7 +245,7 @@ function renderNotifications() {
       <span class="notif-ico" aria-hidden="true">🔔</span>${n ? `<span class="notif-badge">${n > 9 ? "9+" : n}</span>` : ""}
     </button>
     <div class="notif-panel" id="notif-panel" role="menu" hidden>
-      <div class="notif-head">${n ? `${n} new update${n > 1 ? "s" : ""}` : "No new updates"} <span class="muted small">· updated ${esc(fmtDate(DATA_UPDATED))}</span></div>
+      <div class="notif-head">${n ? `${n} new update${n > 1 ? "s" : ""}` : "No new updates"} <span class="muted small">· checked ${esc(fmtDate(LAST_CHECKED))}</span></div>
       <ul class="notif-list">
         ${list.length ? list.map((x) => `<li class="notif-item${(n && fresh.includes(x)) ? " is-new" : ""}">
           <a href="${x.href}" ${x.goto ? `data-goto="${esc(x.goto)}"` : ""} class="notif-link">${esc(x.title)}</a>
