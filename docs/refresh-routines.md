@@ -142,6 +142,21 @@ the source of truth for the prompt.
 >      new announcements to that manager's `webNews` array ({date, outlet, title,
 >      url}), deduped against their existing `news` + `webNews`; prefer the
 >      manager's own press-release URL.
+>    - **MIRROR webNews into deals/intel (critical).** A `webNews` entry shows ONLY
+>      in the notifications bell — it does NOT appear in the Deal Activity or
+>      Fundraising Intelligence feeds, the dashboard KPIs, or any tab/list (those
+>      render solely from `deals` / `intel`). So whenever a webNews item is itself a
+>      transaction (investment, financing, unitranche, acquisition, disposal/exit,
+>      refinancing, restructuring, structured credit/CLO, continuation vehicle) or a
+>      capital-formation/strategy event (first/final close, fundraise, launch,
+>      mandate, partnership/JV/MoU, senior personnel, strategy), you MUST ALSO add a
+>      matching item to `deals` (transactions) or `intel` (everything else) — same
+>      date, headline and sourceUrl, with the right `managerId` and a `type` from the
+>      existing vocab — so the item appears on the dashboard and in its tab, not just
+>      the bell. Only pure manager PR (quarterly/annual results, market commentary,
+>      thought-leadership, awards, outlooks) stays webNews-only. Audit: every recent
+>      webNews URL should also be a `sourceUrl` in deals/intel unless it is one of
+>      those PR-only categories.
 >    - **Reconcile fund records** → when a first/final close (or material fund
 >      raise) is found, also update the matching fund in the `funds` array: set
 >      `status` (Open → "First Close" → "Final Close"), update `raised` (and
