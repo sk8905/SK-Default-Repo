@@ -16,8 +16,8 @@
 import {
   items, cases, caseSummaries, practiceAreas, firms, tiers, updateTypes, restructurings,
   firmById, areaById, typeById, tierById, LAST_REVIEWED, LAST_CHECKED, LAST_CHECKED_TIME,
-} from "./data.js?v=20260624-12";
-import { donutChart, columnChart } from "./charts.js?v=20260624-12";
+} from "./data.js?v=20260624-13";
+import { donutChart, columnChart } from "./charts.js?v=20260624-13";
 
 const app = document.getElementById("app");
 
@@ -609,26 +609,31 @@ function rxRow(r) {
     r.notes ? `<p class="rx-line muted">${esc(r.notes)}</p>` : "",
   ].join("");
   const foot = [
-    r.court ? esc(r.court) : "",
-    r.citation ? `<span class="cite">${esc(r.citation)}</span>` : "",
-    r.sector ? esc(r.sector) : "",
     r.articleUrl ? `<a href="${esc(r.articleUrl)}" target="_blank" rel="noopener noreferrer">${esc(firm ? firm.name : "Firm")} analysis ↗</a>` : "",
     r.judgmentUrl ? `<a href="${esc(r.judgmentUrl)}" target="_blank" rel="noopener noreferrer">Judgment ↗</a>` : "",
   ].filter(Boolean).join(" · ");
-  return `<div class="feed-row" id="row-${esc(r.id)}">
+  const compact = [r.court ? esc(r.court) : "", r.citation ? `<span class="cite">${esc(r.citation)}</span>` : "", r.sector ? esc(r.sector) : ""].filter(Boolean).join(" · ");
+  // Collapsed by default: the title row + a compact meta line stay visible; the
+  // <details> reveals debt/creditors/advisers/features/links on expansion.
+  return `<div class="feed-row rx-row" id="row-${esc(r.id)}">
     <div class="feed-meta">
       <div class="chips"><span class="chip rx-type rx-${esc(r.type)}" title="${esc(typeFull)}">${r.type === "scheme" ? "Scheme" : "Plan"}</span></div>
       <span class="feed-date">${r.date ? esc(fmtDate(r.date)) : "undated"}</span>
     </div>
     <div class="feed-body">
-      ${title}
-      <span class="chip rx-out rx-out-${rxOutcomeClass(r.outcome)}" title="${esc(r.outcome)}">${esc(rxOutcomeShort(r.outcome))}</span>
-      ${lines}
-      <div class="feed-foot">
-        ${foot}
+      <div class="rx-titlerow">
+        ${title}
+        <span class="chip rx-out rx-out-${rxOutcomeClass(r.outcome)}" title="${esc(r.outcome)}">${esc(rxOutcomeShort(r.outcome))}</span>
         <button class="save-btn ${saved ? "is-saved" : ""}" data-save="${esc(r.id)}"
-          aria-pressed="${saved}" title="${saved ? "Remove from saved" : "Save this matter"}">${saved ? "★ Saved" : "☆ Save"}</button>
+          aria-pressed="${saved}" title="${saved ? "Remove from saved" : "Save this matter"}">${saved ? "★" : "☆"}</button>
       </div>
+      <details class="rx-det">
+        <summary class="rx-summary"><span class="rx-compact">${compact}</span><span class="rx-more"></span></summary>
+        <div class="rx-expand">
+          ${lines}
+          ${foot ? `<div class="feed-foot">${foot}</div>` : ""}
+        </div>
+      </details>
     </div>
   </div>`;
 }
@@ -663,7 +668,10 @@ function viewRestructurings() {
           <input id="rx-search" type="search" placeholder="Search company, citation, sector, creditor…"
             value="${esc(rxFilter.q)}" aria-label="Search plans and schemes" autocomplete="off"/>
         </div>
-        <div id="rx-count" class="result-count" aria-live="polite"></div>
+        <div class="rx-bar">
+          <div id="rx-count" class="result-count" aria-live="polite"></div>
+          <button type="button" class="link-btn" id="rx-toggle-all" aria-expanded="false">Expand all</button>
+        </div>
         <section class="card"><div id="rx-results" class="feed"></div></section>
       </section>
     </div>`;
@@ -680,6 +688,13 @@ function viewRestructurings() {
   }));
   const search = app.querySelector("#rx-search");
   search.addEventListener("input", () => { rxFilter.q = search.value; renderRxResults(); });
+  app.querySelector("#rx-toggle-all").addEventListener("click", (e) => {
+    const dets = app.querySelectorAll(".rx-det");
+    const anyClosed = [...dets].some((d) => !d.open);
+    dets.forEach((d) => { d.open = anyClosed; });
+    e.currentTarget.textContent = anyClosed ? "Collapse all" : "Expand all";
+    e.currentTarget.setAttribute("aria-expanded", String(anyClosed));
+  });
   renderRxResults();
 }
 
@@ -702,6 +717,8 @@ function renderRxResults() {
   const schemes = matched.filter((r) => r.type === "scheme").length;
   countEl.textContent = `${matched.length} matter${matched.length !== 1 ? "s" : ""} · ${plans} plan${plans !== 1 ? "s" : ""}, ${schemes} scheme${schemes !== 1 ? "s" : ""}`;
   el.innerHTML = matched.length ? byYear(matched, rxRow) : '<p class="empty">No matters match these filters.</p>';
+  const allBtn = document.getElementById("rx-toggle-all");
+  if (allBtn) { allBtn.textContent = "Expand all"; allBtn.setAttribute("aria-expanded", "false"); allBtn.style.display = matched.length ? "" : "none"; }
 }
 
 // =============================================================================
