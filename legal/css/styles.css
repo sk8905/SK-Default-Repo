@@ -437,15 +437,17 @@ a.compact-head:hover { color: var(--primary); }
 .rx-lbl { font-weight: 700; color: var(--ink-soft); text-transform: uppercase; font-size: .68rem; letter-spacing: .4px; margin-right: .25rem; }
 .rx-features { margin: .25rem 0 .15rem; padding-left: 1.1rem; }
 .rx-features li { font-size: .8rem; color: var(--muted); margin: .1rem 0; }
-/* Collapsible row: title + outcome stay visible; <details> reveals the rest. */
+/* Collapsible row — the COMPANY NAME (inside <summary>) is the expand toggle. */
 .rx-bar { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: .8rem; }
-.rx-titlerow { display: flex; align-items: baseline; gap: .45rem; flex-wrap: wrap; }
-.rx-titlerow .save-btn { margin-left: auto; padding: .1rem .45rem; font-size: .8rem; }
-.rx-det { margin-top: .1rem; }
-.rx-summary { cursor: pointer; list-style: none; display: flex; align-items: baseline; gap: .6rem; flex-wrap: wrap; padding: .1rem 0; }
+.rx-det { margin-top: 0; }
+.rx-summary { cursor: pointer; list-style: none; padding: .1rem 0; }
 .rx-summary::-webkit-details-marker { display: none; }
-.rx-compact { font-size: .8rem; color: var(--muted); }
-.rx-more::after { content: "Show details ▾"; color: var(--primary); font-weight: 600; font-size: .78rem; white-space: nowrap; }
-.rx-det[open] .rx-more::after { content: "Hide details ▴"; }
-.rx-summary:hover .rx-more::after { text-decoration: underline; }
-.rx-expand { margin-top: .35rem; }
+.rx-title-line { display: flex; align-items: baseline; gap: .45rem; flex-wrap: wrap; }
+.rx-name { color: var(--ink); }
+.rx-summary:hover .rx-name { color: var(--primary); }
+.rx-caret { margin-left: auto; color: var(--primary); font-weight: 600; font-size: .78rem; white-space: nowrap; flex-shrink: 0; }
+.rx-caret::after { content: "Show details ▾"; }
+.rx-det[open] .rx-caret::after { content: "Hide ▴"; }
+.rx-summary:hover .rx-caret { text-decoration: underline; }
+.rx-compact { display: block; font-size: .8rem; color: var(--muted); margin-top: .1rem; }
+.rx-expand { margin-top: .4rem; }

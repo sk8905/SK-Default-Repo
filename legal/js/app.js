@@ -16,8 +16,8 @@
 import {
   items, cases, caseSummaries, practiceAreas, firms, tiers, updateTypes, restructurings,
   firmById, areaById, typeById, tierById, LAST_REVIEWED, LAST_CHECKED, LAST_CHECKED_TIME,
-} from "./data.js?v=20260624-13";
-import { donutChart, columnChart } from "./charts.js?v=20260624-13";
+} from "./data.js?v=20260624-14";
+import { donutChart, columnChart } from "./charts.js?v=20260624-14";
 
 const app = document.getElementById("app");
 
@@ -596,9 +596,6 @@ function rxRow(r) {
   const firm = r.firm ? (firmById[r.firm] || { name: r.firm }) : null;
   const saved = getSaved().has(r.id);
   const typeFull = r.type === "scheme" ? "Part 26 scheme of arrangement" : "Part 26A restructuring plan";
-  const title = r.judgmentUrl
-    ? `<a class="feed-title" href="${esc(r.judgmentUrl)}" target="_blank" rel="noopener noreferrer">${esc(r.company)} ↗</a>`
-    : `<span class="feed-title">${esc(r.company)}</span>`;
   const features = (r.features || []).length
     ? `<ul class="rx-features">${r.features.map((f) => `<li>${esc(f)}</li>`).join("")}</ul>` : "";
   const lines = [
@@ -613,25 +610,30 @@ function rxRow(r) {
     r.judgmentUrl ? `<a href="${esc(r.judgmentUrl)}" target="_blank" rel="noopener noreferrer">Judgment ↗</a>` : "",
   ].filter(Boolean).join(" · ");
   const compact = [r.court ? esc(r.court) : "", r.citation ? `<span class="cite">${esc(r.citation)}</span>` : "", r.sector ? esc(r.sector) : ""].filter(Boolean).join(" · ");
-  // Collapsed by default: the title row + a compact meta line stay visible; the
-  // <details> reveals debt/creditors/advisers/features/links on expansion.
+  // Collapsed by default — the COMPANY NAME (inside <summary>) is the expand/
+  // collapse toggle. Expanding reveals debt/creditors/advisers/features and the
+  // firm-analysis / judgment links.
   return `<div class="feed-row rx-row" id="row-${esc(r.id)}">
     <div class="feed-meta">
       <div class="chips"><span class="chip rx-type rx-${esc(r.type)}" title="${esc(typeFull)}">${r.type === "scheme" ? "Scheme" : "Plan"}</span></div>
       <span class="feed-date">${r.date ? esc(fmtDate(r.date)) : "undated"}</span>
     </div>
     <div class="feed-body">
-      <div class="rx-titlerow">
-        ${title}
-        <span class="chip rx-out rx-out-${rxOutcomeClass(r.outcome)}" title="${esc(r.outcome)}">${esc(rxOutcomeShort(r.outcome))}</span>
-        <button class="save-btn ${saved ? "is-saved" : ""}" data-save="${esc(r.id)}"
-          aria-pressed="${saved}" title="${saved ? "Remove from saved" : "Save this matter"}">${saved ? "★" : "☆"}</button>
-      </div>
       <details class="rx-det">
-        <summary class="rx-summary"><span class="rx-compact">${compact}</span><span class="rx-more"></span></summary>
+        <summary class="rx-summary">
+          <span class="rx-title-line">
+            <span class="feed-title rx-name">${esc(r.company)}</span>
+            <span class="chip rx-out rx-out-${rxOutcomeClass(r.outcome)}" title="${esc(r.outcome)}">${esc(rxOutcomeShort(r.outcome))}</span>
+            <span class="rx-caret" aria-hidden="true"></span>
+          </span>
+          ${compact ? `<span class="rx-compact">${compact}</span>` : ""}
+        </summary>
         <div class="rx-expand">
           ${lines}
-          ${foot ? `<div class="feed-foot">${foot}</div>` : ""}
+          <div class="feed-foot">
+            ${foot}${foot ? " · " : ""}<button class="save-btn ${saved ? "is-saved" : ""}" data-save="${esc(r.id)}"
+              aria-pressed="${saved}" title="${saved ? "Remove from saved" : "Save this matter"}">${saved ? "★ Saved" : "☆ Save"}</button>
+          </div>
         </div>
       </details>
     </div>
