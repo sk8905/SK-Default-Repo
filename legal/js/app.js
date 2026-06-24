@@ -7,17 +7,17 @@
 //          #/list?area=…     list pre-filtered (also ?saved=1, ?q=…, ?tier=…)
 //          #/item/<id>       single alert detail
 //
-// Per-user state (saved alerts, last-visit marker) is kept in localStorage — no
-// network, no API key. To sync saved alerts across devices later, add a small
-// Worker endpoint backed by Cloudflare KV (see docs/cloudflare-setup.md) and
-// swap the two functions in the "Saved state" block below.
+// Per-user state: saved items sync across devices via the /api/saved Worker/KV
+// endpoint when behind Cloudflare Access (see the "Saved state" block below),
+// with localStorage as an instant cache / offline fallback. The last-visit and
+// notification-seen markers stay device-local in localStorage.
 // =============================================================================
 
 import {
   items, cases, caseSummaries, practiceAreas, firms, tiers, updateTypes, restructurings,
   firmById, areaById, typeById, tierById, LAST_REVIEWED, LAST_CHECKED, LAST_CHECKED_TIME,
-} from "./data.js?v=20260624-18";
-import { donutChart, columnChart } from "./charts.js?v=20260624-18";
+} from "./data.js?v=20260624-19";
+import { donutChart, columnChart } from "./charts.js?v=20260624-19";
 
 const app = document.getElementById("app");
 
@@ -55,9 +55,17 @@ function byYear(list, rowFn) {
     .join("");
 }
 
-// ---- Saved state (localStorage) ---------------------------------------------
+// ---- Saved state (localStorage + cloud sync) --------------------------------
+// Saved items persist to a per-user Cloudflare KV store (via the /api/saved
+// endpoint) when the site is served behind Cloudflare Access, so saved alerts,
+// cases and restructuring matters sync across the user's devices. localStorage
+// is kept as an instant cache / offline fallback, so the app still works if the
+// API isn't reachable (e.g. plain static hosting or local preview).
 const SAVED_KEY = "lexalert.saved";
+const SAVED_API = "/api/saved";
 const VISIT_KEY = "lexalert.lastVisit";
+let savedCloud = false;        // true once the saved-items API responds
+let savedPushTimer = null;
 
 function getSaved() {
   try { return new Set(JSON.parse(localStorage.getItem(SAVED_KEY) || "[]")); }
@@ -66,6 +74,18 @@ function getSaved() {
 function setSaved(set) {
   try { localStorage.setItem(SAVED_KEY, JSON.stringify([...set])); } catch { /* ignore */ }
   updateSavedCount();
+  pushSavedRemote();
+}
+// Debounced save to the cloud (no-op when not signed in / not on Cloudflare).
+function pushSavedRemote() {
+  if (!savedCloud) return;
+  clearTimeout(savedPushTimer);
+  savedPushTimer = setTimeout(() => {
+    fetch(SAVED_API, {
+      method: "PUT", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ saved: [...getSaved()] }),
+    }).catch(() => {});
+  }, 400);
 }
 function toggleSaved(id) {
   const s = getSaved();
@@ -77,6 +97,26 @@ function updateSavedCount() {
   const n = getSaved().size;
   const el = document.getElementById("saved-count");
   if (el) el.textContent = n ? String(n) : "";
+}
+// On load, reconcile this device's saved set with the per-user cloud copy. We
+// UNION the two (saving is additive, so we never want to drop an item saved on
+// another device or on this one), persist the merged set locally, and push it
+// back up so every device converges. No-op when the API isn't reachable.
+async function initSavedSync() {
+  let r;
+  try { r = await fetch(SAVED_API, { headers: { accept: "application/json" } }); }
+  catch { return; }            // offline / not on Cloudflare → localStorage only
+  if (!r || !r.ok) return;     // 404 on static hosting, 401 if not authed
+  let d; try { d = await r.json(); } catch { return; }
+  savedCloud = true;
+  const server = Array.isArray(d.saved) ? d.saved : [];
+  const local = [...getSaved()];
+  const union = new Set([...local, ...server]);
+  try { localStorage.setItem(SAVED_KEY, JSON.stringify([...union])); } catch { /* ignore */ }
+  updateSavedCount();
+  // Push only if the merged set differs from what the server already holds.
+  if (union.size !== server.length || server.some((id) => !union.has(id))) pushSavedRemote();
+  router();                    // re-render so saved stars / Saved view reflect the merge
 }
 
 // "New since last visit" — alerts dated after the previous visit timestamp.
@@ -883,3 +923,4 @@ initChrome();
 renderNotifications();
 router();
 markVisitedSoon();
+initSavedSync();   // pull + merge the per-user saved list across devices (behind Access)

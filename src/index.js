@@ -1,5 +1,6 @@
 // Cloudflare Worker entry — serves the static site (via the ASSETS binding) and
-// the per-user watchlist API at /api/watchlist (backed by the WATCHLIST KV).
+// the per-user watchlist API at /api/watchlist plus the Meridian Legal saved-
+// items API at /api/saved (both backed by the WATCHLIST KV, distinct prefixes).
 //
 // The whole Worker is gated by Cloudflare Access, so every request that reaches
 // here is already authenticated; Access injects a signed identity JWT
@@ -31,6 +32,35 @@ function identity(request) {
 }
 
 const keyFor = (email) => "wl:" + email;
+// Meridian Legal saved alerts/cases/matters — a flat array of item ids, keyed
+// under a distinct prefix in the same KV namespace so it never collides with a
+// watchlist. Per-user isolation comes from the verified Access email, exactly
+// like the watchlist, so saved items sync across that user's devices.
+const savedKeyFor = (email) => "lsv:" + email;
+
+async function handleSaved(request, env) {
+  const email = identity(request);
+  if (!email) return json({ error: "unauthenticated" }, 401);
+
+  if (request.method === "GET") {
+    const raw = await env.WATCHLIST.get(savedKeyFor(email));
+    let saved = [];
+    if (raw) { try { const p = JSON.parse(raw); if (Array.isArray(p)) saved = p; } catch { /* keep default */ } }
+    return json({ email, saved });
+  }
+
+  if (request.method === "PUT") {
+    let body;
+    try { body = await request.json(); } catch { return json({ error: "invalid json" }, 400); }
+    const saved = Array.isArray(body.saved)
+      ? body.saved.filter((x) => typeof x === "string" && x.length <= 24).slice(0, 10000)
+      : [];
+    await env.WATCHLIST.put(savedKeyFor(email), JSON.stringify(saved));
+    return json({ ok: true });
+  }
+
+  return json({ error: "method not allowed" }, 405);
+}
 
 async function handleWatchlist(request, env) {
   const email = identity(request);
@@ -73,6 +103,7 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === "/api/watchlist") return handleWatchlist(request, env);
+    if (url.pathname === "/api/saved") return handleSaved(request, env);
     if (url.pathname === "/api/me") return handleMe(request);
     // Sign-in helper: hitting this behind Access triggers the Access login,
     // then bounces the user to `to` (default the landing page).
