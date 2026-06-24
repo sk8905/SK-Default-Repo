@@ -74,6 +74,20 @@ the source of truth for the prompt.
     tells which run produced the shown data; it appears in the topbar and the
     notification header next to `LAST_CHECKED`. Keep both apps' value identical
     when a single run touches both.
+    - **DERIVE it from the clock — never copy a value.** Read the real time with
+      `TZ='Europe/London' date '+%H:%M %Z'` and use that. Do NOT reuse the example
+      strings above, the previous run's value, or a "06:00"/"12:00" schedule label:
+      a manually-triggered run can fire at any time, and a routine fired at 15:41
+      must stamp `"15:41 BST"`, not `"06:01 BST"`. (Real bug on 2026-06-24: a run
+      executed ~15:41 wrote `LAST_CHECKED_TIME = "06:01 BST"` and titled its commit
+      "06:00 BST refresh", so the live site read as though nothing had run since
+      06:00 — it looked like the afternoon routine had failed when it had actually
+      succeeded.)
+    - **Never move it backwards within the same day.** If the file already shows a
+      LATER time for today's `LAST_CHECKED` (e.g. a 12:06 run already ran), the new
+      value must be ≥ that — a later run must not regress the displayed time.
+    - The commit subject's time label, if you use one, MUST match this same real
+      time — do not title a 15:41 run "06:00 BST refresh".
   - Only set `DATA_UPDATED` (credit) / `LAST_REVIEWED` (legal) to today when that
     app's actual data changed (new deal/intel/webNews or alert/case).
 - **Validate** before committing — and validate as an **ES module**, because the
