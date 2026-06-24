@@ -14,10 +14,10 @@
 // =============================================================================
 
 import {
-  items, cases, caseSummaries, practiceAreas, firms, tiers, updateTypes,
+  items, cases, caseSummaries, practiceAreas, firms, tiers, updateTypes, restructurings,
   firmById, areaById, typeById, tierById, LAST_REVIEWED, LAST_CHECKED, LAST_CHECKED_TIME,
-} from "./data.js?v=20260624-10";
-import { donutChart, columnChart } from "./charts.js?v=20260624-10";
+} from "./data.js?v=20260624-11";
+import { donutChart, columnChart } from "./charts.js?v=20260624-11";
 
 const app = document.getElementById("app");
 
@@ -563,6 +563,128 @@ function viewItem(id) {
 }
 
 // =============================================================================
+// =============================================================================
+// VIEW: Plans & Schemes (#/restructurings) — Part 26A restructuring plans and
+// distressed Part 26 schemes of arrangement since 2020, with an All / Plans /
+// Schemes type filter (plus search, outcome and year).
+// =============================================================================
+const rxFilter = { type: "all", q: "", years: [], outcomes: [] };
+
+function rxTypeLabel(t) { return t === "scheme" ? "Scheme (Pt 26)" : "Plan (Pt 26A)"; }
+function rxOutcomeClass(o) {
+  const t = (o || "").toLowerCase();
+  if (t.includes("refus") || t.includes("overturn") || (t.includes("appeal") && t.includes("allow"))) return "neg";
+  if (t.includes("upheld") || t.includes("dismiss")) return "pos";
+  if (t.includes("conven") || t.includes("withdraw")) return "neu";
+  return "pos";
+}
+
+function rxCard(r) {
+  const firm = r.firm ? (firmById[r.firm] || { name: r.firm }) : null;
+  const saved = getSaved().has(r.id);
+  const creditors = (r.creditors || []).length ? esc(r.creditors.join("; ")) : '<span class="muted">Not disclosed</span>';
+  const advisers = (r.advisers || []).length ? esc(r.advisers.join(", ")) : '<span class="muted">Not identified</span>';
+  const features = (r.features || []).length
+    ? `<ul class="rx-features">${r.features.map((f) => `<li>${esc(f)}</li>`).join("")}</ul>` : '<span class="muted">—</span>';
+  const links = [
+    r.articleUrl ? `<a href="${esc(r.articleUrl)}" target="_blank" rel="noopener noreferrer">${esc(firm ? firm.name : "Firm")} analysis ↗</a>` : "",
+    r.judgmentUrl ? `<a href="${esc(r.judgmentUrl)}" target="_blank" rel="noopener noreferrer">Judgment${r.citation ? ` — ${esc(r.citation)}` : ""} ↗</a>`
+      : (r.citation ? `<span class="muted small">${esc(r.citation)}</span>` : ""),
+  ].filter(Boolean).join(' <span class="rx-dot">·</span> ');
+  return `<article class="rx-card" id="row-${esc(r.id)}">
+    <div class="rx-head">
+      <h3 class="rx-company">${esc(r.company)}</h3>
+      <div class="rx-chips">
+        <span class="chip rx-type rx-${esc(r.type)}">${esc(rxTypeLabel(r.type))}</span>
+        <span class="chip rx-out rx-out-${rxOutcomeClass(r.outcome)}">${esc(r.outcome)}</span>
+        <button class="save-btn ${saved ? "is-saved" : ""}" data-save="${esc(r.id)}" aria-pressed="${saved}"
+          title="${saved ? "Remove from saved" : "Save"}">${saved ? "★" : "☆"}</button>
+      </div>
+    </div>
+    <div class="rx-meta muted small">${r.date ? esc(fmtDate(r.date)) : "undated"}${r.court ? ` · ${esc(r.court)}` : ""}${r.sector ? ` · ${esc(r.sector)}` : ""}</div>
+    <dl class="rx-grid">
+      <div><dt>Debt</dt><dd>${r.debt ? esc(r.debt) : '<span class="muted">Not disclosed</span>'}</dd></div>
+      <div><dt>Largest creditors</dt><dd>${creditors}</dd></div>
+      <div><dt>Company advised by</dt><dd>${advisers}</dd></div>
+      <div class="rx-feat"><dt>Key features</dt><dd>${features}</dd></div>
+    </dl>
+    ${r.notes ? `<p class="rx-notes muted small">${esc(r.notes)}</p>` : ""}
+    <div class="rx-links">${links}</div>
+  </article>`;
+}
+
+function viewRestructurings() {
+  const q = parseHashQuery();
+  rxFilter.type = ["plan", "scheme"].includes(q.type) ? q.type : "all";
+  rxFilter.q = q.q || "";
+  rxFilter.years = [];
+  rxFilter.outcomes = [];
+  const years = [...new Set(restructurings.map((r) => (r.date || "").slice(0, 4)).filter(Boolean))].sort((a, b) => b.localeCompare(a));
+  const outcomes = [...new Set(restructurings.map((r) => r.outcome))].sort();
+  const seg = (val, label) => `<button type="button" class="seg-btn${rxFilter.type === val ? " active" : ""}" data-rxtype="${val}">${label}</button>`;
+
+  app.innerHTML = `
+    <div class="list-head">
+      <h1>Plans &amp; Schemes</h1>
+      <p class="muted">English-law restructuring plans (Companies Act 2006 <strong>Part 26A</strong>) and
+        distressed schemes of arrangement (<strong>Part 26</strong>) before the court since 2020 — company,
+        debt, largest creditors, key features, the company's advisers, a tracked-firm analysis and the judgment.</p>
+    </div>
+    <div class="list-layout">
+      <aside class="filters" aria-label="Filters">
+        <div class="seg" role="group" aria-label="Type filter">
+          ${seg("all", "All")}${seg("plan", "Plans")}${seg("scheme", "Schemes")}
+        </div>
+        ${foldGroup("Outcome", "outcomes", outcomes.map((o) => ({ id: o, name: o })), rxFilter.outcomes)}
+        ${foldGroup("Year", "years", years.map((y) => ({ id: y, name: y })), rxFilter.years)}
+      </aside>
+      <section class="results-wrap">
+        <div class="searchbar">
+          <input id="rx-search" type="search" placeholder="Search company, citation, sector, creditor…"
+            value="${esc(rxFilter.q)}" aria-label="Search plans and schemes" autocomplete="off"/>
+        </div>
+        <div id="rx-count" class="result-count" aria-live="polite"></div>
+        <div id="rx-results"></div>
+      </section>
+    </div>`;
+
+  app.querySelectorAll("[data-rxtype]").forEach((b) => b.addEventListener("click", () => {
+    rxFilter.type = b.getAttribute("data-rxtype");
+    app.querySelectorAll("[data-rxtype]").forEach((x) => x.classList.toggle("active", x === b));
+    renderRxResults();
+  }));
+  app.querySelectorAll('input[type="checkbox"][name]').forEach((cb) => cb.addEventListener("change", () => {
+    rxFilter[cb.name] = [...app.querySelectorAll(`input[name="${cb.name}"]:checked`)].map((x) => x.value);
+    refreshFoldBadge(cb);
+    renderRxResults();
+  }));
+  const search = app.querySelector("#rx-search");
+  search.addEventListener("input", () => { rxFilter.q = search.value; renderRxResults(); });
+  renderRxResults();
+}
+
+function renderRxResults() {
+  const el = document.getElementById("rx-results");
+  const countEl = document.getElementById("rx-count");
+  if (!el) return;
+  const matched = restructurings.filter((r) => {
+    if (rxFilter.type !== "all" && r.type !== rxFilter.type) return false;
+    if (rxFilter.years.length && !rxFilter.years.includes((r.date || "").slice(0, 4))) return false;
+    if (rxFilter.outcomes.length && !rxFilter.outcomes.includes(r.outcome)) return false;
+    if (rxFilter.q.trim()) {
+      const hay = [r.company, r.citation, r.sector, r.debt, (r.creditors || []).join(" "),
+        (r.advisers || []).join(" "), (r.features || []).join(" ")].join(" ").toLowerCase();
+      if (!hay.includes(rxFilter.q.trim().toLowerCase())) return false;
+    }
+    return true;
+  });
+  const plans = matched.filter((r) => r.type === "plan").length;
+  const schemes = matched.filter((r) => r.type === "scheme").length;
+  countEl.textContent = `${matched.length} matter${matched.length !== 1 ? "s" : ""} · ${plans} plan${plans !== 1 ? "s" : ""}, ${schemes} scheme${schemes !== 1 ? "s" : ""}`;
+  el.innerHTML = matched.length ? byYear(matched, rxCard) : '<p class="empty">No matters match these filters.</p>';
+}
+
+// =============================================================================
 // Router + global click delegation
 // =============================================================================
 function router() {
@@ -573,6 +695,7 @@ function router() {
   if (path === "/" || path === "") viewDashboard();
   else if (path === "/list") viewList();
   else if (path === "/cases") viewCases();
+  else if (path === "/restructurings") viewRestructurings();
   else if (path.startsWith("/item/")) viewItem(decodeURIComponent(path.slice("/item/".length)));
   else viewDashboard();
 
