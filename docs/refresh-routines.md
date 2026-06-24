@@ -75,8 +75,15 @@ the source of truth for the prompt.
     when a single run touches both.
   - Only set `DATA_UPDATED` (credit) / `LAST_REVIEWED` (legal) to today when that
     app's actual data changed (new deal/intel/webNews or alert/case).
-- **Validate** before committing: `node --check credit/js/data.js` and
-  `node --check legal/js/data.js`.
+- **Validate** before committing — and validate as an **ES module**, because the
+  apps load `data.js` via `<script type="module">`. Plain `node --check file.js`
+  parses in script mode and can PASS on module-only errors (e.g. a missing comma
+  between array objects), shipping a blank page. Use an ESM check instead:
+  `for f in credit/js/data.js legal/js/data.js; do cp "$f" /tmp/c.mjs && node --check /tmp/c.mjs || echo "FAIL $f"; done`
+  — or import-test it: `node --input-type=module -e "import('./legal/js/data.js').then(m=>console.log(m.items.length))"`.
+  (A real bug seen 2026-06-24: a `data.js` rewrite dropped the commas between
+  `items`; `node --check *.js` passed but the module failed to parse and Legal
+  rendered blank.)
 - **Publish on every run.** Because `LAST_CHECKED` is bumped each run, every run
   produces a commit (even a "nothing new" run, which just advances `LAST_CHECKED`
   + cache-busters). Commit (message trailers below), then push to `main` AND the
