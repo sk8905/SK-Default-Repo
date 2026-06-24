@@ -15,9 +15,9 @@
 // `LAST_REVIEWED` whenever you refresh the data.
 // =============================================================================
 
-export const LAST_REVIEWED = "2026-06-23";
+export const LAST_REVIEWED = "2026-06-24";
 // When the refresh routine last ran (even if nothing new) — shown as "Last refresh".
-export const LAST_CHECKED = "2026-06-23";
+export const LAST_CHECKED = "2026-06-24";
 
 // ---- Practice areas ---------------------------------------------------------
 export const practiceAreas = [
@@ -1037,6 +1037,35 @@ export const items = [
     tags: ["stablecoins", "Bank of England", "systemic stablecoins", "digital assets", "payments", "financial stability", "PRA", "FCA"],
     url: "https://financialregulation.linklaters.com/post/102n4ye/bank-of-england-updates-its-policy-for-uk-systemic-stablecoins",
   },
+  {
+    id: "u135", title: "Crime and Policing Act 2026: corporate criminal liability expanded to all senior manager offences",
+    area: "corporate", areas: ["corporate", "banking"], type: "update", firm: "slaughtermay",
+    date: "2026-06-23", jurisdiction: "England & Wales",
+    summary: "The Crime and Policing Act 2026 (in force 29 June 2026) significantly expands the corporate 'failure to prevent' framework to cover all criminal offences committed by a senior manager in England and Wales — extending well beyond the earlier Economic Crime (Transparency and Enforcement) Act's narrower fraud, false accounting and money-laundering limbs. Slaughter and May's June 2026 Global Investigations Bulletin also covers FCA enforcement actions against Deutsche Bank and BancTrust; an SFO investigations update; FRC audit enforcement; OFSI's £1 million penalty on Sabre Global Technologies for Russia-linked sanctions breaches; and recent reforms to the Insolvency Service's civil enforcement powers.",
+    points: [
+      "Crime and Policing Act 2026 (in force 29 June 2026): corporate liability for 'failure to prevent' a senior manager's offence is extended to all crimes — no longer limited to fraud, false accounting and money laundering.",
+      "FCA issued enforcement action against Deutsche Bank and BancTrust; FRC took audit enforcement steps noted in the bulletin.",
+      "OFSI imposed a £1 million fine on Sabre Global Technologies for Russia-related sanctions breaches.",
+      "Insolvency Service civil enforcement powers reformed to enable faster recovery of assets from directors who breach disqualification undertakings.",
+    ],
+    tags: ["corporate criminal liability", "failure to prevent", "Crime and Policing Act 2026", "FCA enforcement", "OFSI", "sanctions", "insolvency service"],
+    url: "https://www.slaughterandmay.com/insights/global-investigations-bulletin/global-investigations-bulletin-june-2026/",
+  },
+  {
+    id: "u136", title: "Re Deutsche Glasfaser Group GmbH [2026] EWHC 1467 (Ch): English court sanctions €7bn German fibre-optic group scheme",
+    area: "ri", areas: ["ri", "banking"], type: "update", firm: "southsquare",
+    date: "2026-06-22", jurisdiction: "England & Wales",
+    court: "High Court (Ch)", citation: "[2026] EWHC 1467 (Ch)",
+    summary: "Hildyard J sanctioned the scheme of arrangement of Deutsche Glasfaser Group GmbH, Germany's leading FTTH fibre-optic provider, on 19 June 2026 — restructuring approximately €6.95 billion of debt. The scheme bifurcates existing debt into reinstated operating company and holdco tranches, injects €400 million of new super-senior capital, and secures €845 million in equity contributions from existing shareholders, generating an estimated €840 million surplus versus insolvency. At the scheme meeting, over 97.6% by value of the single creditor class voted in favour, reflecting a pre-arranged 95%+ creditor lock-up. South Square members appeared in the proceedings.",
+    points: [
+      "Single creditor class scheme; 97.6% by value voted in favour at the scheme meeting; pre-arranged lock-up exceeded 95% before the convening hearing.",
+      "Bifurcation of €6.95bn in existing debt into reinstated opco and holdco tranches, plus €400m new super-senior money and €845m sponsor equity injection.",
+      "Court permitted staggered scheme document distribution to allow parties to resolve outstanding issues before the scheme meeting.",
+      "Sanction generates €840m surplus vs. insolvency; illustrated the English scheme's continuing utility for restructuring German-incorporated groups.",
+    ],
+    tags: ["scheme of arrangement", "restructuring", "German company", "fibre optic", "cross-border", "English court", "Hildyard J"],
+    url: "https://southsquare.com/new-judgment-re-deutsche-glasfaser-group-gmbh-2026-ewhc-1467-ch-convening-hearing/",
+  },
 ];
 
 // ---- Recent cases published on BAILII -------------------------------------
@@ -1156,6 +1185,9 @@ export const cases = [
   { id: "c38", name: "Hipgnosis Music Limited v Merck Mercuriadis", citation: "[2026] EWHC 1500 (Ch)", court: "High Court (Ch)",
     date: "2026-06-23", area: "corporate", url: "https://caselaw.nationalarchives.gov.uk/ewhc/ch/2026/1500",
     summary: "Former director diverted a corporate opportunity (music royalty catalogue acquisition business) to newly formed vehicles for personal gain; High Court held he breached the s.175 CA 2006 duty to avoid conflicts and that the successor vehicle and its manager were accessories jointly liable to account for profits." },
+  { id: "c39", name: "Bank of India v Firestar Diamond FZE & Ors", citation: "[2026] EWHC 1565 (Comm)", court: "High Court (Comm)",
+    date: "2026-06-23", area: "banking", url: "https://caselaw.nationalarchives.gov.uk/ewhc/comm/2026/1565",
+    summary: "Commercial Court upholds a personal guarantee given by Nirav Modi to Bank of India over obligations of Firestar Diamond FZE, rejecting arguments that Indian foreign-exchange regulations (FEMA) rendered the guarantee void; confirms SOFR replaces synthetic LIBOR as the applicable contractual interest rate after September 2024." },
 ];
 
 // ---- Lightweight lookups ----------------------------------------------------
@@ -1206,4 +1238,5 @@ export const caseSummaries = {
   c36: "Between 2001 and 2006 Dexia entered into 11 interest rate swap transactions with the City of Turin totalling around €400m, hedging the municipality's variable-rate bond obligations. When interest rates fell for over a decade Turin sought to invalidate the swaps in Italian proceedings, arguing non-disclosure of mark-to-market values and implicit costs under the Cattolica doctrine, and constitutional and civil-code defects. Mr Justice Andrew Baker rejected each argument in full and granted Dexia comprehensive declaratory relief at a trial Turin chose not to attend. He held that Turin's swaps were straightforward hedges — not complex aleatory contracts requiring Cattolica-style disclosure — that express ISDA Master Agreement language ruling out an advisory role protected the bank, and that Turin as a professional investor could not invoke retail-client protections; Turin's non-attendance generated a substantial costs liability and final declarations deployable in Italian enforcement.",
   c37: "Iconic Sports Eagle Investment LLC held a put option over a substantial minority stake (aggregate value exceeding US$100 million) in Eagle Football Holdings Limited, which owns stakes in Olympique Lyonnais and Botafogo FR. After the defendant Textor repudiated the put option agreement, Iconic brought a claim for specific performance and the case raised two issues remitted by the Court of Appeal: whether Iconic was barred from advancing the 'Snell Point' (that a party need only show readiness and willingness to perform at the date of the specific performance order) and whether that point was correct in law. Deputy Judge Anderson KC held that Iconic was not estopped from advancing the argument and that the principle in Snell's Equity — permitting a claimant to demonstrate readiness at the judgment date rather than the contractual completion date when the counterparty has repudiated — correctly states English law. The decision provides practical authority for M&A and private equity practitioners whose clients face repudiation of share option or SPA obligations, confirming that inability to complete on the original timetable does not defeat a specific performance claim where the defendant caused the default.",
   c38: "Hipgnosis Music Limited alleged its former director, Merck Mercuriadis, diverted the company's business of acquiring music royalty catalogues by pursuing an essentially identical model through Hipgnosis Songs Fund Limited (HSFL2), which completed a successful £202 million IPO in July 2018 after the original vehicle failed. Adam Johnson J held that Mercuriadis breached the s.175 CA 2006 duty to avoid conflicts of interest: the corporate opportunity had not been approved or abandoned by the company, and he exploited it through different corporate structures for personal gain, engaging the continuing duties imposed by s.170(2)(a) CA 2006 on former directors. The successor vehicle HSFL2 and its associated management company were found to be accessories to the breach and jointly liable to account for profits. The decision is an important modern statement on the corporate opportunity doctrine and the reach of post-directorship fiduciary obligations under English law.",
+  c39: "Bank of India sought to enforce a personal guarantee signed by Nirav Modi — the fugitive Indian diamantaire held at HMP Thameside — securing USD $4.1 million owed by his company Firestar Diamond FZE. The Commercial Court (Tinkler DJ) rejected Modi's argument that the guarantee was void under Indian foreign-exchange regulations (FEMA): the Reserve Bank of India may grant retrospective approval, and the obligation to obtain it rests on the guarantor, not the bank. The court also confirmed that SOFR-based rates replace synthetic LIBOR under the facility documentation following that benchmark's cessation in September 2024, and held that Modi had been validly served with the October 2025 demand notice. Judgment was entered for Bank of India in full.",
 };

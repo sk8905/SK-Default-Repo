@@ -21,7 +21,7 @@
 export const DATA_UPDATED = "2026-06-23";
 // When the refresh routine last ran (even if it found nothing new) — shown in the
 // topbar as "Last refresh" so a run can be confirmed regardless of data changes.
-export const LAST_CHECKED = "2026-06-23";
+export const LAST_CHECKED = "2026-06-24";
 
 export const STRATEGIES = [
   "Senior Direct Lending",
