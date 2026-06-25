@@ -21,7 +21,7 @@ export const LAST_CHECKED = "2026-06-25";
 // Time-of-day the routine last ran, pre-formatted WITH a timezone label (e.g.
 // "05:22 BST") so it renders the same regardless of the viewer's browser timezone.
 // Set every run alongside LAST_CHECKED — two runs a day (~06:00 / ~12:00).
-export const LAST_CHECKED_TIME = "05:18 BST";
+export const LAST_CHECKED_TIME = "12:02 BST";
 
 // ---- Practice areas ---------------------------------------------------------
 export const practiceAreas = [
@@ -4940,6 +4940,16 @@ export const items = [
     summary: "A&O Shearman examines the EEA regulatory framework restricting market access for non-EEA banks, including passporting equivalence, third-country branch requirements, and the impact on cross-border lending and capital markets activity into the EEA.",
     points: [],
     tags: ["EEA", "third-country", "banking regulation", "passporting", "cross-border"],
+    dateEstimated: false,
+  },
+  {
+    url: "https://www.slaughterandmay.com/insights/corporate-update/corporate-update-bulletin-25-june-2026/",
+    id: "u565", title: "Corporate Update Bulletin — 25 June 2026",
+    area: "corporate", areas: ["corporate"], type: "update", firm: "slaughtermay",
+    date: "2026-06-25", jurisdiction: "United Kingdom",
+    summary: "Slaughter and May's fortnightly Corporate Update Bulletin highlighting the latest English law and regulatory developments of interest to corporates, covering company law, M&A, capital markets and governance developments as at 25 June 2026.",
+    points: [],
+    tags: ["corporate law", "M&A", "company law", "governance", "regulatory update"],
     dateEstimated: false,
   },
 ];
