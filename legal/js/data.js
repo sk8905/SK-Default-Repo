@@ -15,13 +15,13 @@
 // `LAST_REVIEWED` whenever you refresh the data.
 // =============================================================================
 
-export const LAST_REVIEWED = "2026-06-24";
+export const LAST_REVIEWED = "2026-06-25";
 // When the refresh routine last ran (even if nothing new) — shown as "Last refresh".
-export const LAST_CHECKED = "2026-06-24";
+export const LAST_CHECKED = "2026-06-25";
 // Time-of-day the routine last ran, pre-formatted WITH a timezone label (e.g.
 // "05:22 BST") so it renders the same regardless of the viewer's browser timezone.
 // Set every run alongside LAST_CHECKED — two runs a day (~06:00 / ~12:00).
-export const LAST_CHECKED_TIME = "15:41 BST";
+export const LAST_CHECKED_TIME = "05:18 BST";
 
 // ---- Practice areas ---------------------------------------------------------
 export const practiceAreas = [
@@ -4921,6 +4921,26 @@ export const items = [
     points: [],
     tags: ["cryptoassets", "stablecoins", "FCA", "financial regulation"],
     dateEstimated: true,
+  },
+  {
+    url: "https://www.macfarlanes.com/what-we-think/in-depth/2026/investment-management-update-june-2026/",
+    id: "u563", title: "Investment Management Update — June 2026",
+    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "macfarlanes",
+    date: "2026-06-17", jurisdiction: "United Kingdom",
+    summary: "Macfarlanes' monthly investment management briefing covering UK and EU regulatory developments in June 2026, including FCA fund authorisation updates, AIFMD II implementation progress, and emerging ESG disclosure requirements for UK asset managers.",
+    points: [],
+    tags: ["investment management", "FCA", "AIFMD II", "ESG", "fund regulation"],
+    dateEstimated: false,
+  },
+  {
+    url: "https://www.aoshearman.com/en/insights/eea-restrictions-on-non-eea-banks",
+    id: "u564", title: "EEA Restrictions on Non-EEA Banks",
+    area: "banking", areas: ["banking"], type: "update", firm: "aoshearman",
+    date: "2026-06-11", jurisdiction: "European Union",
+    summary: "A&O Shearman examines the EEA regulatory framework restricting market access for non-EEA banks, including passporting equivalence, third-country branch requirements, and the impact on cross-border lending and capital markets activity into the EEA.",
+    points: [],
+    tags: ["EEA", "third-country", "banking regulation", "passporting", "cross-border"],
+    dateEstimated: false,
   },
 ];
 
