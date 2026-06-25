@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260625-1";
+} from "./data.js?v=20260625-2";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260625-1";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260625-2";
 
 const app = document.getElementById("app");
 
@@ -1203,9 +1203,9 @@ function viewWatchlist() {
     return;
   }
   const listCard = (title, items, type, render) =>
-    `<section class="card"><h2>${title} <span class="muted">(${items.length})</span></h2>${items.length
+    `<details class="card wl-cat" open><summary class="wl-cat-head"><h2>${title} <span class="muted">(${items.length})</span></h2><span class="wl-caret" aria-hidden="true"></span></summary>${items.length
       ? `<ul class="link-list">${items.map((x) => `<li>${nameCell(type, x.id, render(x))}</li>`).join("")}</ul>`
-      : '<p class="muted small">None followed.</p>'}</section>`;
+      : '<p class="muted small">None followed.</p>'}</details>`;
   app.innerHTML = `
     <div class="page-head"><h1>My Watchlist</h1><p class="muted">${fm.length + ff.length + fl.length} followed · ${cloudSync ? "synced across devices" : "saved on this device"}</p></div>
     ${accountBar}
