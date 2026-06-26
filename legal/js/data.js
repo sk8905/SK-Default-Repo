@@ -15,13 +15,13 @@
 // `LAST_REVIEWED` whenever you refresh the data.
 // =============================================================================
 
-export const LAST_REVIEWED = "2026-06-25";
+export const LAST_REVIEWED = "2026-06-26";
 // When the refresh routine last ran (even if nothing new) — shown as "Last refresh".
-export const LAST_CHECKED = "2026-06-25";
+export const LAST_CHECKED = "2026-06-26";
 // Time-of-day the routine last ran, pre-formatted WITH a timezone label (e.g.
 // "05:22 BST") so it renders the same regardless of the viewer's browser timezone.
 // Set every run alongside LAST_CHECKED — two runs a day (~06:00 / ~12:00).
-export const LAST_CHECKED_TIME = "12:02 BST";
+export const LAST_CHECKED_TIME = "05:14 BST";
 
 // ---- Practice areas ---------------------------------------------------------
 export const practiceAreas = [
@@ -4950,6 +4950,21 @@ export const items = [
     summary: "Slaughter and May's fortnightly Corporate Update Bulletin highlighting the latest English law and regulatory developments of interest to corporates, covering company law, M&A, capital markets and governance developments as at 25 June 2026.",
     points: [],
     tags: ["corporate law", "M&A", "company law", "governance", "regulatory update"],
+    dateEstimated: false,
+  },
+  {
+    url: "https://www.sidley.com/en/insights/newsupdates/2026/06/uk-and-eu-investment-management-update-june-2026",
+    id: "u566", title: "UK/EU Investment Management Update (June 2026)",
+    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "sidley",
+    date: "2026-06-17", jurisdiction: "United Kingdom / European Union",
+    summary: "Sidley Austin's monthly investment management update covering UK and EU regulatory developments, including FCA CP26/16 on asset registration delegation for authorised AIF depositaries, HMT/FCA progress on replacing UK AIFMD with a streamlined three-tier AIFM framework, the EU AIFMD delegated regulation on liquidity management tools (in force 19 March 2026, applying from 16 April 2026), and ESMA's final report on the 2025 common supervisory action on compliance and audit functions of UCITS managers and AIFMs.",
+    points: [
+      "FCA published CP26/16 (21 May 2026) proposing changes enabling depositaries of authorised AIFs to delegate asset registration and custody functions to sub-custodians, to support private market investment",
+      "HMT and FCA progressing replacement of UK AIFMD with streamlined three-tier AIFM classification framework; draft SI and FCA consultation paper expected mid-2026",
+      "EU AIFMD delegated regulation on liquidity management tools entered into force 19 March 2026 and applies from 16 April 2026",
+      "ESMA final report on 2025 common supervisory action on compliance and audit functions of UCITS managers and AIFMs published 11 May 2026",
+    ],
+    tags: ["AIFMD", "FCA", "fund regulation", "authorised funds", "UCITS", "liquidity management", "investment management", "CP26/16"],
     dateEstimated: false,
   },
 ];
