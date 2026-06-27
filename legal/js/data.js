@@ -15,13 +15,13 @@
 // `LAST_REVIEWED` whenever you refresh the data.
 // =============================================================================
 
-export const LAST_REVIEWED = "2026-06-26";
+export const LAST_REVIEWED = "2026-06-27";
 // When the refresh routine last ran (even if nothing new) — shown as "Last refresh".
 export const LAST_CHECKED = "2026-06-27";
 // Time-of-day the routine last ran, pre-formatted WITH a timezone label (e.g.
 // "05:22 BST") so it renders the same regardless of the viewer's browser timezone.
 // Set every run alongside LAST_CHECKED — two runs a day (~06:00 / ~12:00).
-export const LAST_CHECKED_TIME = "05:04 BST";
+export const LAST_CHECKED_TIME = "12:02 BST";
 
 // ---- Practice areas ---------------------------------------------------------
 export const practiceAreas = [
@@ -4982,6 +4982,20 @@ export const items = [
     sourceUrl: "https://www.simmons-simmons.com/en/publications/cmpzcp1yl008kv6xk30l6igas/the-financial-services-and-markets-bill-2026-27-key-reforms",
     dateEstimated: false,
   },
+  {
+    url: "https://www.macfarlanes.com/insights/102n6dt/corporate-law-update-20-26-june/",
+    id: "u568", title: "Corporate Law Update: 20–26 June 2026",
+    area: "corporate", areas: ["corporate"], type: "update", firm: "macfarlanes",
+    date: "2026-06-26", jurisdiction: "United Kingdom",
+    summary: "Macfarlanes' weekly corporate law update covering developments from 20–26 June 2026: HMRC launches a wide-ranging consultation on the taxation of distributions and capital repayments by companies (closing 14 September 2026); FRC publishes a mythbuster clarifying auditors' responsibilities regarding Provision 29 statements under the UK Corporate Governance Code (effective for financial years beginning 1 January 2026); and a High Court ruling on the construction of 'Banking Days' in cross-border contracts, rejecting a multi-timezone interpretation.",
+    points: [
+      "HMRC consultation on distributions and capital repayments: proposals to align UK/non-UK treatment, tighten capital-treatment rules for share buybacks and owner-manager exits, and introduce new anti-avoidance measures (closes 14 September 2026)",
+      "FRC Provision 29 mythbuster: auditors will read but not formally opine on directors' explanations of why they have not complied with Provision 29 of the UK Corporate Governance Code",
+      "Banking Days judgment: 'Banking Days' spanning multiple jurisdictions interpreted by reference to the time zone of the place of performance, rejecting a 37–38-hour 'day' interpretation",
+    ],
+    tags: ["corporate law", "HMRC", "distributions", "share buybacks", "UK Corporate Governance Code", "FRC", "auditors", "banking days"],
+    dateEstimated: false,
+  },
 ];
 
 // ---- Recent cases published on BAILII -------------------------------------
@@ -5107,6 +5121,12 @@ export const cases = [
   { id: "c40", name: "Deutsche Glasfaser Group GmbH, Re (Scheme Sanction)", citation: "[2026] EWHC 1563 (Ch)", court: "High Court (Ch)",
     date: "2026-06-24", area: "ri", url: "https://caselaw.nationalarchives.gov.uk/ewhc/ch/2026/1563",
     summary: "Mr Justice Adam Johnson sanctions a creditor scheme of arrangement under s.899 CA 2006 for German fibre-optic group Deutsche Glasfaser (~€7bn debt), bifurcating debt into opco/holdco tranches and injecting €400m super-senior capital; creditors voted 100% in favour; a companion judgment to the convening hearing [2026] EWHC 1467 (Ch) and confirms English court jurisdiction for large cross-border German restructurings." },
+  { id: "c41", name: "Musst Holdings Ltd v Astra Asset Management UK Ltd & Anor", citation: "[2026] EWHC 1599 (Ch)", court: "High Court (Ch)",
+    date: "2026-06-26", area: "fundsreg", url: "https://www.bailii.org/ew/cases/EWHC/Ch/2026/1599.html",
+    summary: "Further judgment in the long-running Musst/Astra litigation (introduction-fee dispute against an AIFM); addresses whether litigation costs incurred in earlier related proceedings can be claimed as a head of damages (costs as damages)." },
+  { id: "c42", name: "Gordian Holdings Ltd v Sofroniou", citation: "[2026] EWHC 1602 (KB)", court: "High Court (KB)",
+    date: "2026-06-26", area: "ri", url: "https://www.bailii.org/ew/cases/EWHC/KB/2026/1602.html",
+    summary: "Further proceedings in a dispute involving allegations of transactions defrauding creditors under s.423 Insolvency Act 1986 and guarantee enforcement; connected to Bank of Cyprus lending and earlier proceedings at [2021] EWHC 235 (Comm)." },
 ];
 
 // ---- Lightweight lookups ----------------------------------------------------
@@ -5159,6 +5179,8 @@ export const caseSummaries = {
   c38: "Hipgnosis Music Limited alleged its former director, Merck Mercuriadis, diverted the company's business of acquiring music royalty catalogues by pursuing an essentially identical model through Hipgnosis Songs Fund Limited (HSFL2), which completed a successful £202 million IPO in July 2018 after the original vehicle failed. Adam Johnson J held that Mercuriadis breached the s.175 CA 2006 duty to avoid conflicts of interest: the corporate opportunity had not been approved or abandoned by the company, and he exploited it through different corporate structures for personal gain, engaging the continuing duties imposed by s.170(2)(a) CA 2006 on former directors. The successor vehicle HSFL2 and its associated management company were found to be accessories to the breach and jointly liable to account for profits. The decision is an important modern statement on the corporate opportunity doctrine and the reach of post-directorship fiduciary obligations under English law.",
   c39: "Bank of India sought to enforce a personal guarantee signed by Nirav Modi — the fugitive Indian diamantaire held at HMP Thameside — securing USD $4.1 million owed by his company Firestar Diamond FZE. The Commercial Court (Tinkler DJ) rejected Modi's argument that the guarantee was void under Indian foreign-exchange regulations (FEMA): the Reserve Bank of India may grant retrospective approval, and the obligation to obtain it rests on the guarantor, not the bank. The court also confirmed that SOFR-based rates replace synthetic LIBOR under the facility documentation following that benchmark's cessation in September 2024, and held that Modi had been validly served with the October 2025 demand notice. Judgment was entered for Bank of India in full.",
   c40: "Deutsche Glasfaser Group GmbH — Germany's leading FTTH fibre-optic infrastructure provider — faced €162m in interest due 30 June 2026 and proposed a creditor scheme of arrangement under s.899 CA 2006 bifurcating its ~€7bn of existing debt into structurally senior opco debt and structurally subordinated holdco debt, alongside a new €400m super-senior facility and an €845m equity injection from EQT and OMERS. Mr Justice Adam Johnson sanctioned the scheme on 24 June 2026, noting that 98 of 100 creditors attended the meeting and voted unanimously in favour, with scheme-scenario recovery (60.8–91.8 cents/€) materially superior to a distressed liquidation (34.2–48.8 cents/€). A last-minute German tax ruling received on 16 June 2026 introduced conditionality over the implementation mechanism, but the court held this did not prevent sanction; the scheme remains binding pending resolution of that point by 24 August 2026. This is a companion to [2026] EWHC 1467 (Ch) (the convening hearing) and confirms the continuing utility of English Part 26 schemes — distinct from Part 26A restructuring plans — for cross-border restructurings of German-incorporated groups with English law-governed facilities.",
+  c41: "Musst Holdings Ltd brought a long-running introduction-fee dispute against Astra Asset Management UK Ltd, an alternative investment fund manager (AIFM). In this further judgment the Chancery Division considered whether costs that Musst incurred in earlier, related proceedings between the same parties can be claimed as a head of consequential loss (costs as damages) in the main action, rather than being governed exclusively by the costs regime of those earlier proceedings. The decision is relevant to fundsreg litigation where multi-stage disputes generate inter-related costs exposure.",
+  c42: "Gordian Holdings Ltd brought further proceedings against Sofroniou in which it alleged transactions defrauding creditors within s.423 Insolvency Act 1986 and sought to enforce personal guarantee obligations. The dispute arises out of Bank of Cyprus lending and is connected to earlier Commercial Court proceedings at [2021] EWHC 235 (Comm). The judgment addresses the scope of s.423 claims and guarantee enforcement in the context of alleged creditor-defrauding transactions.",
 };
 
 export const restructurings = [
@@ -5217,4 +5239,5 @@ export const restructurings = [
   {"company": "Codere Finance 2 (UK) Limited", "type": "scheme", "date": "2020-10-06", "court": "High Court (Ch)", "citation": "[2020] EWHC 2683 (Ch)", "judgmentUrl": "https://www.bailii.org/ew/cases/EWHC/Ch/2020/2683.html", "sector": "Gaming / Leisure", "debt": "Restructuring of over €800m of senior secured notes", "creditors": ["Senior Secured Noteholders", "Ad hoc committee of noteholders"], "features": ["challenged convening hearing on class composition (ad hoc committee fees)", "forum shopping via newly incorporated English obligor held permissible", "COVID-19 liquidity crisis"], "advisers": ["Clifford Chance"], "firm": "freshfields", "articleUrl": "https://transactions.freshfields.com/post/102ghx8/coderes-2020-uk-scheme-of-arrangement-a-shot-across-the-bow-for-bridge-financin", "outcome": "Sanctioned", "notes": "Convening judgment [2020] EWHC 2441 (Ch) (13 Sept 2020); sanction [2020] EWHC 2683 (Ch) (6 Oct 2020). Spanish-parented international gaming group.", "id": "rx53"},
   {"company": "Virgin Atlantic Airways Limited", "type": "plan", "date": "2020-09-02", "court": "High Court (Ch)", "citation": "[2020] EWHC 2376 (Ch)", "judgmentUrl": "https://www.bailii.org/ew/cases/EWHC/Ch/2020/2376.html", "sector": "Aviation", "debt": "c.£1.2bn solvent recapitalisation (incl. £170m new secured debt + $30m and £200m shareholder support); deferral/compromise of liabilities owed to creditors and trade suppliers", "creditors": ["Bondholders/secured creditors", "Aircraft lessors", "Trade creditors"], "features": ["first ever Part 26A restructuring plan", "four creditor classes", "relevant alternative = administration", "part of a wider solvent recapitalisation"], "advisers": ["Allen & Overy"], "firm": "kirkland", "articleUrl": "https://www.kirkland.com/publications/article/2020/11/the-first-uk-restructuring-plan", "outcome": "Sanctioned", "notes": "Convening judgment [2020] EWHC 2191 (Ch) (Trower J, 4 Aug 2020); sanction [2020] EWHC 2376 (Ch) (Snowden J). Recognised under Chapter 15 in the US. Kirkland advised the UK Civil Aviation Authority.", "id": "rx54"},
   {"company": "Swissport Fuelling Limited", "type": "scheme", "date": "2020-06-09", "court": "High Court (Ch)", "citation": "[2020] EWHC 1499 (Ch)", "judgmentUrl": "https://www.bailii.org/ew/cases/EWHC/Ch/2020/1499.html", "sector": "Aviation services (ground/cargo handling)", "debt": "New money facility of up to £380m and amendment/extension of existing senior facilities; guarantor scheme", "creditors": ["Senior secured lenders"], "features": ["COVID-19 liquidity rescue financing", "scheme proposed by a UK guarantor (not the primary borrower) using a deed of contribution / ricochet claim", "EU Insolvency Regulation / jurisdiction discussion"], "advisers": ["Kirkland & Ellis"], "firm": null, "articleUrl": null, "outcome": "Sanctioned", "notes": "Re Swissport Fuelling Ltd [2020] EWHC 1499 (Ch), Trower J. Part 26 scheme used for COVID rescue financing. (A separate Swissport restructuring followed later via other means.)", "id": "rx55"},
+  {"company": "Deutsche Glasfaser Group GmbH", "type": "scheme", "date": "2026-06-24", "court": "High Court (Ch)", "citation": "[2026] EWHC 1563 (Ch)", "judgmentUrl": "https://caselaw.nationalarchives.gov.uk/ewhc/ch/2026/1563", "sector": "Telecoms / Digital Infrastructure", "debt": "~€7bn", "creditors": ["Senior secured creditors", "EQT (equity sponsor)", "OMERS (equity sponsor)"], "features": ["Bifurcation of debt into opco/holdco tranches", "€400m super-senior capital injection", "Unanimous creditor support (100% by value)", "English scheme jurisdiction confirmed for German-domiciled group"], "advisers": ["Freshfields Bruckhaus Deringer (company)", "Linklaters (ad hoc creditor committee)"], "firm": null, "articleUrl": null, "outcome": "Sanctioned", "notes": "Mr Justice Adam Johnson. Companion convening judgment [2026] EWHC 1467 (Ch) (22 June 2026). Confirms English court jurisdiction for large cross-border German restructurings via Part 26 scheme.", "id": "rx56"},
 ];
