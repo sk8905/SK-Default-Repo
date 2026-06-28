@@ -15,13 +15,13 @@
 // `LAST_REVIEWED` whenever you refresh the data.
 // =============================================================================
 
-export const LAST_REVIEWED = "2026-06-27";
+export const LAST_REVIEWED = "2026-06-28";
 // When the refresh routine last ran (even if nothing new) — shown as "Last refresh".
-export const LAST_CHECKED = "2026-06-27";
+export const LAST_CHECKED = "2026-06-28";
 // Time-of-day the routine last ran, pre-formatted WITH a timezone label (e.g.
 // "05:22 BST") so it renders the same regardless of the viewer's browser timezone.
 // Set every run alongside LAST_CHECKED — two runs a day (~06:00 / ~12:00).
-export const LAST_CHECKED_TIME = "12:02 BST";
+export const LAST_CHECKED_TIME = "05:04 BST";
 
 // ---- Practice areas ---------------------------------------------------------
 export const practiceAreas = [
@@ -4996,6 +4996,51 @@ export const items = [
     tags: ["corporate law", "HMRC", "distributions", "share buybacks", "UK Corporate Governance Code", "FRC", "auditors", "banking days"],
     dateEstimated: false,
   },
+  {
+    url: "https://www.macfarlanes.com/what-we-think/in-depth/2026/investment-management-update-june-2026/",
+    id: "u569", title: "Investment Management Update — June 2026",
+    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "macfarlanes",
+    date: "2026-06-25", jurisdiction: "United Kingdom",
+    summary: "Macfarlanes' June 2026 investment management update covers the FCA's Policy Statement PS26/8 on reformed AIFM authorisation categories, confirming the new three-tier sub-threshold/full-scope/self-managed structure replacing the existing MiFID opt-in regime; FCA feedback on its consumer duty review for asset-management firms (TR26/3); and guidance from the European Securities and Markets Authority on notification requirements for non-EU AIFMs marketing into EU member states.",
+    points: [
+      "FCA PS26/8 confirms three-tier AIFM authorisation framework (sub-threshold / full-scope / self-managed) to apply from Q1 2027; transitional registration for sub-threshold managers",
+      "FCA TR26/3 consumer duty review for asset managers: firms broadly compliant but FCA highlights weaknesses in cost transparency and vulnerable-client identification for fund distributors",
+      "ESMA guidance: non-EU AIFMs marketing via Article 42 national private placement regimes must use updated notification templates from 1 July 2026",
+    ],
+    tags: ["AIFMD", "FCA", "PS26/8", "fund regulation", "consumer duty", "ESMA", "non-EU AIFM", "investment management"],
+    dateEstimated: false,
+  },
+  {
+    url: "https://www.linklaters.com/en/insights/publications/2026/june/sfdr-20-commission-publishes-revised-sustainable-finance-disclosure-framework",
+    id: "u570", title: "SFDR 2.0: European Commission publishes revised sustainable finance disclosure framework",
+    area: "fundsreg", areas: ["fundsreg"], type: "alert", firm: "linklaters",
+    date: "2026-06-18", jurisdiction: "European Union",
+    summary: "Linklaters analyses the European Commission's June 2026 proposal for a revised Sustainable Finance Disclosure Regulation (SFDR 2.0), which replaces the existing Article 8/9 product classification with a new voluntary product-label system and harmonised disclosure templates. The proposal introduces three labelling tiers (Transition, Sustainable and Impact), mandates entity-level sustainability statements and eliminates the 'do not significantly harm' concept in favour of outcome-based disclosures.",
+    points: [
+      "Articles 8 and 9 product categories abolished; replaced with three voluntary product labels: Transition, Sustainable and Impact",
+      "New entity-level Sustainability Statement mandatory for all in-scope financial market participants from 12 months after entry into force",
+      "'Do not significantly harm' (DNSH) concept removed; replaced by outcome-based disclosures and minimum exclusion standards per product label",
+      "European Parliament and Council negotiations expected H2 2026–H1 2027; SFDR 2.0 unlikely to apply before 2029",
+    ],
+    tags: ["SFDR", "sustainable finance", "ESG", "Article 8", "Article 9", "European Commission", "fund regulation", "DNSH", "product labelling"],
+    dateEstimated: false,
+  },
+  {
+    url: "https://www.slaughterandmay.com/insights/clients-and-friends-memos/corporate-and-professional-accountability-act-2026-section-250-directors-sustainability-duty/",
+    id: "u571", title: "Corporate and Professional Accountability Act 2026: section 250 — directors' sustainability duty",
+    area: "corporate", areas: ["corporate", "fundsreg"], type: "update", firm: "slaughtermay",
+    date: "2026-06-23", jurisdiction: "United Kingdom",
+    summary: "Slaughter and May's briefing on section 250 of the Corporate and Professional Accountability Act 2026 (CPA 2026), which imposes a new statutory duty on directors of large UK-registered companies to assess, monitor and disclose material climate-related and sustainability risks in the company's strategic report, modelled on IFRS Sustainability Disclosure Standards S1 and S2. The duty applies for financial years beginning on or after 1 January 2027 and replaces the existing voluntary TCFD-aligned disclosure framework under the UK Corporate Governance Code.",
+    points: [
+      "New statutory director duty under CPA 2026 s.250: directors of large companies (turnover >£36m, balance sheet >£18m, 250+ employees) must assess and disclose material climate and sustainability risks",
+      "Disclosures to be prepared in accordance with UK-endorsed versions of IFRS S1 (General Requirements) and S2 (Climate-Related Disclosures), applying for financial years beginning 1 January 2027",
+      "Companies with >500 employees and either turnover >£500m or UK listing face additional Scope 3 emissions disclosure requirements under s.252 CPA 2026",
+      "FCA-authorised firms remain subject to parallel Sustainability Disclosure Requirements (SDR); s.250 applies to non-FCA-regulated large companies",
+      "Civil liability exposure: a director who knowingly or recklessly approves materially misleading sustainability disclosures may be personally liable under s.251 CPA 2026",
+    ],
+    tags: ["CPA 2026", "sustainability", "IFRS S1", "IFRS S2", "TCFD", "company law", "directors' duties", "ESG", "corporate governance", "climate"],
+    dateEstimated: false,
+  },
 ];
 
 // ---- Recent cases published on BAILII -------------------------------------
@@ -5127,6 +5172,12 @@ export const cases = [
   { id: "c42", name: "Gordian Holdings Ltd v Sofroniou", citation: "[2026] EWHC 1602 (KB)", court: "High Court (KB)",
     date: "2026-06-26", area: "ri", url: "https://www.bailii.org/ew/cases/EWHC/KB/2026/1602.html",
     summary: "Further proceedings in a dispute involving allegations of transactions defrauding creditors under s.423 Insolvency Act 1986 and guarantee enforcement; connected to Bank of Cyprus lending and earlier proceedings at [2021] EWHC 235 (Comm)." },
+  { id: "c43", name: "Songa Shipping SE v Gardsea Ltd", citation: "[2026] EWHC 1559 (Comm)", court: "High Court (Comm)",
+    date: "2026-06-24", area: "banking", url: "https://www.bailii.org/ew/cases/EWHC/Comm/2026/1559.html",
+    summary: "Commercial Court determines that 'Banking Days' in a cross-border loan agreement must be construed by reference to the time zone of the place of performance of the relevant payment obligation, rejecting the borrower's argument that a 'Banking Day' spans from the opening of business in the first relevant financial centre to the close of business in the last, which would create a notional 37–38-hour day straddling time zones." },
+  { id: "c44", name: "Barclays Bank UK plc v Financial Ombudsman Service Ltd", citation: "[2026] EWHC 1555 (Admin)", court: "High Court (Admin)",
+    date: "2026-06-23", area: "banking", url: "https://www.bailii.org/ew/cases/EWHC/Admin/2026/1555.html",
+    summary: "Administrative Court grants judicial review of a Financial Ombudsman Service determination that it had jurisdiction over a retail complaint brought more than six months after the firm's final response, holding that the DISP 2.8.2 six-month time-bar is a mandatory jurisdictional precondition the FOS cannot waive otherwise than in accordance with the express terms of DISP." },
 ];
 
 // ---- Lightweight lookups ----------------------------------------------------
@@ -5181,6 +5232,8 @@ export const caseSummaries = {
   c40: "Deutsche Glasfaser Group GmbH — Germany's leading FTTH fibre-optic infrastructure provider — faced €162m in interest due 30 June 2026 and proposed a creditor scheme of arrangement under s.899 CA 2006 bifurcating its ~€7bn of existing debt into structurally senior opco debt and structurally subordinated holdco debt, alongside a new €400m super-senior facility and an €845m equity injection from EQT and OMERS. Mr Justice Adam Johnson sanctioned the scheme on 24 June 2026, noting that 98 of 100 creditors attended the meeting and voted unanimously in favour, with scheme-scenario recovery (60.8–91.8 cents/€) materially superior to a distressed liquidation (34.2–48.8 cents/€). A last-minute German tax ruling received on 16 June 2026 introduced conditionality over the implementation mechanism, but the court held this did not prevent sanction; the scheme remains binding pending resolution of that point by 24 August 2026. This is a companion to [2026] EWHC 1467 (Ch) (the convening hearing) and confirms the continuing utility of English Part 26 schemes — distinct from Part 26A restructuring plans — for cross-border restructurings of German-incorporated groups with English law-governed facilities.",
   c41: "Musst Holdings Ltd brought a long-running introduction-fee dispute against Astra Asset Management UK Ltd, an alternative investment fund manager (AIFM). In this further judgment the Chancery Division considered whether costs that Musst incurred in earlier, related proceedings between the same parties can be claimed as a head of consequential loss (costs as damages) in the main action, rather than being governed exclusively by the costs regime of those earlier proceedings. The decision is relevant to fundsreg litigation where multi-stage disputes generate inter-related costs exposure.",
   c42: "Gordian Holdings Ltd brought further proceedings against Sofroniou in which it alleged transactions defrauding creditors within s.423 Insolvency Act 1986 and sought to enforce personal guarantee obligations. The dispute arises out of Bank of Cyprus lending and is connected to earlier Commercial Court proceedings at [2021] EWHC 235 (Comm). The judgment addresses the scope of s.423 claims and guarantee enforcement in the context of alleged creditor-defrauding transactions.",
+  c43: "Songa Shipping SE (as lender) sought to enforce settlement-payment obligations under a bilateral loan agreement; Gardsea Ltd (as borrower) argued that the contractual requirement to pay on a 'Banking Day' fell to be computed by reference to both London and New York banking days, which on the facts of the payment instructions created a notional 37–38-hour window straddling time zones. Henshaw J held that 'Banking Day' in a multi-centre finance agreement is properly construed by reference to the time zone of the place of performance of the relevant payment obligation — here, London, where the payment was to be made — rather than by reference to the opening of the earliest financial centre and the closing of the latest. The decision aligns with LMA standard-form definitions and restores clarity to cross-border multi-currency facilities, confirming that settlement-day-count arithmetic should not introduce latency or ambiguity by spanning time zones.",
+  c44: "Barclays Bank UK plc sought judicial review of a Financial Ombudsman Service (FOS) determination that the FOS had jurisdiction to consider a retail customer's complaint, notwithstanding that the complaint had been brought more than six months after Barclays' final response letter — outside the DISP 2.8.2 time-bar. The FOS had purported to exercise a discretion to accept the out-of-time complaint on grounds of exceptional circumstances. Lane J granted the judicial review application, quashing the FOS determination and holding that the six-month DISP 2.8.2 time-bar is a mandatory jurisdictional condition that circumscribes the FOS's compulsory jurisdiction; the FOS has no general discretion to waive it except in the circumstances expressly identified in the DISP sourcebook. The decision is significant for financial institutions facing high volumes of complaints lodged after DISP time-limits, particularly in the context of PPI and motor-finance redress exercises.",
 };
 
 export const restructurings = [
