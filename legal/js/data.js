@@ -21,7 +21,7 @@ export const LAST_CHECKED = "2026-06-28";
 // Time-of-day the routine last ran, pre-formatted WITH a timezone label (e.g.
 // "05:22 BST") so it renders the same regardless of the viewer's browser timezone.
 // Set every run alongside LAST_CHECKED — two runs a day (~06:00 / ~12:00).
-export const LAST_CHECKED_TIME = "05:04 BST";
+export const LAST_CHECKED_TIME = "12:02 BST";
 
 // ---- Practice areas ---------------------------------------------------------
 export const practiceAreas = [
@@ -5041,6 +5041,52 @@ export const items = [
     tags: ["CPA 2026", "sustainability", "IFRS S1", "IFRS S2", "TCFD", "company law", "directors' duties", "ESG", "corporate governance", "climate"],
     dateEstimated: false,
   },
+  {
+    url: "https://www.lw.com/en/insights/crd-vi-implications-of-the-licensed-branch-requirement-on-lending-to-eu-borrowers",
+    id: "u572", title: "CRD VI: Implications of the Licensed Branch Requirement on Lending to EU Borrowers",
+    area: "banking", areas: ["banking"], type: "alert", firm: "latham",
+    date: "2026-06-23", jurisdiction: "European Union / United Kingdom",
+    summary: "Latham & Watkins analyses the CRD VI licensed branch requirement, which will require non-EU banks (including UK banks post-Brexit) to establish licensed branches in EU member states in order to provide cross-border lending services to EU-based borrowers on a solicited basis from 2027. The alert examines the impact on syndicated lending, direct lending and securitisation structures, and the steps lenders should take to ensure compliance.",
+    points: [
+      "CRD VI Article 21c introduces a mandatory licensed branch requirement for third-country credit institutions engaging in solicited cross-border lending to EU borrowers",
+      "UK lenders will be treated as third-country institutions and must establish licensed branches in relevant EU member states or restructure their lending arrangements to comply",
+      "Timeline: member states must transpose by 11 January 2026; licensed branch requirement enters into force by 11 January 2027 (with transitional relief for existing relationships)",
+      "Implications for syndicated loans and direct lending: participation in deals with EU borrowers will need to be routed through licensed EU branches or booked via EU subsidiaries",
+    ],
+    tags: ["CRD VI", "licensed branch", "third-country banks", "cross-border lending", "EU borrowers", "banking regulation", "post-Brexit"],
+    dateEstimated: false,
+  },
+  {
+    url: "https://www.slaughterandmay.com/insights/financial-regulation-weekly-bulletin/financial-regulation-weekly-bulletin-25-june-2026/",
+    id: "u573", title: "Financial Regulation Weekly Bulletin — 25 June 2026",
+    area: "banking", areas: ["banking", "fundsreg"], type: "update", firm: "slaughtermay",
+    date: "2026-06-25", jurisdiction: "United Kingdom / European Union",
+    summary: "Slaughter and May's weekly financial regulation bulletin of 25 June 2026 covers: EU Council's SFDR 2.0 negotiating position (exempting professional-investor AIFs from categorisation); PRA CP9/26 on Basel 3.1 IMA adjustments; BoE sterling stablecoin policy statement (reserves up to 70% interest-bearing, £40bn issuance guardrail); RPIB consultation on next-generation UK payments infrastructure; BoE private markets stress test scenarios; EBA Pillar 3 final ITS on ESG/shadow banking disclosures; CRR equivalence repeal commencement; CCP Global Fire Drill 2025 findings; US-UK OFSI/OFAC joint sanctions guidance; FATF Rec 16 payment-transparency consultation; FCA SIPPs CP26/20; and CACEIS UK public censure.",
+    points: [
+      "SFDR 2.0 — EU Council agreed negotiating position: AIFs marketed exclusively to professional investors exempt from categorisation; trilogue with Parliament to begin",
+      "Basel 3.1 IMA (PRA CP9/26): P&L attribution monitoring extended from 1 to 3 years; implementation date 1 January 2028; consultation deadline 18 September 2026",
+      "BoE sterling stablecoin: reserves up to 70% in interest-bearing assets (up from 60%); £40bn temporary issuance guardrail; further guidance consultations planned for 2027",
+      "EBA Pillar 3 final ITS under CRR III: ESG risk, equity exposure and shadow banking entity requirements; application 31 December 2026 (small institutions: 31 December 2027)",
+      "CACEIS UK: FCA public censure for inadequate client account monitoring; bank required to distribute £31.7m to affected clients",
+    ],
+    tags: ["SFDR", "Basel 3.1", "IMA", "stablecoins", "BoE", "payments", "private markets", "EBA", "Pillar 3", "CRR", "FATF", "FCA", "banking regulation", "funds regulation"],
+    dateEstimated: false,
+  },
+  {
+    url: "https://financialregulation.linklaters.com/post/102n79i/the-candour-dividend-how-the-pra-is-rewarding-early-co-operation",
+    id: "u574", title: "The Candour Dividend: How the PRA Is Rewarding Early Co-operation",
+    area: "banking", areas: ["banking"], type: "alert", firm: "linklaters",
+    date: "2026-06-26", jurisdiction: "United Kingdom",
+    summary: "Linklaters examines the PRA's Early Account Scheme (EAS), launched in 2024, which incentivises firms to engage proactively with enforcement investigations. The PRA's Head of Enforcement David Chaplin reports measurable changes: earlier engagement, voluntary factual admissions occurring years sooner than historically typical, and penalty reductions of up to 50% for firms demonstrating candour and early acceptance of responsibility. The article contrasts the PRA's approach with the FCA's supervisory-tools methodology and notes the PRA reserves EAS for cases where breach facts are clear.",
+    points: [
+      "PRA Early Account Scheme (EAS, 2024): firms that engage early and accept responsibility can receive penalty reductions of up to 50%",
+      "PRA Head of Enforcement David Chaplin reports voluntary factual admissions now occurring years sooner than historically typical, enabling faster investigations",
+      "EAS reserved for clear-breach cases; not available where breach facts are disputed or the firm denies regulatory findings",
+      "Contrasted with FCA's supervisory-tools methodology: the PRA places greater emphasis on early narrative engagement by the regulated firm",
+    ],
+    tags: ["PRA", "enforcement", "Early Account Scheme", "candour", "penalty reduction", "banking regulation", "investigations"],
+    dateEstimated: false,
+  },
 ];
 
 // ---- Recent cases published on BAILII -------------------------------------
@@ -5293,4 +5339,6 @@ export const restructurings = [
   {"company": "Virgin Atlantic Airways Limited", "type": "plan", "date": "2020-09-02", "court": "High Court (Ch)", "citation": "[2020] EWHC 2376 (Ch)", "judgmentUrl": "https://www.bailii.org/ew/cases/EWHC/Ch/2020/2376.html", "sector": "Aviation", "debt": "c.£1.2bn solvent recapitalisation (incl. £170m new secured debt + $30m and £200m shareholder support); deferral/compromise of liabilities owed to creditors and trade suppliers", "creditors": ["Bondholders/secured creditors", "Aircraft lessors", "Trade creditors"], "features": ["first ever Part 26A restructuring plan", "four creditor classes", "relevant alternative = administration", "part of a wider solvent recapitalisation"], "advisers": ["Allen & Overy"], "firm": "kirkland", "articleUrl": "https://www.kirkland.com/publications/article/2020/11/the-first-uk-restructuring-plan", "outcome": "Sanctioned", "notes": "Convening judgment [2020] EWHC 2191 (Ch) (Trower J, 4 Aug 2020); sanction [2020] EWHC 2376 (Ch) (Snowden J). Recognised under Chapter 15 in the US. Kirkland advised the UK Civil Aviation Authority.", "id": "rx54"},
   {"company": "Swissport Fuelling Limited", "type": "scheme", "date": "2020-06-09", "court": "High Court (Ch)", "citation": "[2020] EWHC 1499 (Ch)", "judgmentUrl": "https://www.bailii.org/ew/cases/EWHC/Ch/2020/1499.html", "sector": "Aviation services (ground/cargo handling)", "debt": "New money facility of up to £380m and amendment/extension of existing senior facilities; guarantor scheme", "creditors": ["Senior secured lenders"], "features": ["COVID-19 liquidity rescue financing", "scheme proposed by a UK guarantor (not the primary borrower) using a deed of contribution / ricochet claim", "EU Insolvency Regulation / jurisdiction discussion"], "advisers": ["Kirkland & Ellis"], "firm": null, "articleUrl": null, "outcome": "Sanctioned", "notes": "Re Swissport Fuelling Ltd [2020] EWHC 1499 (Ch), Trower J. Part 26 scheme used for COVID rescue financing. (A separate Swissport restructuring followed later via other means.)", "id": "rx55"},
   {"company": "Deutsche Glasfaser Group GmbH", "type": "scheme", "date": "2026-06-24", "court": "High Court (Ch)", "citation": "[2026] EWHC 1563 (Ch)", "judgmentUrl": "https://caselaw.nationalarchives.gov.uk/ewhc/ch/2026/1563", "sector": "Telecoms / Digital Infrastructure", "debt": "~€7bn", "creditors": ["Senior secured creditors", "EQT (equity sponsor)", "OMERS (equity sponsor)"], "features": ["Bifurcation of debt into opco/holdco tranches", "€400m super-senior capital injection", "Unanimous creditor support (100% by value)", "English scheme jurisdiction confirmed for German-domiciled group"], "advisers": ["Freshfields Bruckhaus Deringer (company)", "Linklaters (ad hoc creditor committee)"], "firm": null, "articleUrl": null, "outcome": "Sanctioned", "notes": "Mr Justice Adam Johnson. Companion convening judgment [2026] EWHC 1467 (Ch) (22 June 2026). Confirms English court jurisdiction for large cross-border German restructurings via Part 26 scheme.", "id": "rx56"},
+  {"company": "NFE Global Holdings Limited and NFE Brazil Newco Limited (New Fortress Energy)", "type": "plan", "date": "2026-06-18", "court": "High Court (Ch)", "citation": null, "judgmentUrl": null, "sector": "Energy / LNG (US liquefied natural gas company)", "debt": ">$9bn", "creditors": ["Seven creditor classes (six voted unanimously; one voted 99.84% in favour)"], "features": ["Part 26A restructuring plan — largest consensual restructuring by value under Part 26A to date", "Bifurcation into 'BrazilCo' (Brazil assets, creditor-owned) and 'New NFE' (remaining listed entity)", "Seven creditor classes; 99% of plan creditors in favour", "Sanctioned by Mr Justice Cawson on 18 June 2026"], "advisers": [], "firm": null, "articleUrl": "https://ir.newfortressenergy.com/news-releases/news-release-details/new-fortress-energy-inc-announces-approval-uk-restructuring-plan", "outcome": "Sanctioned", "notes": "Sanction hearing 18 June 2026, Mr Justice Cawson. Largest Part 26A restructuring by value at time of sanction (>$9bn). Company bifurcated: Brazil assets transferred to 'BrazilCo' (wholly owned by plan creditors); remaining group listed as 'New NFE'. EWHC neutral citation not yet confirmed in public record.", "id": "rx57"},
+  {"company": "Big Table Group (Las Iguanas Holdings Ltd)", "type": "plan", "date": "2026-06-05", "court": "High Court (Ch)", "citation": null, "judgmentUrl": null, "sector": "Hospitality / Casual Dining (Las Iguanas, Bella Italia, Café Rouge)", "debt": "c.£37m loan note debt written off; landlord lease renegotiations across 44 sites", "creditors": ["Loan note creditors", "Landlords (44 sites)"], "features": ["Part 26A restructuring plan", "Write-off of c.£37m loan note debt", "Landlord lease renegotiations and site exits", "£3m capital injection from Big Table Group parent", "First plan under the 2026 Practice Statement (effective 1 January 2026)"], "advisers": [], "firm": null, "articleUrl": "https://www.thecaterer.com/news/las-iguanas-restructuring-plan-wins-court-approval", "outcome": "Sanctioned", "notes": "Sanction hearing 5 June 2026. Epiris-backed Big Table Group operator of Las Iguanas, Bella Italia and Café Rouge brands. Described as the first restructuring plan sanctioned under the revised 2026 Practice Statement. EWHC neutral citation not yet confirmed in public record.", "id": "rx58"},
 ];
