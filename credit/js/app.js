@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260629-14";
+} from "./data.js?v=20260629-15";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260629-14";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260629-15";
 
 const app = document.getElementById("app");
 
@@ -449,6 +449,20 @@ function viewDashboard() {
   // CLO items live in their own #/clos section; surface the most recent here too.
   const cloByDate = [...deals.filter((d) => d.clo), ...intel.filter((i) => i.clo)]
     .sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  // Latest press across the tracked universe (manager news + webNews), deduped.
+  const newsByDate = (() => {
+    const out = [], seen = new Set();
+    managers.forEach((m) => {
+      [...(m.news || []), ...(m.webNews || [])].forEach((w) => {
+        const base = (w.url || w.title || "").toLowerCase().split(/[?#]/)[0].replace(/\/$/, "");
+        if (base && seen.has(base + "|" + m.id)) return;
+        seen.add(base + "|" + m.id);
+        out.push({ ...w, _mname: m.name });
+      });
+    });
+    return out.sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  })();
+  const newsCompact = (x) => `<li class="compact-item">${x.url ? `<a class="compact-head" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.title)} ↗</a>` : `<span class="compact-head">${esc(x.title)}</span>`}<div class="compact-meta muted small">${x.date ? esc(fmtDate(x.date)) : ""}${x._mname ? ` · ${esc(x._mname)}` : ""}${x.outlet ? ` · ${esc(x.outlet)}` : ""}</div></li>`;
 
   app.innerHTML = `
     <div class="page-head">
@@ -459,7 +473,13 @@ function viewDashboard() {
       ${kpis.map((k) => `<div class="kpi-card clickable" ${k.jump}><div class="kpi-value">${k.value}</div><div class="kpi-label">${k.label}</div><div class="kpi-sub muted">${k.sub}</div></div>`).join("")}
     </div>
 
-    <div class="grid-3">
+    <div class="grid-4">
+      <section class="card feature-card">
+        <h2>Latest news</h2>
+        <p class="muted small">Manager &amp; investor press across the tracked universe. Click a headline to open the source.</p>
+        ${newsByDate.length ? `<ul class="compact-list">${newsByDate.slice(0, 12).map(newsCompact).join("")}</ul>` : '<p class="muted small">No news yet.</p>'}
+        <div class="card-foot">${link("#/news", "View all news →")}</div>
+      </section>
       <section class="card feature-card">
         <h2>Latest deal activity</h2>
         <p class="muted small">Financings, investments, acquisitions, refinancings, restructurings and exits. Click a headline to open it in the deal feed.</p>

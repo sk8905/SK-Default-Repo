@@ -108,6 +108,7 @@ h3 { font-size: 1rem; margin: 0; }
 .page-head { margin-bottom: 1.25rem; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
 /* Feed pages: charts in a 30% left margin, feed in the 70% right column. */
 .split-3070 { display: grid; grid-template-columns: 36fr 64fr; gap: 1.5rem; align-items: start; }
 /* Let the grid honour the 3fr:7fr ratio exactly. Without this, a column's
@@ -388,14 +389,16 @@ a.intel-head:hover { color: var(--primary); }
 .footer p { max-width: 1500px; margin: 0 auto; font-size: .78rem; color: var(--muted); }
 
 /* ---------- responsive ---------- */
-/* 3-up dashboard rows step down to 2 columns before collapsing to 1. */
+/* Multi-up dashboard rows step down to 2 columns before collapsing to 1. */
 @media (max-width: 1100px) {
   .grid-3 { grid-template-columns: 1fr 1fr; }
+  .grid-4 { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 900px) {
   .grid-2 { grid-template-columns: 1fr; }
   .split-3070 { grid-template-columns: 1fr; }
   .grid-3 { grid-template-columns: 1fr; }
+  .grid-4 { grid-template-columns: 1fr; }
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .card-grid { grid-template-columns: 1fr; }
 
