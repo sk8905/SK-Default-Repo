@@ -5,10 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Meridian Credit</title>
   <meta name="description" content="European private credit deal &amp; fundraising intelligence — prototype" />
-  <link rel="stylesheet" href="css/styles.css?v=20260629-20" />
+  <link rel="stylesheet" href="css/styles.css?v=20260629-21" />
 </head>
 <body>
   <header class="topbar">
+    <div class="topbar-inner">
+    <div class="platform-switch" role="group" aria-label="Switch platform">
+      <a href="/credit/" class="ps-btn is-active" aria-current="page">Credit</a>
+      <a href="/legal/" class="ps-btn">Legal</a>
+    </div>
     <a class="brand" href="#/" aria-label="Meridian Credit home">
       <span class="logo" aria-hidden="true">◆</span>
       <span class="brand-text">
@@ -33,14 +38,8 @@
       <div id="data-status" class="data-status"></div>
     </div>
     <div id="notif" class="notif"></div>
-  </header>
-
-  <div class="platform-bar">
-    <div class="platform-switch" role="group" aria-label="Switch platform">
-      <a href="/credit/" class="ps-btn is-active" aria-current="page">Credit</a>
-      <a href="/legal/" class="ps-btn">Legal</a>
     </div>
-  </div>
+  </header>
 
   <main id="app" class="container"></main>
 
@@ -48,6 +47,6 @@
     <p>Meridian Credit — demonstration prototype. Data compiled from <strong>manager &amp; investor press releases, regulatory/results disclosures and trade press</strong>. Figures are shown in € for consistency (several originally reported in USD/GBP, so are approximate), and items marked <span class="chip est">Est.</span> or noted "undisclosed" are proxies or not precisely disclosed. Verify against the cited sources before relying on any figure. See <code>docs/research-notes.md</code> for the sourcing trail.</p>
   </footer>
 
-  <script type="module" src="js/app.js?v=20260629-20"></script>
+  <script type="module" src="js/app.js?v=20260629-21"></script>
 </body>
 </html>
