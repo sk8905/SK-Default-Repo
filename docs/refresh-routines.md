@@ -99,6 +99,18 @@ the source of truth for the prompt.
   (A real bug seen 2026-06-24: a `data.js` rewrite dropped the commas between
   `items`; `node --check *.js` passed but the module failed to parse and Legal
   rendered blank.)
+  - **Also check for ARRAY HOLES (double commas).** A *double* comma between
+    array objects (`},\n,\n  {` — e.g. when an insert script prepends a comma to
+    an array that already ends with a trailing comma) creates a sparse hole.
+    `node --check` AND `Array.filter()`/`forEach` all silently skip holes, so they
+    pass — but the apps build values with spread+`reduce` (e.g. Credit's
+    `LATEST_ITEM = [...intel, ...deals].reduce(...)`), and spread materialises a
+    hole as `undefined`, throwing `Cannot read properties of undefined` and
+    blanking the page. Validate with a method that SEES holes:
+    `node --input-type=module -e "import('./credit/js/data.js').then(m=>{const h=[...m.deals,...m.intel].filter(x=>x===undefined).length; if(h)throw new Error(h+' array holes'); console.log('ok, no holes')})"`.
+    (A real bug seen 2026-06-29: an insert left `},\n,\n  {` in `deals` and
+    `intel`; `node --check` and `.filter()` passed but the Credit app rendered
+    blank — header/footer only.)
 - **Publish on every run.** Because `LAST_CHECKED` is bumped each run, every run
   produces a commit (even a "nothing new" run, which just advances `LAST_CHECKED`
   + cache-busters). Commit (message trailers below), then push to `main` AND the
