@@ -64,21 +64,19 @@ img, svg { max-width: 100%; }
 .brand-text { display: flex; flex-direction: column; }
 .brand-text strong { font-size: 1.05rem; letter-spacing: .3px; }
 .brand-sub { font-size: .7rem; color: #5eead4; text-transform: uppercase; letter-spacing: 1px; }
-.mainnav { display: flex; gap: .25rem; flex: 1 1 auto; justify-content: center; }
+.mainnav { display: flex; gap: .25rem; flex: 0 1 auto; justify-content: flex-start; }
 /* Credit <-> Legal platform switcher */
 .platform-switch { display: inline-flex; align-items: center; gap: 2px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.22); border-radius: 8px; padding: 2px; margin-right: .6rem; flex: 0 0 auto; }
 .ps-btn { padding: .3rem .6rem; border-radius: 6px; font-size: .8rem; font-weight: 700; color: #cbd5e1; text-decoration: none; white-space: nowrap; }
 .ps-btn:hover { color: #fff; text-decoration: none; background: rgba(255,255,255,.1); }
 .ps-btn.is-active, .ps-btn.is-active:hover { background: #fff; color: #134e4a; }
-/* On wide screens, float the switch out of flow and pin its left edge to the
-   page container's left edge so it lines up with the page heading/body text,
-   while the logo stays in the corner. The 11rem floor keeps it clear of the
-   logo on narrower desktops. */
+/* On wide screens, pin the logo to the far-left corner (out of flow) and indent
+   the rest of the row to the page container's left edge, so the switch and the
+   nav tabs line up with the page heading/body text. The 11rem floor keeps the
+   content clear of the logo on narrower desktops. */
 @media (min-width: 1101px) {
-  .topbar-inner .platform-switch {
-    position: absolute; top: 50%; transform: translateY(-50%); margin: 0;
-    left: max(11rem, calc((100% - min(100%, var(--maxw))) / 2 + 2rem));
-  }
+  .topbar-inner { padding-left: max(11rem, calc((100% - min(100%, var(--maxw))) / 2 + 2rem)); }
+  .topbar-inner .brand { position: absolute; left: 1.5rem; top: 50%; transform: translateY(-50%); }
 }
 .nav-link { color: #cbd5e1; padding: .5rem .85rem; border-radius: 6px; font-weight: 500; white-space: nowrap; }
 .nav-link:hover, .nav-link:focus-visible { color: #fff; text-decoration: none; background: rgba(255,255,255,.08); }
@@ -90,7 +88,7 @@ img, svg { max-width: 100%; }
   background: var(--accent); color: #fff; border-radius: 999px;
   font-size: .68rem; font-weight: 700; line-height: 16px; text-align: center;
 }
-.topbar-right { flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-end; gap: .2rem; }
+.topbar-right { flex: 0 0 auto; margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: .2rem; }
 .account-nav { font-size: .72rem; color: #cbd5e1; white-space: nowrap; }
 .account-nav strong { color: #fff; font-weight: 600; }
 .account-nav a { color: #5eead4; font-weight: 600; }
@@ -157,7 +155,7 @@ img, svg { max-width: 100%; }
 
 /* ---- KPIs (Meridian: teal left border) ---- */
 .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.25rem; }
-.kpis-5 { grid-template-columns: repeat(5, 1fr); }
+.kpis-5 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
 .kpi {
   background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--c, var(--primary));
   border-radius: var(--radius); padding: 1rem 1.1rem; box-shadow: var(--shadow);
