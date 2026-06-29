@@ -382,6 +382,9 @@ a.compact-head:hover { color: var(--primary); }
   .dash-cols { grid-template-columns: 1fr; }
   .kpis-5 { grid-template-columns: repeat(3, 1fr); }
 }
+@media (max-width: 1100px) {
+  .grid-3 { grid-template-columns: 1fr 1fr; }
+}
 @media (max-width: 860px) {
   .grid-2 { grid-template-columns: 1fr; }
   .grid-3 { grid-template-columns: 1fr; }

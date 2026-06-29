@@ -16,8 +16,8 @@
 import {
   items, cases, caseSummaries, practiceAreas, firms, tiers, updateTypes, restructurings,
   firmById, areaById, typeById, tierById, LAST_REVIEWED, LAST_CHECKED, LAST_CHECKED_TIME,
-} from "./data.js?v=20260629-5";
-import { donutChart, columnChart } from "./charts.js?v=20260629-5";
+} from "./data.js?v=20260629-6";
+import { donutChart, columnChart } from "./charts.js?v=20260629-6";
 
 const app = document.getElementById("app");
 
@@ -272,7 +272,7 @@ function viewDashboard() {
     value: items.filter((i) => (firmById[i.firm] || {}).tier === t.id).length,
     nav: { tier: t.id },
   }));
-  const months = [...new Set(items.map((i) => ym(i.date)))].sort().slice(-8);
+  const months = [...new Set(items.map((i) => ym(i.date)).filter(Boolean))].sort().slice(-8);
   const monthData = months.map((m) => ({
     label: MONTHS[Number(m.slice(5, 7)) - 1] + " " + m.slice(2, 4),
     value: items.filter((i) => ym(i.date) === m).length,
@@ -344,8 +344,8 @@ function viewList() {
   filterState.q = q.q || "";
   filterState.saved = q.saved === "1";
 
-  const years = [...new Set(items.map((i) => i.date.slice(0, 4)))].sort((a, b) => b.localeCompare(a));
-  const monthOpts = [...new Set(items.map((i) => ym(i.date)))].sort((a, b) => b.localeCompare(a))
+  const years = [...new Set(items.map((i) => i.date.slice(0, 4)).filter(Boolean))].sort((a, b) => b.localeCompare(a));
+  const monthOpts = [...new Set(items.map((i) => ym(i.date)).filter(Boolean))].sort((a, b) => b.localeCompare(a))
     .map((m) => ({ id: m, name: MONTHS[Number(m.slice(5, 7)) - 1] + " " + m.slice(0, 4) }));
 
   app.innerHTML = `

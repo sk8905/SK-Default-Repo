@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260629-10";
+} from "./data.js?v=20260629-11";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260629-10";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260629-11";
 
 const app = document.getElementById("app");
 
@@ -219,7 +219,7 @@ function notifItems() {
   const out = [];
   deals.forEach((d) => out.push({ id: "d:" + d.id, date: d.date || "", kind: d.type, title: d.headline, href: d.clo ? "#/clos" : "#/deals", goto: (d.clo ? "clos:" : "deals:") + d.id }));
   intel.forEach((i) => out.push({ id: "i:" + i.id, date: i.date || "", kind: i.type, title: i.headline, href: i.clo ? "#/clos" : "#/intel", goto: (i.clo ? "clos:" : "intel:") + i.id }));
-  managers.forEach((m) => (m.webNews || []).forEach((w) => out.push({ id: "w:" + (w.url || w.title), date: w.date || "", kind: "News", title: w.title, href: "#/manager/" + m.id })));
+  managers.forEach((m) => (m.webNews || []).forEach((w) => out.push({ id: "w:" + m.id + ":" + (w.url || w.title), date: w.date || "", kind: "News", title: w.title, href: "#/manager/" + m.id })));
   return out.sort((a, b) => String(b.date).localeCompare(String(a.date)));
 }
 function closeNotif() {
@@ -338,7 +338,7 @@ const filterState = {
   managers: { q: "", strategy: [], sort: { key: "name", dir: "asc" } },
   lps: { q: "", type: [], strategy: [], sort: { key: "name", dir: "asc" } },
   intel: { q: "", type: [], year: [] },
-  deals: { q: "", type: [], year: [] },
+  deals: { q: "", type: [], year: [], period: "" },
   clos: { q: "", kind: [], year: [] },
 };
 
@@ -460,13 +460,13 @@ function viewDashboard() {
       <section class="card feature-card">
         <h2>Latest deal activity</h2>
         <p class="muted small">Financings, investments, acquisitions, refinancings, restructurings and exits. Click a headline to open it in the deal feed.</p>
-        ${deals.length ? `<ul class="compact-list">${dealsByDate.slice(0, 12).map((d) => compactRow(d, "deals")).join("")}</ul>` : '<p class="muted small">No deal activity yet.</p>'}
+        ${dealsByDate.length ? `<ul class="compact-list">${dealsByDate.slice(0, 12).map((d) => compactRow(d, "deals")).join("")}</ul>` : '<p class="muted small">No deal activity yet.</p>'}
         <div class="card-foot">${link("#/deals", "View all deal activity →")}</div>
       </section>
       <section class="card feature-card">
         <h2>Latest fundraising intelligence</h2>
         <p class="muted small">Fund launches, first/final closes, LP mandates, personnel and strategy moves. Click a headline to open it in the fundraising feed.</p>
-        ${intel.length ? `<ul class="compact-list">${intelByDate.slice(0, 12).map((i) => compactRow(i, "intel")).join("")}</ul>` : '<p class="muted small">No items yet.</p>'}
+        ${intelByDate.length ? `<ul class="compact-list">${intelByDate.slice(0, 12).map((i) => compactRow(i, "intel")).join("")}</ul>` : '<p class="muted small">No items yet.</p>'}
         <div class="card-foot">${link("#/intel", "View full fundraising intelligence →")}</div>
       </section>
       <section class="card feature-card">
@@ -854,6 +854,14 @@ function viewManager(id) {
   const fs = fundsByManager(id).sort((a, b) => b.vintage - a.vintage);
   const news = intelForManager(id);
   const liveFunds = fs.filter((x) => !x.evergreen && !x.lifecycle && x.status !== "Final Close").length;
+  // CLO activity is carved into its own section per manager; the Deal activity
+  // and Fundraising sections exclude clo:true items (consistent with #/clos).
+  const mgrDeals = dealsForManager(m.id).filter((d) => !d.clo);
+  const mgrIntel = news.filter((i) => !i.clo);
+  const mgrClo = [
+    ...dealsForManager(m.id).filter((d) => d.clo).map((d) => ({ ...d, _kind: "deal" })),
+    ...news.filter((i) => i.clo).map((i) => ({ ...i, _kind: "intel" })),
+  ];
 
   app.innerHTML = `
     ${breadcrumb([["#/managers", "Managers"], [null, m.name]])}
@@ -888,11 +896,12 @@ function viewManager(id) {
 
     <div class="section-divider"><span>News, deals &amp; intelligence</span></div>
     ${newsBlock(m)}
-    ${dealsForManager(m.id).length ? `<section class="card"><h2>Deal activity <span class="muted">(${dealsForManager(m.id).length})</span></h2>${byYear(dealsForManager(m.id), dealRow)}</section>` : ""}
+    ${mgrDeals.length ? `<section class="card"><h2>Deal activity <span class="muted">(${mgrDeals.length})</span></h2>${byYear(mgrDeals, dealRow)}</section>` : ""}
     <section class="card">
       <h2>Fundraising intelligence</h2>
-      ${news.length ? byYear(news, intelRow) : '<p class="muted">No fundraising intelligence items for this manager yet.</p>'}
-    </section>`;
+      ${mgrIntel.length ? byYear(mgrIntel, intelRow) : '<p class="muted">No fundraising intelligence items for this manager yet.</p>'}
+    </section>
+    ${mgrClo.length ? `<section class="card"><h2>CLO activity <span class="muted">(${mgrClo.length})</span></h2><p class="muted small">Collateralised loan obligation pricings, resets, platforms &amp; funds. <a href="#/clos">All CLO activity →</a></p>${byYear(mgrClo, (x) => (x._kind === "deal" ? dealRow(x) : intelRow(x)))}</section>` : ""}`;
 }
 
 // ================================ INVESTORS =================================
@@ -1054,14 +1063,16 @@ function viewDeals() {
   const f = filterState.deals;
   // CLO transactions are carved out into their own #/clos section.
   const base = deals.filter((d) => !d.clo);
+  // ---- quarter helper (also used by the by-quarter chart drill-down) ----
+  const quarterOf = (d) => { const m = /^(\d{4})-(\d{2})/.exec(d || ""); return m ? `${m[1]}-Q${Math.floor((+m[2] - 1) / 3) + 1}` : null; };
   const rows = base.filter((d) =>
     (!f.q || (d.headline + d.summary + (managerById[d.managerId] ? managerById[d.managerId].name : "")).toLowerCase().includes(f.q.toLowerCase())) &&
     (!f.type.length || f.type.includes(d.type)) &&
-    (!f.year.length || f.year.includes(yearOf(d.date)))
+    (!f.year.length || f.year.includes(yearOf(d.date))) &&
+    (!f.period || quarterOf(d.date) === f.period)
   ).sort((a, b) => String(b.date).localeCompare(String(a.date))); // newest first
 
   // ---- deal charts (moved here from the dashboard) ----
-  const quarterOf = (d) => { const m = /^(\d{4})-(\d{2})/.exec(d || ""); return m ? `${m[1]}-Q${Math.floor((+m[2] - 1) / 3) + 1}` : null; };
   const dq = {};
   base.forEach((d) => { const q = quarterOf(d.date); if (q) dq[q] = (dq[q] || 0) + 1; });
   const nowD = new Date();
@@ -1073,7 +1084,7 @@ function viewDeals() {
   const buildTrend = (a, b) => {
     const win = dQuarters.slice(a, b + 1);
     const lab = win.length <= 16 ? (q) => "'" + q.slice(2) : (q) => (q.endsWith("Q1") ? "'" + q.slice(2, 4) : "");
-    return win.map((q) => ({ label: lab(q), value: dq[q] || 0, nav: { jump: "deals" } }));
+    return win.map((q) => ({ label: lab(q), value: dq[q] || 0, nav: { jump: "deals", period: q } }));
   };
   const tStart = Math.min(Math.max(0, trendState.start ?? (NQ - 8)), NQ - 1);
   const tEnd = Math.min(Math.max(tStart, trendState.end ?? (NQ - 1)), NQ - 1);
@@ -1085,7 +1096,7 @@ function viewDeals() {
     .sort((a, b) => b.value - a.value).slice(0, 10);
 
   app.innerHTML = `
-    <div class="page-head"><h1>Deal Activity</h1><p class="muted">${rows.length} of ${base.length} transactions · investments, exits, refinancings, restructurings &amp; distress · <a href="#/clos">CLOs are in their own section →</a></p></div>
+    <div class="page-head"><h1>Deal Activity</h1><p class="muted">${rows.length} of ${base.length} transactions · investments, exits, refinancings, restructurings &amp; distress${f.period ? ` · <strong>${esc(f.period)}</strong> <button type="button" class="link-btn" id="clear-period">clear quarter ✕</button>` : ""} · <a href="#/clos">CLOs are in their own section →</a></p></div>
     <div class="split-3070">
       <div class="split-left">
         <section class="card">
@@ -1107,8 +1118,8 @@ function viewDeals() {
       <div class="split-right">
         <div class="filters">
           <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Company, manager…" value="${esc(f.q)}"></label>
-          ${multiFilter("deals:type", "Type", [...new Set(deals.map((d) => d.type))].sort(), f.type)}
-          ${multiFilter("deals:year", "Year", [...new Set(deals.map((d) => yearOf(d.date)).filter(Boolean))].sort((a, b) => b.localeCompare(a)), f.year)}
+          ${multiFilter("deals:type", "Type", [...new Set(base.map((d) => d.type))].sort(), f.type)}
+          ${multiFilter("deals:year", "Year", [...new Set(base.map((d) => yearOf(d.date)).filter(Boolean))].sort((a, b) => b.localeCompare(a)), f.year)}
         </div>
         <section class="card">
           ${rows.length ? byYear(rows, dealRow) : '<p class="empty">No deal items match these filters.</p>'}
@@ -1116,6 +1127,10 @@ function viewDeals() {
       </div>
     </div>`;
   wireFilters("deals");
+
+  // Clear the active quarter filter set by clicking a column in the by-quarter chart.
+  const clearPeriod = document.getElementById("clear-period");
+  if (clearPeriod) clearPeriod.addEventListener("click", () => { filterState.deals.period = ""; router(); });
 
   // Wire the quarterly range sliders (re-render only the chart on drag).
   const sEl = document.getElementById("trend-start");
@@ -1245,8 +1260,13 @@ function viewWatchlist() {
   // fundraising intelligence — tagged so a single year-grouped list can render
   // each item with its own row style.
   const matches = (x) => (x.managerId && mIds.has(x.managerId)) || (x.fundId && fIds.has(x.fundId));
-  const dealItems = deals.filter(matches).map((d) => ({ ...d, _kind: "deal" }));
-  const intelItems = intel.filter(matches).map((i) => ({ ...i, _kind: "intel" }));
+  const dealItems = deals.filter((d) => !d.clo && matches(d)).map((d) => ({ ...d, _kind: "deal" }));
+  const intelItems = intel.filter((i) => !i.clo && matches(i)).map((i) => ({ ...i, _kind: "intel" }));
+  // CLO activity for followed managers/funds is carved into its own section.
+  const cloItems = [
+    ...deals.filter((d) => d.clo && matches(d)).map((d) => ({ ...d, _kind: "deal" })),
+    ...intel.filter((i) => i.clo && matches(i)).map((i) => ({ ...i, _kind: "intel" })),
+  ];
   const newsItems = [];
   fm.forEach((m) => {
     const all = [...(m.news || []), ...(m.webNews || [])];
@@ -1286,7 +1306,8 @@ function viewWatchlist() {
       ${listCard("Funds", ff, "fund", (f) => `${link(`#/fund/${f.id}`, f.name)} <span class="muted small">${esc(managerById[f.managerId].name)}</span>`)}
       ${listCard("Investors", fl, "lp", (l) => `${link(`#/lp/${l.id}`, l.name)} <span class="muted small">${esc(l.type)}</span>`)}
     </div>
-    <section class="card"><h2>News, deals &amp; fundraising <span class="muted">(${feed.length})</span></h2>${feed.length ? byYear(feed, feedRow) : '<p class="muted small">No news, deals or fundraising yet for the managers/funds you follow.</p>'}</section>`;
+    <section class="card"><h2>News, deals &amp; fundraising <span class="muted">(${feed.length})</span></h2>${feed.length ? byYear(feed, feedRow) : '<p class="muted small">No news, deals or fundraising yet for the managers/funds you follow.</p>'}</section>
+    ${cloItems.length ? `<section class="card"><h2>CLO activity <span class="muted">(${cloItems.length})</span></h2><p class="muted small">Collateralised loan obligation activity for the managers/funds you follow. <a href="#/clos">All CLO activity →</a></p>${byYear(cloItems, feedRow)}</section>` : ""}`;
 }
 
 // ============================== shared bits ================================
@@ -1411,11 +1432,19 @@ app.addEventListener("click", (e) => {
         sort: filterState.funds.sort || { key: "name", dir: "asc" },
       };
     } else if (route === "deals") {
-      filterState.deals = { q: "", type: arr(jump.getAttribute("data-dtype")), year: [] };
+      const period = jump.getAttribute("data-period");
+      // A quarter click (carries data-period) just sets the quarter, preserving
+      // the user's other deal filters; a type jump (dashboard donut) resets them.
+      if (period) filterState.deals = { ...filterState.deals, period };
+      else filterState.deals = { q: "", type: arr(jump.getAttribute("data-dtype")), year: [], period: "" };
     } else if (route === "intel") {
       filterState.intel = { q: "", type: arr(jump.getAttribute("data-itype")), year: [] };
     }
-    location.hash = "#/" + route;
+    // Navigating changes the hash (→ router via hashchange); when we're already
+    // on the target page the hash doesn't change, so re-render explicitly.
+    const target = "#/" + route;
+    if (location.hash === target) router();
+    else location.hash = target;
     return;
   }
   const row = e.target.closest("[data-href]");

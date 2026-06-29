@@ -37,7 +37,8 @@ export function barChart(data, { width = 520 } = {}) {
 
 // Donut chart. data: [{label, value, color?, nav?}]
 export function donutChart(data, { size = 200 } = {}) {
-  const total = data.reduce((s, d) => s + d.value, 0) || 1;
+  const sum = data.reduce((s, d) => s + d.value, 0); // real total shown in the centre
+  const total = sum || 1;                            // geometry divisor (avoid /0)
   const cx = size / 2, cy = size / 2, r = size / 2 - 6, inner = r * 0.62;
   let angle = -Math.PI / 2;
   const palette = ["#0f766e", "#14b8a6", "#5eead4", "#0d9488", "#2dd4bf", "#99f6e4"];
@@ -59,7 +60,7 @@ export function donutChart(data, { size = 200 } = {}) {
   ).join("");
   return `<div class="donut-wrap">
     <svg viewBox="0 0 ${size} ${size}" class="donut" role="img" aria-label="Donut chart">${arcs}
-      <text x="${cx}" y="${cy - 2}" text-anchor="middle" class="donut-total">${total}</text>
+      <text x="${cx}" y="${cy - 2}" text-anchor="middle" class="donut-total">${sum}</text>
       <text x="${cx}" y="${cy + 16}" text-anchor="middle" class="donut-sub">alerts</text>
     </svg>
     <div class="legend">${legend}</div>

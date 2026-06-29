@@ -388,6 +388,10 @@ a.intel-head:hover { color: var(--primary); }
 .footer p { max-width: 1500px; margin: 0 auto; font-size: .78rem; color: var(--muted); }
 
 /* ---------- responsive ---------- */
+/* 3-up dashboard rows step down to 2 columns before collapsing to 1. */
+@media (max-width: 1100px) {
+  .grid-3 { grid-template-columns: 1fr 1fr; }
+}
 @media (max-width: 900px) {
   .grid-2 { grid-template-columns: 1fr; }
   .split-3070 { grid-template-columns: 1fr; }

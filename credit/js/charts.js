@@ -10,7 +10,7 @@ const PALETTE = [
 ];
 
 function esc(s) {
-  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
 // Turn a datum's optional `nav` object ({jump:"funds", strategy:"…"}) into
@@ -42,7 +42,8 @@ export function barChart(data, { unit = "", width = 520 } = {}) {
 
 // Donut chart. data: [{label, value, nav?}]
 export function donutChart(data, { size = 220 } = {}) {
-  const total = data.reduce((s, d) => s + d.value, 0) || 1;
+  const sum = data.reduce((s, d) => s + d.value, 0); // real total shown in the centre
+  const total = sum || 1;                            // geometry divisor (avoid /0)
   const cx = size / 2, cy = size / 2, r = size / 2 - 8, inner = r * 0.6;
   let angle = -Math.PI / 2;
   const arcs = data.map((d, i) => {
@@ -63,7 +64,7 @@ export function donutChart(data, { size = 220 } = {}) {
   ).join("");
   return `<div class="donut-wrap">
     <svg viewBox="0 0 ${size} ${size}" class="donut" role="img">${arcs}
-      <text x="${cx}" y="${cy - 4}" text-anchor="middle" class="donut-total">${total}</text>
+      <text x="${cx}" y="${cy - 4}" text-anchor="middle" class="donut-total">${sum}</text>
       <text x="${cx}" y="${cy + 14}" text-anchor="middle" class="donut-sub">total</text>
     </svg>
     <div class="legend">${legend}</div>
@@ -72,6 +73,7 @@ export function donutChart(data, { size = 220 } = {}) {
 
 // Line chart. data: [{label, value}] in chronological order
 export function lineChart(data, { unit = "", width = 560, height = 220 } = {}) {
+  if (!data || !data.length) return `<svg viewBox="0 0 ${width} ${height}" class="chart" role="img"></svg>`;
   const left = 50, right = 20, top = 20, bottom = 30;
   const max = Math.max(1, ...data.map((d) => d.value));
   const plotW = width - left - right, plotH = height - top - bottom;
