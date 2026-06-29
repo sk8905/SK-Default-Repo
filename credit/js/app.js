@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260629-8";
+} from "./data.js?v=20260629-9";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260629-8";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260629-9";
 
 const app = document.getElementById("app");
 
@@ -457,7 +457,7 @@ function viewDashboard() {
       ${kpis.map((k) => `<div class="kpi-card clickable" ${k.jump}><div class="kpi-value">${k.value}</div><div class="kpi-label">${k.label}</div><div class="kpi-sub muted">${k.sub}</div></div>`).join("")}
     </div>
 
-    <div class="grid-2">
+    <div class="grid-3">
       <section class="card feature-card">
         <h2>Latest deal activity</h2>
         <p class="muted small">Financings, investments, acquisitions, refinancings, restructurings and exits. Click a headline to open it in the deal feed.</p>
@@ -470,14 +470,13 @@ function viewDashboard() {
         ${intel.length ? `<ul class="compact-list">${intelByDate.slice(0, 12).map((i) => compactRow(i, "intel")).join("")}</ul>` : '<p class="muted small">No items yet.</p>'}
         <div class="card-foot">${link("#/intel", "View full fundraising intelligence →")}</div>
       </section>
+      <section class="card feature-card">
+        <h2>Latest CLO news</h2>
+        <p class="muted small">Collateralised loan obligation pricings, resets, platforms, funds &amp; ETFs. Click a headline to open it in the CLOs section.</p>
+        ${cloByDate.length ? `<ul class="compact-list">${cloByDate.slice(0, 12).map((c) => compactRow(c, "clos")).join("")}</ul>` : '<p class="muted small">No CLO news yet.</p>'}
+        <div class="card-foot">${link("#/clos", "View all CLO activity →")}</div>
+      </section>
     </div>
-
-    <section class="card feature-card">
-      <h2>Latest CLO news <span class="muted">(${cloByDate.length})</span></h2>
-      <p class="muted small">Collateralised loan obligation pricings, resets, platforms, funds &amp; ETFs — carved out of Deals &amp; Fundraising. Click a headline to open it in the CLOs section.</p>
-      ${cloByDate.length ? `<ul class="compact-list compact-cols">${cloByDate.slice(0, 12).map((c) => compactRow(c, "clos")).join("")}</ul>` : '<p class="muted small">No CLO news yet.</p>'}
-      <div class="card-foot">${link("#/clos", "View all CLO activity →")}</div>
-    </section>
 
     <div class="grid-2">
       <section class="card"><h2>Deals by type</h2>${byDealType.length ? donutChart(byDealType) : '<p class="muted small">No deals tracked.</p>'}</section>
