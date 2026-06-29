@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260629-9";
+} from "./data.js?v=20260629-10";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260629-9";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260629-10";
 
 const app = document.getElementById("app");
 
@@ -416,9 +416,7 @@ function viewDashboard() {
   // tracked and listed elsewhere but excluded from private-credit market stats).
   const creditFunds = funds.filter((f) => !isEquity(f));
   const nowD = new Date();
-  const monthKey = `${nowD.getFullYear()}-${String(nowD.getMonth() + 1).padStart(2, "0")}`;
   const curQ = `${nowD.getFullYear()}-Q${Math.floor(nowD.getMonth() / 3) + 1}`;
-  const longMonth = nowD.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
   const quarterOf = (d) => { const m = /^(\d{4})-(\d{2})/.exec(d || ""); return m ? `${m[1]}-Q${Math.floor((+m[2] - 1) / 3) + 1}` : null; };
   // CLO items are carved out into #/clos, so they're excluded from the Deal
   // Activity and Fundraising aggregates/feeds on the dashboard too.
@@ -426,15 +424,16 @@ function viewDashboard() {
   const intelNoClo = intel.filter((i) => !i.clo);
 
   // ---- headline KPIs ----
-  const dealsThisMonth = dealsNoClo.filter((d) => String(d.date).startsWith(monthKey)).length;
   const dealsThisQuarter = dealsNoClo.filter((d) => quarterOf(d.date) === curQ).length;
   const openProcesses = creditFunds.filter((f) => !f.evergreen && (f.status === "Open" || f.status === "First Close")).length;
   const closesThisQuarter = creditFunds.filter((f) => isClose(f) && fundQuarter(f) === curQ).length;
+  const cloClosesThisQuarter = [...deals.filter((d) => d.clo), ...intel.filter((i) => i.clo)]
+    .filter((c) => quarterOf(c.date) === curQ).length;
   const kpis = [
-    { label: "Deals this month", value: dealsThisMonth, sub: longMonth, jump: 'data-jump="deals"' },
     { label: "Deals this quarter", value: dealsThisQuarter, sub: curQ, jump: 'data-jump="deals"' },
     { label: "Open fundraising processes", value: openProcesses, sub: "funds currently in market", jump: 'data-jump="funds" data-status="in-market"' },
     { label: "Fundraising closes this quarter", value: closesThisQuarter, sub: curQ, jump: `data-jump="funds" data-period="${curQ}"` },
+    { label: "CLO closes this quarter", value: cloClosesThisQuarter, sub: curQ, jump: 'data-jump="clos"' },
   ];
 
   // ---- the two charts retained on the dashboard ----
