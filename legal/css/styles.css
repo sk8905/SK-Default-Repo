@@ -50,28 +50,25 @@ img, svg { max-width: 100%; }
   position: sticky; top: 0; z-index: 10;
   background: var(--navy); color: #fff;
 }
-/* Inner row is constrained to the page width so the platform switch (its first
-   child) lines up with the page heading below it. */
+/* Full-bleed row: brand pinned to the far-left corner, account/bell to the
+   far-right corner. The platform switch sits just after the brand on the left;
+   the nav grows to fill the middle so the right cluster stays in the corner. */
 .topbar-inner {
   display: flex; align-items: center; gap: 2rem;
-  max-width: var(--maxw); margin: 0 auto;
-  padding: 0 2rem; height: 60px;
+  padding: 0 1.5rem; height: 60px;
 }
-.brand { display: flex; align-items: center; gap: .6rem; flex: 1 1 0; text-decoration: none; color: #fff; }
+.brand { display: flex; align-items: center; gap: .6rem; flex: 0 0 auto; text-decoration: none; color: #fff; }
 .brand:hover { text-decoration: none; }
 .logo { color: #2dd4bf; font-size: 1.3rem; line-height: 1; }
 .brand-text { display: flex; flex-direction: column; }
 .brand-text strong { font-size: 1.05rem; letter-spacing: .3px; }
 .brand-sub { font-size: .7rem; color: #5eead4; text-transform: uppercase; letter-spacing: 1px; }
-.mainnav { display: flex; gap: .25rem; flex: 0 0 auto; justify-content: center; }
+.mainnav { display: flex; gap: .25rem; flex: 1 1 auto; justify-content: center; }
 /* Credit <-> Legal platform switcher */
 .platform-switch { display: inline-flex; align-items: center; gap: 2px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.22); border-radius: 8px; padding: 2px; margin-right: .6rem; flex: 0 0 auto; }
 .ps-btn { padding: .3rem .6rem; border-radius: 6px; font-size: .8rem; font-weight: 700; color: #cbd5e1; text-decoration: none; white-space: nowrap; }
 .ps-btn:hover { color: #fff; text-decoration: none; background: rgba(255,255,255,.1); }
 .ps-btn.is-active, .ps-btn.is-active:hover { background: #fff; color: #134e4a; }
-/* The switch leads the topbar's constrained inner row; no extra left margin so
-   its edge aligns with the page heading. */
-.topbar-inner .platform-switch { margin-right: 0; }
 .nav-link { color: #cbd5e1; padding: .5rem .85rem; border-radius: 6px; font-weight: 500; white-space: nowrap; }
 .nav-link:hover, .nav-link:focus-visible { color: #fff; text-decoration: none; background: rgba(255,255,255,.08); }
 .nav-link.active { color: #fff; background: rgba(255,255,255,.15); }
@@ -82,7 +79,7 @@ img, svg { max-width: 100%; }
   background: var(--accent); color: #fff; border-radius: 999px;
   font-size: .68rem; font-weight: 700; line-height: 16px; text-align: center;
 }
-.topbar-right { flex: 1 1 0; display: flex; flex-direction: column; align-items: flex-end; gap: .2rem; }
+.topbar-right { flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-end; gap: .2rem; }
 .account-nav { font-size: .72rem; color: #cbd5e1; white-space: nowrap; }
 .account-nav strong { color: #fff; font-weight: 600; }
 .account-nav a { color: #5eead4; font-weight: 600; }

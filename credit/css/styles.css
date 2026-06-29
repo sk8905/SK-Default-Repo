@@ -38,28 +38,25 @@ h3 { font-size: 1rem; margin: 0; }
   background: #0b1f44; color: #fff;
   position: sticky; top: 0; z-index: 10;
 }
-/* Inner row is constrained to the page width so the platform switch (its first
-   child) lines up with the page heading below it. */
+/* Full-bleed row: brand pinned to the far-left corner, account/bell to the
+   far-right corner. The platform switch sits just after the brand on the left;
+   the nav grows to fill the middle so the right cluster stays in the corner. */
 .topbar-inner {
   display: flex; align-items: center; gap: 2rem;
-  max-width: 1500px; margin: 0 auto;
-  padding: 0 2rem; height: 60px;
+  padding: 0 1.5rem; height: 60px;
 }
-.brand { display: flex; align-items: center; gap: .6rem; flex: 1 1 0; text-decoration: none; color: #fff; }
+.brand { display: flex; align-items: center; gap: .6rem; flex: 0 0 auto; text-decoration: none; color: #fff; }
 .brand:hover { text-decoration: none; }
 .brand-text { display: flex; flex-direction: column; }
 .brand-text strong { font-size: 1.05rem; letter-spacing: .3px; }
 .brand-sub { font-size: .7rem; color: #93c5fd; text-transform: uppercase; letter-spacing: 1px; }
 .logo { color: var(--accent); font-size: 1.3rem; line-height: 1; }
-.mainnav { display: flex; gap: .25rem; flex: 0 0 auto; justify-content: center; }
+.mainnav { display: flex; gap: .25rem; flex: 1 1 auto; justify-content: center; }
 /* Credit <-> Legal platform switcher */
 .platform-switch { display: inline-flex; align-items: center; gap: 2px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.22); border-radius: 8px; padding: 2px; margin-right: .6rem; flex: 0 0 auto; }
 .ps-btn { padding: .3rem .6rem; border-radius: 6px; font-size: .8rem; font-weight: 700; color: #cbd5e1; text-decoration: none; white-space: nowrap; }
 .ps-btn:hover { color: #fff; text-decoration: none; background: rgba(255,255,255,.1); }
 .ps-btn.is-active, .ps-btn.is-active:hover { background: #fff; color: #0b1f44; }
-/* The switch leads the topbar's constrained inner row; no extra left margin so
-   its edge aligns with the page heading. */
-.topbar-inner .platform-switch { margin-right: 0; }
 .nav-link {
   color: #cbd5e1; padding: .5rem .85rem; border-radius: 6px; font-weight: 500;
 }
@@ -71,7 +68,7 @@ h3 { font-size: 1rem; margin: 0; }
 .nav-sep { width: 1px; align-self: center; height: 18px; background: rgba(255,255,255,.18); margin: 0 .35rem; }
 .topbar-tag { flex: 1 1 0; text-align: right; font-size: .72rem; color: #93c5fd; text-transform: uppercase; letter-spacing: 1px; }
 /* Right-hand topbar stack: tagline above, signed-in identity + sign out below. */
-.topbar-right { flex: 1 1 0; display: flex; flex-direction: column; align-items: flex-end; gap: .2rem; }
+.topbar-right { flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-end; gap: .2rem; }
 .topbar-right .topbar-tag { flex: 0 0 auto; }
 .account-nav { font-size: .72rem; color: #cbd5e1; white-space: nowrap; }
 .account-nav strong { color: #fff; font-weight: 600; }
