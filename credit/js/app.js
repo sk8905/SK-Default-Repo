@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260629-1";
+} from "./data.js?v=20260629-2";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260629-1";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260629-2";
 
 const app = document.getElementById("app");
 
@@ -217,8 +217,8 @@ function renderAccountNav() {
 const NOTIF_KEY = "meridian.credit.notifSeen";
 function notifItems() {
   const out = [];
-  deals.forEach((d) => out.push({ id: "d:" + d.id, date: d.date || "", kind: d.type, title: d.headline, href: "#/deals", goto: "deals:" + d.id }));
-  intel.forEach((i) => out.push({ id: "i:" + i.id, date: i.date || "", kind: i.type, title: i.headline, href: "#/intel", goto: "intel:" + i.id }));
+  deals.forEach((d) => out.push({ id: "d:" + d.id, date: d.date || "", kind: d.type, title: d.headline, href: d.clo ? "#/clos" : "#/deals", goto: (d.clo ? "clos:" : "deals:") + d.id }));
+  intel.forEach((i) => out.push({ id: "i:" + i.id, date: i.date || "", kind: i.type, title: i.headline, href: i.clo ? "#/clos" : "#/intel", goto: (i.clo ? "clos:" : "intel:") + i.id }));
   managers.forEach((m) => (m.webNews || []).forEach((w) => out.push({ id: "w:" + (w.url || w.title), date: w.date || "", kind: "News", title: w.title, href: "#/manager/" + m.id })));
   return out.sort((a, b) => String(b.date).localeCompare(String(a.date)));
 }
@@ -339,6 +339,7 @@ const filterState = {
   lps: { q: "", type: [], strategy: [], sort: { key: "name", dir: "asc" } },
   intel: { q: "", type: [], year: [] },
   deals: { q: "", type: [], year: [] },
+  clos: { q: "", kind: [], year: [] },
 };
 
 // Calendar year (string) from an item's date; "" if none.
@@ -419,10 +420,14 @@ function viewDashboard() {
   const curQ = `${nowD.getFullYear()}-Q${Math.floor(nowD.getMonth() / 3) + 1}`;
   const longMonth = nowD.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
   const quarterOf = (d) => { const m = /^(\d{4})-(\d{2})/.exec(d || ""); return m ? `${m[1]}-Q${Math.floor((+m[2] - 1) / 3) + 1}` : null; };
+  // CLO items are carved out into #/clos, so they're excluded from the Deal
+  // Activity and Fundraising aggregates/feeds on the dashboard too.
+  const dealsNoClo = deals.filter((d) => !d.clo);
+  const intelNoClo = intel.filter((i) => !i.clo);
 
   // ---- headline KPIs ----
-  const dealsThisMonth = deals.filter((d) => String(d.date).startsWith(monthKey)).length;
-  const dealsThisQuarter = deals.filter((d) => quarterOf(d.date) === curQ).length;
+  const dealsThisMonth = dealsNoClo.filter((d) => String(d.date).startsWith(monthKey)).length;
+  const dealsThisQuarter = dealsNoClo.filter((d) => quarterOf(d.date) === curQ).length;
   const openProcesses = creditFunds.filter((f) => !f.evergreen && (f.status === "Open" || f.status === "First Close")).length;
   const closesThisQuarter = creditFunds.filter((f) => isClose(f) && fundQuarter(f) === curQ).length;
   const kpis = [
@@ -433,12 +438,12 @@ function viewDashboard() {
   ];
 
   // ---- the two charts retained on the dashboard ----
-  const byDealType = [...new Set(deals.map((d) => d.type))].map((t) => ({ label: t, value: deals.filter((d) => d.type === t).length, nav: { jump: "deals", dtype: t } })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
+  const byDealType = [...new Set(dealsNoClo.map((d) => d.type))].map((t) => ({ label: t, value: dealsNoClo.filter((d) => d.type === t).length, nav: { jump: "deals", dtype: t } })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
   const byStatus = FUND_CATEGORIES.map((s) => ({ label: s, value: creditFunds.filter((f) => fundCategory(f) === s).length, nav: { jump: "funds", status: s } })).filter((d) => d.value > 0);
 
   // ---- latest feeds (headlines + links only; click → item on its feed page) ----
-  const dealsByDate = [...deals].sort((a, b) => String(b.date).localeCompare(String(a.date)));
-  const intelByDate = [...intel].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  const dealsByDate = [...dealsNoClo].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  const intelByDate = [...intelNoClo].sort((a, b) => String(b.date).localeCompare(String(a.date)));
 
   app.innerHTML = `
     <div class="page-head">
@@ -970,7 +975,9 @@ function intelRow(i) {
 
 function viewIntel() {
   const f = filterState.intel;
-  const rows = intel.filter((i) =>
+  // CLO fundraising/platform news is carved out into its own #/clos section.
+  const base = intel.filter((i) => !i.clo);
+  const rows = base.filter((i) =>
     (!f.q || (i.headline + i.summary).toLowerCase().includes(f.q.toLowerCase())) &&
     (!f.type.length || f.type.includes(i.type)) &&
     (!f.year.length || f.year.includes(yearOf(i.date)))
@@ -993,7 +1000,7 @@ function viewIntel() {
   const trend = quarters.map((q) => ({ label: "'" + q.slice(2), value: qCounts[q] || 0, nav: { jump: "funds", period: q } }));
 
   app.innerHTML = `
-    <div class="page-head"><h1>Fundraising Intelligence</h1><p class="muted">${rows.length} of ${intel.length} items · European private credit capital formation</p></div>
+    <div class="page-head"><h1>Fundraising Intelligence</h1><p class="muted">${rows.length} of ${base.length} items · European private credit capital formation · <a href="#/clos">CLOs are in their own section →</a></p></div>
     <div class="split-3070">
       <div class="split-left">
         <section class="card"><h2>Capital raised by strategy <span class="muted">(€bn)</span></h2>${byStrategy.length ? barChart(byStrategy, { unit: "€", width: 540 }) : '<p class="muted small">No data.</p>'}</section>
@@ -1004,8 +1011,8 @@ function viewIntel() {
       <div class="split-right">
         <div class="filters">
           <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Keyword…" value="${esc(f.q)}"></label>
-          ${multiFilter("intel:type", "Type", [...new Set(intel.map((i) => i.type))].sort(), f.type)}
-          ${multiFilter("intel:year", "Year", [...new Set(intel.map((i) => yearOf(i.date)).filter(Boolean))].sort((a, b) => b.localeCompare(a)), f.year)}
+          ${multiFilter("intel:type", "Type", [...new Set(base.map((i) => i.type))].sort(), f.type)}
+          ${multiFilter("intel:year", "Year", [...new Set(base.map((i) => yearOf(i.date)).filter(Boolean))].sort((a, b) => b.localeCompare(a)), f.year)}
         </div>
         <section class="card">
           ${rows.length ? byYear(rows, intelRow) : '<p class="empty">No intelligence items match these filters.</p>'}
@@ -1037,7 +1044,9 @@ function dealRow(d) {
 
 function viewDeals() {
   const f = filterState.deals;
-  const rows = deals.filter((d) =>
+  // CLO transactions are carved out into their own #/clos section.
+  const base = deals.filter((d) => !d.clo);
+  const rows = base.filter((d) =>
     (!f.q || (d.headline + d.summary + (managerById[d.managerId] ? managerById[d.managerId].name : "")).toLowerCase().includes(f.q.toLowerCase())) &&
     (!f.type.length || f.type.includes(d.type)) &&
     (!f.year.length || f.year.includes(yearOf(d.date)))
@@ -1046,7 +1055,7 @@ function viewDeals() {
   // ---- deal charts (moved here from the dashboard) ----
   const quarterOf = (d) => { const m = /^(\d{4})-(\d{2})/.exec(d || ""); return m ? `${m[1]}-Q${Math.floor((+m[2] - 1) / 3) + 1}` : null; };
   const dq = {};
-  deals.forEach((d) => { const q = quarterOf(d.date); if (q) dq[q] = (dq[q] || 0) + 1; });
+  base.forEach((d) => { const q = quarterOf(d.date); if (q) dq[q] = (dq[q] || 0) + 1; });
   const nowD = new Date();
   let dy = nowD.getFullYear(), dqr = Math.floor(nowD.getMonth() / 3) + 1;
   const dQuarters = [];
@@ -1062,13 +1071,13 @@ function viewDeals() {
   const tEnd = Math.min(Math.max(tStart, trendState.end ?? (NQ - 1)), NQ - 1);
   // most active managers by disclosed deal count (top 10).
   const dealMgrCounts = {};
-  deals.forEach((d) => { if (d.managerId) dealMgrCounts[d.managerId] = (dealMgrCounts[d.managerId] || 0) + 1; });
+  base.forEach((d) => { if (d.managerId) dealMgrCounts[d.managerId] = (dealMgrCounts[d.managerId] || 0) + 1; });
   const byDealManager = Object.entries(dealMgrCounts)
     .map(([id, value]) => ({ label: managerById[id] ? managerById[id].name : id, value, nav: { jump: "manager/" + id } }))
     .sort((a, b) => b.value - a.value).slice(0, 10);
 
   app.innerHTML = `
-    <div class="page-head"><h1>Deal Activity</h1><p class="muted">${rows.length} of ${deals.length} transactions · investments, exits, refinancings, restructurings &amp; distress</p></div>
+    <div class="page-head"><h1>Deal Activity</h1><p class="muted">${rows.length} of ${base.length} transactions · investments, exits, refinancings, restructurings &amp; distress · <a href="#/clos">CLOs are in their own section →</a></p></div>
     <div class="split-3070">
       <div class="split-left">
         <section class="card">
@@ -1119,9 +1128,64 @@ function viewDeals() {
   applyPendingFocus("deals");
 }
 
+// ================================== CLOs ===================================
+// Collateralised loan obligations — pricings, new platforms/managers, CLO funds,
+// CLO ETFs, awards and CLO-team personnel — carved out of Deal Activity and
+// Fundraising Intelligence into one dedicated feed. Items keep their original
+// home array (deals / intel, tagged `clo:true`); this view simply gathers them.
+function viewClos() {
+  const f = filterState.clos;
+  const cloDeals = deals.filter((d) => d.clo).map((d) => ({ ...d, _kind: "deal" }));
+  const cloIntel = intel.filter((i) => i.clo).map((i) => ({ ...i, _kind: "intel" }));
+  const all = [...cloDeals, ...cloIntel];
+  const rows = all.filter((x) =>
+    (!f.q || ((x.headline || "") + (x.summary || "")).toLowerCase().includes(f.q.toLowerCase())) &&
+    (!f.kind.length || f.kind.includes(x._kind === "deal" ? "Deal" : "Fundraising")) &&
+    (!f.year.length || f.year.includes(yearOf(x.date)))
+  ).sort((a, b) => String(b.date).localeCompare(String(a.date))); // newest first
+
+  // ---- CLO charts ----
+  const quarterOf = (d) => { const m = /^(\d{4})-(\d{2})/.exec(d || ""); return m ? `${m[1]}-Q${Math.floor((+m[2] - 1) / 3) + 1}` : null; };
+  const qc = {};
+  all.forEach((x) => { const q = quarterOf(x.date); if (q) qc[q] = (qc[q] || 0) + 1; });
+  const nowD = new Date();
+  let cy = nowD.getFullYear(), cq = Math.floor(nowD.getMonth() / 3) + 1;
+  const quarters = [];
+  for (let i = 0; i < 20; i++) { quarters.unshift(`${cy}-Q${cq}`); cq--; if (cq < 1) { cq = 4; cy--; } }
+  const trend = quarters.map((q) => ({ label: "'" + q.slice(2), value: qc[q] || 0, nav: { jump: "clos" } }));
+  const mc = {};
+  all.forEach((x) => { if (x.managerId) mc[x.managerId] = (mc[x.managerId] || 0) + 1; });
+  const byMgr = Object.entries(mc)
+    .map(([id, value]) => ({ label: managerById[id] ? managerById[id].name : id, value, nav: { jump: "manager/" + id } }))
+    .sort((a, b) => b.value - a.value).slice(0, 10);
+
+  const feedRow = (x) => x._kind === "deal" ? dealRow(x) : intelRow(x);
+
+  app.innerHTML = `
+    <div class="page-head"><h1>CLOs</h1><p class="muted">${rows.length} of ${all.length} items · collateralised loan obligation pricings, platforms, funds, ETFs &amp; personnel — carved out of Deals &amp; Fundraising</p></div>
+    <div class="split-3070">
+      <div class="split-left">
+        <section class="card"><h2>CLO activity by quarter <span class="muted">(pricings &amp; news)</span></h2>${lineChart(trend, { width: 540, height: 240 })}</section>
+        ${byMgr.length ? `<section class="card"><h2>Most active CLO managers</h2>${barChart(byMgr, { width: 540 })}</section>` : ""}
+      </div>
+      <div class="split-right">
+        <div class="filters">
+          <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Keyword…" value="${esc(f.q)}"></label>
+          ${multiFilter("clos:kind", "Source", ["Deal", "Fundraising"], f.kind)}
+          ${multiFilter("clos:year", "Year", [...new Set(all.map((x) => yearOf(x.date)).filter(Boolean))].sort((a, b) => b.localeCompare(a)), f.year)}
+        </div>
+        <section class="card">
+          ${rows.length ? byYear(rows, feedRow) : '<p class="empty">No CLO items match these filters.</p>'}
+        </section>
+      </div>
+    </div>`;
+  wireFilters("clos");
+  applyPendingFocus("clos");
+}
+
 // =============================== MANDATES ==================================
 function viewMandates() {
-  const board = intel.filter((i) => i.type === "Mandate" || i.type === "Launch")
+  const board = intel.filter((i) => !i.clo && (i.type === "Mandate" || i.type === "Launch"))
     .sort((a, b) => String(b.date).localeCompare(String(a.date))); // newest first
   app.innerHTML = `
     <div class="page-head"><h1>Mandates &amp; Searches</h1><p class="muted">Live LP mandates, RFPs and new-fund launches · ${board.length} items</p></div>
@@ -1402,6 +1466,7 @@ function router() {
     case "lp": return viewLp(arg);
     case "intel": return viewIntel();
     case "deals": return viewDeals();
+    case "clos": return viewClos();
     case "mandates": return viewMandates();
     case "league": return viewLeague();
     case "watchlist": return viewWatchlist();
