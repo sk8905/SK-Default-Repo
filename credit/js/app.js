@@ -444,6 +444,9 @@ function viewDashboard() {
   // ---- latest feeds (headlines + links only; click → item on its feed page) ----
   const dealsByDate = [...dealsNoClo].sort((a, b) => String(b.date).localeCompare(String(a.date)));
   const intelByDate = [...intelNoClo].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  // CLO items live in their own #/clos section; surface the most recent here too.
+  const cloByDate = [...deals.filter((d) => d.clo), ...intel.filter((i) => i.clo)]
+    .sort((a, b) => String(b.date).localeCompare(String(a.date)));
 
   app.innerHTML = `
     <div class="page-head">
@@ -468,6 +471,13 @@ function viewDashboard() {
         <div class="card-foot">${link("#/intel", "View full fundraising intelligence →")}</div>
       </section>
     </div>
+
+    <section class="card feature-card">
+      <h2>Latest CLO news <span class="muted">(${cloByDate.length})</span></h2>
+      <p class="muted small">Collateralised loan obligation pricings, resets, platforms, funds &amp; ETFs — carved out of Deals &amp; Fundraising. Click a headline to open it in the CLOs section.</p>
+      ${cloByDate.length ? `<ul class="compact-list compact-cols">${cloByDate.slice(0, 12).map((c) => compactRow(c, "clos")).join("")}</ul>` : '<p class="muted small">No CLO news yet.</p>'}
+      <div class="card-foot">${link("#/clos", "View all CLO activity →")}</div>
+    </section>
 
     <div class="grid-2">
       <section class="card"><h2>Deals by type</h2>${byDealType.length ? donutChart(byDealType) : '<p class="muted small">No deals tracked.</p>'}</section>
