@@ -16,8 +16,8 @@
 import {
   items, cases, caseSummaries, practiceAreas, firms, tiers, updateTypes, restructurings,
   firmById, areaById, typeById, tierById, LAST_REVIEWED, LAST_CHECKED, LAST_CHECKED_TIME,
-} from "./data.js?v=20260629-14";
-import { donutChart, columnChart } from "./charts.js?v=20260629-14";
+} from "./data.js?v=20260629-15";
+import { donutChart, columnChart } from "./charts.js?v=20260629-15";
 
 const app = document.getElementById("app");
 
@@ -934,7 +934,7 @@ function initChrome() {
   if (status) {
     const latest = [...items].sort(byDateDesc)[0];
     status.innerHTML = `<span class="ds-part">Last refresh ${fmtDate(LAST_CHECKED)}${LAST_CHECKED_TIME ? `, ${LAST_CHECKED_TIME}` : ""}${latest ? " ·" : ""}</span>`
-      + (latest ? ` <span class="ds-part">latest item ${fmtDate(latest.date)}</span>` : "");
+      + (latest ? ` <span class="ds-part">Latest item ${fmtDate(latest.date)}</span>` : "");
     status.title = `Routine last ran ${fmtDate(LAST_CHECKED)}${LAST_CHECKED_TIME ? ` ${LAST_CHECKED_TIME}` : ""}; data last changed ${fmtDate(LAST_REVIEWED)}`;
   }
   // Same pattern as the Meridian app / landing page: behind Cloudflare Access
@@ -945,7 +945,7 @@ function initChrome() {
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
       .then((d) => {
         if (d && d.email) {
-          acct.innerHTML = `signed in as <strong>${esc(d.email)}</strong>`
+          acct.innerHTML = `Signed in as <strong>${esc(d.email)}</strong>`
             + ` · <a href="/cdn-cgi/access/logout">Sign out</a>`;
         }
       })
