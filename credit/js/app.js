@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260629-15";
+} from "./data.js?v=20260629-16";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260629-15";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260629-16";
 
 const app = document.getElementById("app");
 
@@ -473,13 +473,7 @@ function viewDashboard() {
       ${kpis.map((k) => `<div class="kpi-card clickable" ${k.jump}><div class="kpi-value">${k.value}</div><div class="kpi-label">${k.label}</div><div class="kpi-sub muted">${k.sub}</div></div>`).join("")}
     </div>
 
-    <div class="grid-4">
-      <section class="card feature-card">
-        <h2>Latest news</h2>
-        <p class="muted small">Manager &amp; investor press across the tracked universe. Click a headline to open the source.</p>
-        ${newsByDate.length ? `<ul class="compact-list">${newsByDate.slice(0, 12).map(newsCompact).join("")}</ul>` : '<p class="muted small">No news yet.</p>'}
-        <div class="card-foot">${link("#/news", "View all news →")}</div>
-      </section>
+    <div class="grid-3">
       <section class="card feature-card">
         <h2>Latest deal activity</h2>
         <p class="muted small">Financings, investments, acquisitions, refinancings, restructurings and exits. Click a headline to open it in the deal feed.</p>
@@ -499,6 +493,13 @@ function viewDashboard() {
         <div class="card-foot">${link("#/clos", "View all CLO activity →")}</div>
       </section>
     </div>
+
+    <details class="card wl-cat news-panel">
+      <summary class="wl-cat-head"><h2>Latest news <span class="muted">(${newsByDate.length})</span></h2><span class="wl-caret" aria-hidden="true"></span></summary>
+      <p class="muted small">Manager &amp; investor press across the tracked universe. Click a headline to open the source, or open the News tab for the full feed.</p>
+      ${newsByDate.length ? `<ul class="compact-list news-cols">${newsByDate.slice(0, 12).map(newsCompact).join("")}</ul>` : '<p class="muted small">No news yet.</p>'}
+      <div class="card-foot">${link("#/news", "View all news →")}</div>
+    </details>
 
     <div class="grid-2">
       <section class="card"><h2>Deals by type</h2>${byDealType.length ? donutChart(byDealType) : '<p class="muted small">No deals tracked.</p>'}</section>
