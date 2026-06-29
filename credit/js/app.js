@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260629-24";
+} from "./data.js?v=20260629-25";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260629-24";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260629-25";
 
 const app = document.getElementById("app");
 
@@ -335,7 +335,7 @@ function investorsForFund(f) {
 // array means "All". `period` stays a single string (chart drill-down).
 const filterState = {
   funds: { q: "", strategy: [], status: [], geo: [], period: "", sort: { key: "name", dir: "asc" } },
-  managers: { q: "", strategy: [], sort: { key: "name", dir: "asc" } },
+  managers: { q: "", strategy: [], location: [], sort: { key: "name", dir: "asc" } },
   lps: { q: "", type: [], strategy: [], sort: { key: "name", dir: "asc" } },
   intel: { q: "", type: [], year: [] },
   deals: { q: "", type: [], year: [], period: "" },
@@ -761,11 +761,52 @@ function viewFund(id) {
 }
 
 // ================================ MANAGERS ==================================
+// Normalise a manager's HQ string to one or more canonical countries/regions so
+// the Managers tab can offer a clean "Location" filter. Handles dual HQs
+// ("New York, US / London, UK"), abbreviations (UK/FR/DE…) and bare country
+// names. "CA" is disambiguated (Montreal → Canada, else California → US).
+const HQ_REGION_BY_TOKEN = {
+  "uk": "United Kingdom", "united kingdom": "United Kingdom", "london": "United Kingdom", "edinburgh": "United Kingdom",
+  "us": "United States", "united states": "United States", "new york": "United States",
+  "fr": "France", "france": "France",
+  "de": "Germany", "germany": "Germany",
+  "it": "Italy", "italy": "Italy",
+  "es": "Spain", "spain": "Spain",
+  "se": "Sweden", "sweden": "Sweden",
+  "fi": "Finland", "finland": "Finland",
+  "nl": "Netherlands", "netherlands": "Netherlands",
+  "dk": "Denmark", "denmark": "Denmark",
+  "ch": "Switzerland", "switzerland": "Switzerland",
+  "lu": "Luxembourg", "luxembourg": "Luxembourg",
+  "be": "Belgium", "belgium": "Belgium",
+  "il": "Israel", "israel": "Israel",
+  "uae": "UAE", "canada": "Canada", "australia": "Australia",
+  "hong kong": "Hong Kong", "jersey": "Jersey",
+};
+const HQ_CANADA_CITY = /montreal|toronto|vancouver|calgary|ottawa/;
+function hqRegions(hq) {
+  const out = [];
+  String(hq || "").split("/").forEach((part) => {
+    part = part.trim();
+    if (!part) return;
+    const segs = part.split(",").map((s) => s.trim());
+    const last = segs[segs.length - 1].toLowerCase();
+    const city = segs.length > 1 ? segs[0].toLowerCase() : "";
+    let region;
+    if (last === "ca") region = HQ_CANADA_CITY.test(city) ? "Canada" : "United States";
+    else region = HQ_REGION_BY_TOKEN[last] || HQ_REGION_BY_TOKEN[part.toLowerCase()] || segs[segs.length - 1];
+    if (region && !out.includes(region)) out.push(region);
+  });
+  return out;
+}
+
 function viewManagers() {
   const f = filterState.managers;
+  const LOCATIONS = [...new Set(managers.flatMap((m) => hqRegions(m.hq)))].sort();
   const rows = managers.filter((m) =>
     (!f.q || m.name.toLowerCase().includes(f.q.toLowerCase()) || m.hq.toLowerCase().includes(f.q.toLowerCase())) &&
-    (!f.strategy.length || f.strategy.some((s) => m.strategies.includes(s)))
+    (!f.strategy.length || f.strategy.some((s) => m.strategies.includes(s))) &&
+    (!f.location.length || hqRegions(m.hq).some((r) => f.location.includes(r)))
   );
   const sorted = applySort(rows, "managers");
 
@@ -774,6 +815,7 @@ function viewManagers() {
     <div class="filters">
       <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Name or HQ…" value="${esc(f.q)}"></label>
       ${multiFilter("managers:strategy", "Strategy", STRATEGIES, f.strategy)}
+      ${multiFilter("managers:location", "Location", LOCATIONS, f.location)}
     </div>
     <div class="table-wrap"><table class="data-table">
       <thead><tr>${sortTh("managers", "name", "Manager")}${sortTh("managers", "hq", "HQ")}${sortTh("managers", "aum", "AUM")}<th>Strategies</th>${sortTh("managers", "funds", "Funds")}${sortTh("managers", "live", "In&nbsp;mkt")}</tr></thead>
