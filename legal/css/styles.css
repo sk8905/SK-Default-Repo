@@ -181,6 +181,7 @@ a.feed-title:hover { color: var(--primary); }
 
 /* ---- Panels & charts ---- */
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
 .panel {
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
   padding: 1.1rem 1.25rem; margin-bottom: 1rem; box-shadow: var(--shadow); overflow: hidden;
@@ -383,6 +384,7 @@ a.compact-head:hover { color: var(--primary); }
 }
 @media (max-width: 860px) {
   .grid-2 { grid-template-columns: 1fr; }
+  .grid-3 { grid-template-columns: 1fr; }
   .list-layout { grid-template-columns: 1fr; }
   .filters { position: static; max-height: none; overflow: visible; }
   .case-grid { grid-template-columns: 1fr; }

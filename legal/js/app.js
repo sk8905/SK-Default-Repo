@@ -16,8 +16,8 @@
 import {
   items, cases, caseSummaries, practiceAreas, firms, tiers, updateTypes, restructurings,
   firmById, areaById, typeById, tierById, LAST_REVIEWED, LAST_CHECKED, LAST_CHECKED_TIME,
-} from "./data.js?v=20260629-3";
-import { donutChart, columnChart } from "./charts.js?v=20260629-3";
+} from "./data.js?v=20260629-4";
+import { donutChart, columnChart } from "./charts.js?v=20260629-4";
 
 const app = document.getElementById("app");
 
@@ -234,6 +234,14 @@ function caseCompact(c) {
     <div class="compact-meta muted small">${fmtDate(c.date)} · ${esc(c.court)} · ${esc(c.citation)}</div>
   </li>`;
 }
+function rxCompact(r) {
+  const kind = r.type === "scheme" ? "Scheme" : "Plan";
+  const meta = [r.date ? fmtDate(r.date) : "undated", kind, r.citation ? esc(r.citation) : ""].filter(Boolean).join(" · ");
+  return `<li class="compact-item">
+    <a class="compact-head" href="#/restructurings?m=${esc(r.id)}">${esc(r.company)}</a>
+    <div class="compact-meta muted small">${meta}</div>
+  </li>`;
+}
 
 // =============================================================================
 // VIEW: Dashboard (#/)
@@ -253,9 +261,10 @@ function viewDashboard() {
     </a>`;
   }).join("");
 
-  // Dashboard lists: law-firm alerts (left) and recent BAILII cases (right).
+  // Dashboard lists: law-firm alerts, recent BAILII cases, and schemes/RPs.
   const firmList = [...items].sort(byDateDesc).slice(0, 10).map(itemCompact).join("");
   const caseListHtml = [...cases].sort(byDateDesc).slice(0, 10).map(caseCompact).join("");
+  const rxListHtml = [...restructurings].sort(byDateDesc).slice(0, 10).map(rxCompact).join("");
 
   // Supporting charts: by source tier + by month.
   const tierData = tiers.map((t) => ({
@@ -278,7 +287,7 @@ function viewDashboard() {
 
     <section class="kpis kpis-5" aria-label="Alerts this year by practice area">${tiles}</section>
 
-    <div class="grid-2">
+    <div class="grid-3">
       <section class="card feature-card">
         <h2>Law-firm alerts</h2>
         <p class="muted small">Latest legal updates &amp; client alerts from UK Magic Circle, Silver Circle and US-elite London firms. Click a headline to open it.</p>
@@ -290,6 +299,12 @@ function viewDashboard() {
         <p class="muted small">Latest English-law judgments, linked to bailii.org.</p>
         <ul class="compact-list">${caseListHtml}</ul>
         <div class="card-foot"><a href="#/cases">View all case law →</a></div>
+      </section>
+      <section class="card feature-card">
+        <h2>Schemes &amp; RPs</h2>
+        <p class="muted small">Latest restructuring plans &amp; schemes of arrangement before the English court. Click a matter to open it.</p>
+        <ul class="compact-list">${rxListHtml}</ul>
+        <div class="card-foot"><a href="#/restructurings">View all schemes &amp; RPs →</a></div>
       </section>
     </div>
 
