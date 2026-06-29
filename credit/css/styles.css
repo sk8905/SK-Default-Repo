@@ -104,12 +104,12 @@ h3 { font-size: 1rem; margin: 0; }
 .notif-empty { padding: .6rem .5rem; }
 
 /* ---------- layout ---------- */
-.container { max-width: 1180px; margin: 0 auto; padding: 1.75rem 1.5rem 3rem; }
+.container { max-width: 1500px; margin: 0 auto; padding: 1.75rem 2rem 3rem; }
 .page-head { margin-bottom: 1.25rem; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
 /* Feed pages: charts in a 30% left margin, feed in the 70% right column. */
-.split-3070 { display: grid; grid-template-columns: 3fr 7fr; gap: 1rem; align-items: start; }
+.split-3070 { display: grid; grid-template-columns: 36fr 64fr; gap: 1.5rem; align-items: start; }
 /* Let the grid honour the 3fr:7fr ratio exactly. Without this, a column's
    min-content (the Deals range-slider controls, or long unbreakable feed text)
    can push the split off-ratio, and differently per tab — which is why Deals and
@@ -385,7 +385,7 @@ a.intel-head:hover { color: var(--primary); }
 
 /* ---------- footer ---------- */
 .footer { border-top: 1px solid var(--border); background: #fff; padding: 1.25rem 1.5rem; }
-.footer p { max-width: 1180px; margin: 0 auto; font-size: .78rem; color: var(--muted); }
+.footer p { max-width: 1500px; margin: 0 auto; font-size: .78rem; color: var(--muted); }
 
 /* ---------- responsive ---------- */
 @media (max-width: 900px) {
