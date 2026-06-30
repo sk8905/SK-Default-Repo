@@ -107,6 +107,22 @@ img, svg { max-width: 100%; }
 .load-more:hover { border-color: var(--primary); background: rgba(13, 148, 136, .06); }
 .load-more .lm-rem { color: var(--muted); font-weight: 400; }
 
+/* Mobile "Filters" toggle: the checkbox is visually hidden; the label shows
+   only on phones and collapses the filter sidebar by default to save space. */
+.ff-cb { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; clip: rect(0 0 0 0); overflow: hidden; }
+.ff-lab { display: none; }
+@media (max-width: 760px) {
+  .ff-lab {
+    display: inline-flex; align-items: center; gap: .4rem; cursor: pointer; user-select: none;
+    font-weight: 600; font-size: .9rem; color: var(--ink); margin-bottom: .75rem;
+    padding: .5rem .8rem; border: 1px solid var(--line); border-radius: 8px; background: var(--surface);
+  }
+  .ff-lab::after { content: "▾"; color: var(--muted); font-size: .8rem; }
+  .ff-cb:checked ~ .ff-lab::after { content: "▴"; }
+  .list-layout .filters { display: none; }
+  .ff-cb:checked ~ .filters { display: block; }
+}
+
 /* ---- Notifications bell ---- */
 .notif { position: relative; flex: 0 0 auto; }
 .notif-bell {

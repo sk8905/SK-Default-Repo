@@ -147,6 +147,11 @@ h3 { font-size: 1rem; margin: 0; }
 }
 .load-more:hover { border-color: var(--primary); background: rgba(29, 78, 216, .06); }
 .load-more .lm-rem { color: var(--muted); font-weight: 400; }
+
+/* Mobile "Filters" toggle: the checkbox is visually hidden; the label shows
+   only on phones and collapses the filter bar by default to save space. */
+.ff-cb { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; clip: rect(0 0 0 0); overflow: hidden; }
+.ff-lab { display: none; }
 .card {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 1.1rem 1.25rem; margin-bottom: 1rem; box-shadow: var(--shadow);
@@ -465,6 +470,19 @@ a.intel-head:hover { color: var(--primary); }
   /* Stack intel/deal rows so the date/type column doesn't eat the width. */
   .intel-row { flex-direction: column; gap: .35rem; }
   .intel-meta { width: auto; flex-direction: row; align-items: center; gap: .5rem; }
+}
+
+/* Collapse filter bars behind a "Filters" toggle on phones to save space. */
+@media (max-width: 760px) {
+  .ff-lab {
+    display: inline-flex; align-items: center; gap: .4rem; cursor: pointer; user-select: none;
+    font-weight: 600; font-size: .9rem; color: var(--ink); margin-bottom: .75rem;
+    padding: .5rem .8rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
+  }
+  .ff-lab::after { content: "▾"; color: var(--muted); font-size: .8rem; }
+  .ff-cb:checked ~ .ff-lab::after { content: "▴"; }
+  .filters { display: none; }
+  .ff-cb:checked ~ .filters { display: flex; }
 }
 
 @media (max-width: 480px) {

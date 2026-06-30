@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260630-3";
+} from "./data.js?v=20260630-4";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260630-3";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260630-4";
 
 const app = document.getElementById("app");
 
@@ -373,6 +373,17 @@ function pageList(rows, key, sig) {
   const shown = rows.slice(0, pageCount(key));
   return { shown, more: loadMoreBtn(key, rows.length - shown.length) };
 }
+
+// ---- Mobile filter collapse -------------------------------------------------
+// On phones, filter bars are collapsed behind a "Filters" toggle to save space.
+// mfOpen() seeds the toggle: always open on desktop; collapsed by default on
+// mobile until the user opens it (then the choice persists across re-renders).
+const MOBILE_Q = "(max-width: 760px)";
+let mFiltersOpen = null; // null => use the mobile default (collapsed)
+function mfOpen() {
+  if (!window.matchMedia(MOBILE_Q).matches) return true; // desktop: always expanded
+  return mFiltersOpen === null ? false : mFiltersOpen;    // mobile: collapsed by default
+}
 // "Load more" reveals the next page and re-renders in place (keeps scroll).
 document.addEventListener("click", (e) => {
   const b = e.target.closest(".load-more");
@@ -619,7 +630,7 @@ function viewFunds() {
   app.innerHTML = `
     <div class="page-head"><h1>Funds in Market</h1><p class="muted">${rows.length} of ${funds.length} funds${f.period ? ` · closing ${esc(f.period)}` : ""}</p></div>
     ${periodBanner}
-    <div class="filters">
+    <input type="checkbox" id="filters-toggle" class="ff-cb" ${mfOpen() ? "checked" : ""}><label for="filters-toggle" class="ff-lab">Filters</label><div class="filters">
       <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Fund or manager…" value="${esc(f.q)}"></label>
       ${multiFilter("funds:strategy", "Strategy", STRATEGIES, f.strategy)}
       ${multiFilter("funds:status", "Status", [{ value: "in-market", label: "In market (Open + First Close)" }, ...FUND_CATEGORIES], f.status)}
@@ -853,7 +864,7 @@ function viewManagers() {
 
   app.innerHTML = `
     <div class="page-head"><h1>Managers</h1><p class="muted">${rows.length} of ${managers.length} GPs</p></div>
-    <div class="filters">
+    <input type="checkbox" id="filters-toggle" class="ff-cb" ${mfOpen() ? "checked" : ""}><label for="filters-toggle" class="ff-lab">Filters</label><div class="filters">
       <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Name or HQ…" value="${esc(f.q)}"></label>
       ${multiFilter("managers:strategy", "Strategy", STRATEGIES, f.strategy)}
       ${multiFilter("managers:location", "Location", LOCATIONS, f.location)}
@@ -1028,7 +1039,7 @@ function viewLps() {
 
   app.innerHTML = `
     <div class="page-head"><h1>Investors / Allocators</h1><p class="muted">${rows.length} of ${lps.length} LPs</p></div>
-    <div class="filters">
+    <input type="checkbox" id="filters-toggle" class="ff-cb" ${mfOpen() ? "checked" : ""}><label for="filters-toggle" class="ff-lab">Filters</label><div class="filters">
       <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Name or HQ…" value="${esc(f.q)}"></label>
       ${multiFilter("lps:type", "Type", LP_TYPES, f.type)}
       ${multiFilter("lps:strategy", "Interest", STRATEGIES, f.strategy)}
@@ -1139,7 +1150,7 @@ function viewIntel() {
         <section class="card"><h2>Fundraising momentum <span class="muted">(closes / quarter · past 5 years)</span></h2><p class="muted small">Click a quarter to see the funds that reached a first/final close in it.</p>${lineChart(trend, { width: 540, height: 240 })}</section>
       </div>
       <div class="split-right">
-        <div class="filters">
+        <input type="checkbox" id="filters-toggle" class="ff-cb" ${mfOpen() ? "checked" : ""}><label for="filters-toggle" class="ff-lab">Filters</label><div class="filters">
           <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Keyword…" value="${esc(f.q)}"></label>
           ${multiFilter("intel:type", "Type", [...new Set(base.map((i) => i.type))].sort(), f.type)}
           ${multiFilter("intel:year", "Year", [...new Set(base.map((i) => yearOf(i.date)).filter(Boolean))].sort((a, b) => b.localeCompare(a)), f.year)}
@@ -1241,7 +1252,7 @@ function viewDeals() {
         <section class="card"><h2>Most active managers <span class="muted">(by deal count)</span></h2>${byDealManager.length ? barChart(byDealManager, { width: 560 }) : '<p class="muted small">No deals tracked.</p>'}</section>
       </div>
       <div class="split-right">
-        <div class="filters">
+        <input type="checkbox" id="filters-toggle" class="ff-cb" ${mfOpen() ? "checked" : ""}><label for="filters-toggle" class="ff-lab">Filters</label><div class="filters">
           <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Company, manager…" value="${esc(f.q)}"></label>
           ${multiFilter("deals:type", "Type", [...new Set(base.map((d) => d.type))].sort(), f.type)}
           ${multiFilter("deals:year", "Year", [...new Set(base.map((d) => yearOf(d.date)).filter(Boolean))].sort((a, b) => b.localeCompare(a)), f.year)}
@@ -1339,7 +1350,7 @@ function viewClos() {
         ${byMgr.length ? `<section class="card"><h2>Most active CLO managers</h2>${barChart(byMgr, { width: 560 })}</section>` : ""}
       </div>
       <div class="split-right">
-        <div class="filters">
+        <input type="checkbox" id="filters-toggle" class="ff-cb" ${mfOpen() ? "checked" : ""}><label for="filters-toggle" class="ff-lab">Filters</label><div class="filters">
           <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Keyword…" value="${esc(f.q)}"></label>
           ${multiFilter("clos:kind", "Source", ["Deal", "Fundraising"], f.kind)}
           ${multiFilter("clos:year", "Year", [...new Set(all.map((x) => yearOf(x.date)).filter(Boolean))].sort((a, b) => b.localeCompare(a)), f.year)}
@@ -1397,7 +1408,7 @@ function viewNews() {
 
   app.innerHTML = `
     <div class="page-head"><h1>News</h1><p class="muted">${rows.length} of ${all.length} items · manager &amp; investor press across the tracked universe</p></div>
-    <div class="filters">
+    <input type="checkbox" id="filters-toggle" class="ff-cb" ${mfOpen() ? "checked" : ""}><label for="filters-toggle" class="ff-lab">Filters</label><div class="filters">
       <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Headline, outlet, manager…" value="${esc(f.q)}"></label>
     </div>
     <section class="card">${rows.length ? feedHtml(rows, "news", newsRow, JSON.stringify(f)) : '<p class="empty">No news items match your search.</p>'}</section>`;
@@ -1496,6 +1507,9 @@ function wireFilters(view) {
       }
     });
   });
+  // Remember whether the mobile "Filters" toggle is open across re-renders.
+  const ffcb = app.querySelector(".ff-cb");
+  if (ffcb) ffcb.addEventListener("change", () => { if (window.matchMedia(MOBILE_Q).matches) mFiltersOpen = ffcb.checked; });
   reopenMs();
 }
 

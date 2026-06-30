@@ -16,8 +16,8 @@
 import {
   items, cases, caseSummaries, practiceAreas, firms, tiers, updateTypes, restructurings,
   firmById, areaById, typeById, tierById, LAST_REVIEWED, LAST_CHECKED, LAST_CHECKED_TIME,
-} from "./data.js?v=20260630-2";
-import { donutChart, columnChart } from "./charts.js?v=20260630-2";
+} from "./data.js?v=20260630-3";
+import { donutChart, columnChart } from "./charts.js?v=20260630-3";
 
 const app = document.getElementById("app");
 
@@ -86,6 +86,12 @@ document.addEventListener("click", (e) => {
   else if (key === "rx") renderRxResults();
   window.scrollTo(0, y);
 });
+
+// On phones, the filter sidebar is collapsed behind a "Filters" toggle to save
+// space. Open on desktop; collapsed by default on mobile (the sidebar DOM isn't
+// re-rendered while filtering, so the user's choice sticks during a session).
+const MOBILE_Q = "(max-width: 760px)";
+function mfOpen() { return !window.matchMedia(MOBILE_Q).matches; }
 
 // ---- Saved state (localStorage + cloud sync) --------------------------------
 // Saved items persist to a per-user Cloudflare KV store (via the /api/saved
@@ -386,7 +392,7 @@ function viewList() {
       <p class="muted">Filter by practice area, source tier, type or firm, or search the full text.</p>
     </div>
     <div class="list-layout">
-      <aside class="filters" aria-label="Filters">
+      <input type="checkbox" id="filters-toggle" class="ff-cb" ${mfOpen() ? "checked" : ""}><label for="filters-toggle" class="ff-lab">Filters</label><aside class="filters" aria-label="Filters">
         <div class="filters-top">
           <button id="clear-filters" class="link-btn" type="button">Clear all</button>
         </div>
@@ -530,7 +536,7 @@ function viewCases() {
         High Court (Chancery, Commercial &amp; King's/Queen's Bench).</p>
     </div>
     <div class="list-layout">
-      <aside class="filters" aria-label="Filters">
+      <input type="checkbox" id="filters-toggle" class="ff-cb" ${mfOpen() ? "checked" : ""}><label for="filters-toggle" class="ff-lab">Filters</label><aside class="filters" aria-label="Filters">
         <div class="filters-top">
           <button id="clear-filters" class="link-btn" type="button">Clear all</button>
         </div>
@@ -765,7 +771,7 @@ function viewRestructurings() {
         debt, largest creditors, key features, the company's advisers, a tracked-firm analysis and the judgment.</p>
     </div>
     <div class="list-layout">
-      <aside class="filters" aria-label="Filters">
+      <input type="checkbox" id="filters-toggle" class="ff-cb" ${mfOpen() ? "checked" : ""}><label for="filters-toggle" class="ff-lab">Filters</label><aside class="filters" aria-label="Filters">
         <div class="seg" role="group" aria-label="Type filter">
           ${seg("all", "All")}${seg("plan", "Plans")}${seg("scheme", "Schemes")}
         </div>
