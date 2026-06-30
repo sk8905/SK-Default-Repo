@@ -97,6 +97,16 @@ img, svg { max-width: 100%; }
 /* Keep each refresh clause unbroken so it wraps as a whole line on mobile. */
 .ds-part { white-space: nowrap; }
 
+/* "Load more" button for paginated feeds. */
+.load-more-wrap { display: flex; justify-content: center; margin-top: 1rem; }
+.load-more {
+  font: inherit; font-size: .85rem; font-weight: 600; cursor: pointer;
+  background: var(--surface); color: var(--primary);
+  border: 1px solid var(--line); border-radius: 8px; padding: .55rem 1.1rem;
+}
+.load-more:hover { border-color: var(--primary); background: rgba(13, 148, 136, .06); }
+.load-more .lm-rem { color: var(--muted); font-weight: 400; }
+
 /* ---- Notifications bell ---- */
 .notif { position: relative; flex: 0 0 auto; }
 .notif-bell {

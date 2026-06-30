@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260630-1";
+} from "./data.js?v=20260630-2";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260630-1";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260630-2";
 
 const app = document.getElementById("app");
 
@@ -346,6 +346,36 @@ const filterState = {
 
 // Calendar year (string) from an item's date; "" if none.
 const yearOf = (d) => (String(d).match(/^(\d{4})/) || [])[1] || "";
+
+// ---- Feed pagination --------------------------------------------------------
+// Long feeds render the first PAGE items with a "Load more" button that reveals
+// the next PAGE. The shown count resets to PAGE whenever the filter signature
+// for that feed changes (so a new search/filter starts from the top again).
+const PAGE = 25;
+const pageShown = {};
+const pageSig = {};
+function pageReset(key, sig) { if (pageSig[key] !== sig) { pageSig[key] = sig; pageShown[key] = PAGE; } }
+function pageCount(key) { return pageShown[key] || PAGE; }
+function loadMoreBtn(key, remaining) {
+  if (remaining <= 0) return "";
+  return `<div class="load-more-wrap"><button type="button" class="load-more" data-more="${esc(key)}">Load ${Math.min(PAGE, remaining)} more <span class="lm-rem">· ${remaining} remaining</span></button></div>`;
+}
+// Render a year-grouped feed capped to the current page, plus a Load-more button.
+function feedHtml(rows, key, rowFn, sig) {
+  pageReset(key, sig);
+  const shown = rows.slice(0, pageCount(key));
+  return byYear(shown, rowFn) + loadMoreBtn(key, rows.length - shown.length);
+}
+// "Load more" reveals the next page and re-renders in place (keeps scroll).
+document.addEventListener("click", (e) => {
+  const b = e.target.closest(".load-more");
+  if (!b) return;
+  const key = b.getAttribute("data-more");
+  pageShown[key] = pageCount(key) + PAGE;
+  const y = window.scrollY;
+  router();
+  window.scrollTo(0, y);
+});
 
 // Which multi-select popover (if any) is open — kept open across re-renders.
 let openMs = null;
@@ -1103,7 +1133,7 @@ function viewIntel() {
           ${multiFilter("intel:year", "Year", [...new Set(base.map((i) => yearOf(i.date)).filter(Boolean))].sort((a, b) => b.localeCompare(a)), f.year)}
         </div>
         <section class="card">
-          ${rows.length ? byYear(rows, intelRow) : '<p class="empty">No intelligence items match these filters.</p>'}
+          ${rows.length ? feedHtml(rows, "intel", intelRow, JSON.stringify(f)) : '<p class="empty">No intelligence items match these filters.</p>'}
         </section>
       </div>
     </div>
@@ -1205,7 +1235,7 @@ function viewDeals() {
           ${multiFilter("deals:year", "Year", [...new Set(base.map((d) => yearOf(d.date)).filter(Boolean))].sort((a, b) => b.localeCompare(a)), f.year)}
         </div>
         <section class="card">
-          ${rows.length ? byYear(rows, dealRow) : '<p class="empty">No deal items match these filters.</p>'}
+          ${rows.length ? feedHtml(rows, "deals", dealRow, JSON.stringify(f)) : '<p class="empty">No deal items match these filters.</p>'}
         </section>
       </div>
     </div>`;
@@ -1303,7 +1333,7 @@ function viewClos() {
           ${multiFilter("clos:year", "Year", [...new Set(all.map((x) => yearOf(x.date)).filter(Boolean))].sort((a, b) => b.localeCompare(a)), f.year)}
         </div>
         <section class="card">
-          ${rows.length ? byYear(rows, feedRow) : '<p class="empty">No CLO items match these filters.</p>'}
+          ${rows.length ? feedHtml(rows, "clos", feedRow, JSON.stringify(f)) : '<p class="empty">No CLO items match these filters.</p>'}
         </section>
       </div>
     </div>`;
@@ -1358,7 +1388,7 @@ function viewNews() {
     <div class="filters">
       <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Headline, outlet, manager…" value="${esc(f.q)}"></label>
     </div>
-    <section class="card">${rows.length ? byYear(rows, newsRow) : '<p class="empty">No news items match your search.</p>'}</section>`;
+    <section class="card">${rows.length ? feedHtml(rows, "news", newsRow, JSON.stringify(f)) : '<p class="empty">No news items match your search.</p>'}</section>`;
   wireFilters("news");
 }
 

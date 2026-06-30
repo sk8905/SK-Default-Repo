@@ -137,6 +137,16 @@ h3 { font-size: 1rem; margin: 0; }
 .split-3070 .split-left, .split-3070 .split-right { min-width: 0; }
 .split-3070 .split-left { display: flex; flex-direction: column; gap: 1rem; }
 .split-3070 .split-left .chart { width: 100%; height: auto; }
+
+/* "Load more" button for paginated feeds. */
+.load-more-wrap { display: flex; justify-content: center; margin-top: 1rem; }
+.load-more {
+  font: inherit; font-size: .85rem; font-weight: 600; cursor: pointer;
+  background: var(--surface); color: var(--primary);
+  border: 1px solid var(--border); border-radius: 8px; padding: .55rem 1.1rem;
+}
+.load-more:hover { border-color: var(--primary); background: rgba(29, 78, 216, .06); }
+.load-more .lm-rem { color: var(--muted); font-weight: 400; }
 .card {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 1.1rem 1.25rem; margin-bottom: 1rem; box-shadow: var(--shadow);
@@ -414,7 +424,10 @@ a.intel-head:hover { color: var(--primary); }
 }
 @media (max-width: 900px) {
   .grid-2 { grid-template-columns: 1fr; }
+  /* On mobile, push the visuals (charts) below the feed on each tab. */
   .split-3070 { grid-template-columns: 1fr; }
+  .split-3070 .split-right { order: 1; }
+  .split-3070 .split-left { order: 2; }
   .grid-3 { grid-template-columns: 1fr; }
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .card-grid { grid-template-columns: 1fr; }

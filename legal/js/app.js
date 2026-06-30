@@ -16,8 +16,8 @@
 import {
   items, cases, caseSummaries, practiceAreas, firms, tiers, updateTypes, restructurings,
   firmById, areaById, typeById, tierById, LAST_REVIEWED, LAST_CHECKED, LAST_CHECKED_TIME,
-} from "./data.js?v=20260630-1";
-import { donutChart, columnChart } from "./charts.js?v=20260630-1";
+} from "./data.js?v=20260630-2";
+import { donutChart, columnChart } from "./charts.js?v=20260630-2";
 
 const app = document.getElementById("app");
 
@@ -54,6 +54,38 @@ function byYear(list, rowFn) {
     .map((y) => `<div class="year-group"><h3 class="year-head">${esc(y)}</h3>${groups[y].map(rowFn).join("")}</div>`)
     .join("");
 }
+
+// ---- Feed pagination --------------------------------------------------------
+// Long feeds render the first PAGE items with a "Load more" button that reveals
+// the next PAGE. The shown count resets to PAGE whenever the filter signature
+// for that feed changes (so a new search/filter starts from the top again).
+const PAGE = 25;
+const pageShown = {};
+const pageSig = {};
+function pageReset(key, sig) { if (pageSig[key] !== sig) { pageSig[key] = sig; pageShown[key] = PAGE; } }
+function pageCount(key) { return pageShown[key] || PAGE; }
+function loadMoreBtn(key, remaining) {
+  if (remaining <= 0) return "";
+  return `<div class="load-more-wrap"><button type="button" class="load-more" data-more="${esc(key)}">Load ${Math.min(PAGE, remaining)} more <span class="lm-rem">· ${remaining} remaining</span></button></div>`;
+}
+function feedHtml(rows, key, rowFn, sig) {
+  pageReset(key, sig);
+  const shown = rows.slice(0, pageCount(key));
+  return byYear(shown, rowFn) + loadMoreBtn(key, rows.length - shown.length);
+}
+// "Load more" reveals the next page and re-renders the affected list in place
+// (a local re-render, so the sidebar filters keep their selected state).
+document.addEventListener("click", (e) => {
+  const b = e.target.closest(".load-more");
+  if (!b) return;
+  const key = b.getAttribute("data-more");
+  pageShown[key] = pageCount(key) + PAGE;
+  const y = window.scrollY;
+  if (key === "alerts") renderResults();
+  else if (key === "cases") renderCaseResults();
+  else if (key === "rx") renderRxResults();
+  window.scrollTo(0, y);
+});
 
 // ---- Saved state (localStorage + cloud sync) --------------------------------
 // Saved items persist to a per-user Cloudflare KV store (via the /api/saved
@@ -466,8 +498,9 @@ function renderResults() {
   const n = rows.length;
   const noun = filterState.saved ? "saved item" : "update";
   countEl.textContent = `${n} ${noun}${n === 1 ? "" : "s"}`;
+  const sig = JSON.stringify([filterState.areas, filterState.tiers, filterState.types, filterState.firms, filterState.years, filterState.months, filterState.q, filterState.saved]);
   results.innerHTML = n
-    ? byYear(rows, (x) => (x._kind === "case" ? caseRow(x) : x._kind === "rx" ? rxRow(x) : itemRow(x)))
+    ? feedHtml(rows, "alerts", (x) => (x._kind === "case" ? caseRow(x) : x._kind === "rx" ? rxRow(x) : itemRow(x)), sig)
     : `<div class="empty">No ${noun}s match these filters.${filterState.saved ? " Save items with the ☆ button." : ""}</div>`;
 }
 
@@ -562,7 +595,7 @@ function renderCaseResults() {
     return true;
   }).sort(byDateDesc);
   countEl.textContent = `${matched.length} case${matched.length === 1 ? "" : "s"}`;
-  el.innerHTML = matched.length ? byYear(matched, caseRow) : `<div class="empty">No cases match these filters.</div>`;
+  el.innerHTML = matched.length ? feedHtml(matched, "cases", caseRow, JSON.stringify(caseFilter)) : `<div class="empty">No cases match these filters.</div>`;
 }
 
 // =============================================================================
@@ -805,7 +838,7 @@ function renderRxResults() {
   const plans = matched.filter((r) => r.type === "plan").length;
   const schemes = matched.filter((r) => r.type === "scheme").length;
   countEl.textContent = `${matched.length} matter${matched.length !== 1 ? "s" : ""} · ${plans} plan${plans !== 1 ? "s" : ""}, ${schemes} scheme${schemes !== 1 ? "s" : ""}`;
-  el.innerHTML = matched.length ? byYear(matched, rxRow) : '<p class="empty">No matters match these filters.</p>';
+  el.innerHTML = matched.length ? feedHtml(matched, "rx", rxRow, JSON.stringify(rxFilter)) : '<p class="empty">No matters match these filters.</p>';
   const allBtn = document.getElementById("rx-toggle-all");
   if (allBtn) { allBtn.textContent = "Expand all"; allBtn.setAttribute("aria-expanded", "false"); allBtn.style.display = matched.length ? "" : "none"; }
 }
