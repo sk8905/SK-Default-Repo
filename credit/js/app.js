@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260630-10";
+} from "./data.js?v=20260630-11";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260630-10";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260630-11";
 
 const app = document.getElementById("app");
 
@@ -1008,6 +1008,11 @@ function viewManager(id) {
       </table></div>${p.more}`; })()
       : `<p class="muted">${esc(m.fundsNote || "No fund tracked for this manager — see the profile note above (e.g. it is a bank/balance-sheet lender, has no dedicated credit arm, or runs only US/global vehicles).")}</p>`}
     </section>
+    <section class="card">
+      <h2>CLOs managed <span class="muted">(${mgrClo.length})</span></h2>
+      <p class="muted small">Collateralised loan obligation vehicles managed by ${esc(m.name)} or its CLO affiliate — issuances, pricings, resets, platforms &amp; funds. <a href="#/clos">All CLO activity →</a></p>
+      ${mgrClo.length ? feedHtml(mgrClo, "mgr:" + id + ":clo", (x) => (x._kind === "deal" ? dealRow(x) : intelRow(x)), "") : '<p class="muted">This manager does not manage any tracked CLOs.</p>'}
+    </section>
     ${commitmentsForManager(m.id).length ? `<section class="card"><h2>Known investors <span class="muted">(${commitmentsForManager(m.id).length})</span></h2><ul class="link-list">${commitmentsForManager(m.id).map((c) => `<li>${link(`#/lp/${c.lpId}`, lpById[c.lpId].name)} <span class="muted small">${esc(c.note)}</span></li>`).join("")}</ul></section>` : ""}
     ${ownersFilingsBlock(m)}
     ${legalBlock(m)}
@@ -1018,11 +1023,6 @@ function viewManager(id) {
     <section class="card">
       <h2>Fundraising intelligence</h2>
       ${mgrIntel.length ? feedHtml(mgrIntel, "mgr:" + id + ":intel", intelRow, "") : '<p class="muted">No fundraising intelligence items for this manager yet.</p>'}
-    </section>
-    <section class="card">
-      <h2>CLO activity <span class="muted">(${mgrClo.length})</span></h2>
-      <p class="muted small">Collateralised loan obligation pricings, resets, platforms &amp; funds. <a href="#/clos">All CLO activity →</a></p>
-      ${mgrClo.length ? feedHtml(mgrClo, "mgr:" + id + ":clo", (x) => (x._kind === "deal" ? dealRow(x) : intelRow(x)), "") : '<p class="muted">This manager does not manage any tracked CLOs.</p>'}
     </section>`;
 }
 
