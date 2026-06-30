@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260630-2";
+} from "./data.js?v=20260630-3";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260630-2";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260630-3";
 
 const app = document.getElementById("app");
 
@@ -366,6 +366,13 @@ function feedHtml(rows, key, rowFn, sig) {
   const shown = rows.slice(0, pageCount(key));
   return byYear(shown, rowFn) + loadMoreBtn(key, rows.length - shown.length);
 }
+// Cap a flat list/table to the current page; returns { shown, more } so the
+// caller can render its own rows and drop the Load-more button after them.
+function pageList(rows, key, sig) {
+  pageReset(key, sig);
+  const shown = rows.slice(0, pageCount(key));
+  return { shown, more: loadMoreBtn(key, rows.length - shown.length) };
+}
 // "Load more" reveals the next page and re-renders in place (keeps scroll).
 document.addEventListener("click", (e) => {
   const b = e.target.closest(".load-more");
@@ -562,8 +569,10 @@ function compactRow(rec, view) {
   return `<li class="compact-item">${head}<div class="compact-meta muted small">${fmtDate(rec.date)}${src}</div></li>`;
 }
 
-function fundTable(rows) {
+function fundTable(rows, key, sig) {
   rows = applySort(rows, "funds");
+  let more = "";
+  if (key) { pageReset(key, sig); const n = pageCount(key); more = loadMoreBtn(key, rows.length - n); rows = rows.slice(0, n); }
   return `<div class="table-wrap"><table class="data-table">
       <thead><tr>${sortTh("funds", "name", "Fund")}${sortTh("funds", "manager", "Manager")}${sortTh("funds", "strategy", "Strategy")}${sortTh("funds", "geo", "Geography")}${sortTh("funds", "status", "Status")}${sortTh("funds", "target", "Target")}${sortTh("funds", "progress", "Progress", "prog-col")}</tr></thead>
       <tbody>
@@ -577,7 +586,7 @@ function fundTable(rows) {
           <td class="prog-col">${raiseDisplay(x)}</td>
         </tr>`).join("")}
       </tbody>
-    </table></div>`;
+    </table></div>` + more;
 }
 
 function viewFunds() {
@@ -599,7 +608,7 @@ function viewFunds() {
   const body = sections.length
     ? sections.map((s) => `<section class="fund-section">
         <h2 class="section-head">${esc(s.st)} <span class="chip ${statusClass(s.st)}">${s.items.length}</span></h2>
-        ${fundTable(s.items)}
+        ${fundTable(s.items, "funds:" + s.st, JSON.stringify(f))}
       </section>`).join("")
     : '<p class="empty">No funds match these filters.</p>';
 
@@ -840,6 +849,7 @@ function viewManagers() {
     (!f.location.length || hqRegions(m.hq).some((r) => f.location.includes(r)))
   );
   const sorted = applySort(rows, "managers");
+  const { shown, more } = pageList(sorted, "managers", JSON.stringify(f));
 
   app.innerHTML = `
     <div class="page-head"><h1>Managers</h1><p class="muted">${rows.length} of ${managers.length} GPs</p></div>
@@ -851,7 +861,7 @@ function viewManagers() {
     <div class="table-wrap"><table class="data-table">
       <thead><tr>${sortTh("managers", "name", "Manager")}${sortTh("managers", "hq", "HQ")}${sortTh("managers", "aum", "AUM")}<th>Strategies</th>${sortTh("managers", "funds", "Funds")}${sortTh("managers", "live", "In&nbsp;mkt")}</tr></thead>
       <tbody>
-        ${sorted.map((m) => {
+        ${shown.map((m) => {
           const fs = fundsByManager(m.id);
           const live = fs.filter((x) => !x.evergreen && !x.lifecycle && x.status !== "Final Close").length;
           const strat = m.strategies.slice(0, 2).map((s) => chip(s)).join(" ") + (m.strategies.length > 2 ? ` <span class="muted small">+${m.strategies.length - 2}</span>` : "") || '<span class="muted small">—</span>';
@@ -866,7 +876,7 @@ function viewManagers() {
         }).join("")}
         ${rows.length === 0 ? '<tr><td colspan="6" class="empty">No managers match these filters.</td></tr>' : ""}
       </tbody>
-    </table></div>`;
+    </table></div>${more}`;
   wireFilters("managers");
 }
 
@@ -926,7 +936,7 @@ function newsBlock(m) {
   return `<section class="card">
     <h2>In the news</h2>
     ${n.length
-      ? byYear(n, newsItemRow)
+      ? feedHtml(n, "mgr:" + m.id + ":news", newsItemRow, "")
       : '<p class="muted small">No curated news yet for this manager. (When populated, items are drawn from the manager\'s own website plus the Financial Times, Bloomberg, Wall Street Journal, Yahoo Finance and other reputable outlets.)'}
   </section>`;
 }
@@ -977,14 +987,14 @@ function viewManager(id) {
     </div>
     <section class="card">
       <h2>Funds <span class="muted">(${fs.length})</span></h2>
-      ${fs.length ? `<div class="table-wrap"><table class="data-table">
+      ${fs.length ? (() => { const p = pageList(fs, "mgr:" + m.id + ":funds", ""); return `<div class="table-wrap"><table class="data-table">
         <thead><tr><th>Fund</th><th>Strategy</th><th>Geography</th><th>Vintage</th><th>Status</th><th>Target</th><th class="prog-col">Progress</th></tr></thead>
-        <tbody>${fs.map((x) => `<tr class="clickable" data-href="#/fund/${x.id}">
+        <tbody>${p.shown.map((x) => `<tr class="clickable" data-href="#/fund/${x.id}">
           <td>${nameCell("fund", x.id, `<strong>${esc(x.name)}</strong>`)}</td><td>${chip(x.strategy)}</td><td>${esc(x.geoFocus)}</td><td>${x.vintage}</td>
           <td>${fundStatusChip(x)} ${lifecycleBadge(x)} ${equityBadge(x)}</td><td>${x.evergreen ? "—" : eur(x.targetSize)}</td>
           <td class="prog-col">${raiseDisplay(x)}</td>
         </tr>`).join("")}</tbody>
-      </table></div>`
+      </table></div>${p.more}`; })()
       : `<p class="muted">${esc(m.fundsNote || "No fund tracked for this manager — see the profile note above (e.g. it is a bank/balance-sheet lender, has no dedicated credit arm, or runs only US/global vehicles).")}</p>`}
     </section>
     ${commitmentsForManager(m.id).length ? `<section class="card"><h2>Known investors <span class="muted">(${commitmentsForManager(m.id).length})</span></h2><ul class="link-list">${commitmentsForManager(m.id).map((c) => `<li>${link(`#/lp/${c.lpId}`, lpById[c.lpId].name)} <span class="muted small">${esc(c.note)}</span></li>`).join("")}</ul></section>` : ""}
@@ -993,15 +1003,15 @@ function viewManager(id) {
 
     <div class="section-divider"><span>News, deals &amp; intelligence</span></div>
     ${newsBlock(m)}
-    ${mgrDeals.length ? `<section class="card"><h2>Deal activity <span class="muted">(${mgrDeals.length})</span></h2>${byYear(mgrDeals, dealRow)}</section>` : ""}
+    ${mgrDeals.length ? `<section class="card"><h2>Deal activity <span class="muted">(${mgrDeals.length})</span></h2>${feedHtml(mgrDeals, "mgr:" + id + ":deals", dealRow, "")}</section>` : ""}
     <section class="card">
       <h2>Fundraising intelligence</h2>
-      ${mgrIntel.length ? byYear(mgrIntel, intelRow) : '<p class="muted">No fundraising intelligence items for this manager yet.</p>'}
+      ${mgrIntel.length ? feedHtml(mgrIntel, "mgr:" + id + ":intel", intelRow, "") : '<p class="muted">No fundraising intelligence items for this manager yet.</p>'}
     </section>
     <section class="card">
       <h2>CLO activity <span class="muted">(${mgrClo.length})</span></h2>
       <p class="muted small">Collateralised loan obligation pricings, resets, platforms &amp; funds. <a href="#/clos">All CLO activity →</a></p>
-      ${mgrClo.length ? byYear(mgrClo, (x) => (x._kind === "deal" ? dealRow(x) : intelRow(x))) : '<p class="muted">This manager does not manage any tracked CLOs.</p>'}
+      ${mgrClo.length ? feedHtml(mgrClo, "mgr:" + id + ":clo", (x) => (x._kind === "deal" ? dealRow(x) : intelRow(x)), "") : '<p class="muted">This manager does not manage any tracked CLOs.</p>'}
     </section>`;
 }
 
@@ -1014,6 +1024,7 @@ function viewLps() {
     (!f.strategy.length || f.strategy.some((s) => l.strategies.includes(s)))
   );
   const sorted = applySort(rows, "lps");
+  const { shown, more } = pageList(sorted, "lps", JSON.stringify(f));
 
   app.innerHTML = `
     <div class="page-head"><h1>Investors / Allocators</h1><p class="muted">${rows.length} of ${lps.length} LPs</p></div>
@@ -1025,14 +1036,14 @@ function viewLps() {
     <div class="table-wrap"><table class="data-table">
       <thead><tr>${sortTh("lps", "name", "Investor")}${sortTh("lps", "type", "Type")}${sortTh("lps", "hq", "HQ")}${sortTh("lps", "aum", "AUM")}${sortTh("lps", "pc", "PC alloc.")}${sortTh("lps", "ticket", "Typical ticket")}${sortTh("lps", "mandate", "Mandate")}</tr></thead>
       <tbody>
-        ${sorted.map((l) => `<tr class="clickable" data-href="#/lp/${l.id}">
+        ${shown.map((l) => `<tr class="clickable" data-href="#/lp/${l.id}">
           <td>${nameCell("lp", l.id, `<strong>${esc(l.name)}</strong>`)}</td><td>${esc(l.type)}</td><td>${esc(l.hq)}</td>
           <td>€${l.aum}bn</td><td>${pct(l.pcAllocationPct)}</td><td>${eur(l.typicalTicket)}</td>
           <td>${chip(l.mandateStatus, mandateClass(l.mandateStatus))}</td>
         </tr>`).join("")}
         ${rows.length === 0 ? '<tr><td colspan="7" class="empty">No investors match these filters.</td></tr>' : ""}
       </tbody>
-    </table></div>`;
+    </table></div>${more}`;
   wireFilters("lps");
 }
 
@@ -1041,6 +1052,7 @@ function viewLp(id) {
   if (!l) return notFound();
   const pcAum = l.pcAllocationPct != null ? (l.aum * l.pcAllocationPct / 100) : null;
   const matches = funds.filter((x) => l.strategies.includes(x.strategy) && (x.status === "Open" || x.status === "First Close" || x.status === "Pre-marketing"));
+  const mf = pageList(matches, "lp:" + l.id + ":funds", "");
 
   app.innerHTML = `
     ${breadcrumb([["#/lps", "Investors"], [null, l.name]])}
@@ -1068,8 +1080,8 @@ function viewLp(id) {
       <h2>Matching funds in market <span class="muted">(${matches.length})</span></h2>
       <p class="muted small">Live funds whose strategy aligns with this investor's stated interests.</p>
       <ul class="link-list">
-        ${matches.map((x) => `<li>${link(`#/fund/${x.id}`, x.name)} <span class="muted small">${esc(managerById[x.managerId].name)} · ${chip(x.strategy)} · ${chip(x.status, statusClass(x.status))}</span></li>`).join("") || '<li class="muted">No matching live funds.</li>'}
-      </ul>
+        ${mf.shown.map((x) => `<li>${link(`#/fund/${x.id}`, x.name)} <span class="muted small">${esc(managerById[x.managerId].name)} · ${chip(x.strategy)} · ${chip(x.status, statusClass(x.status))}</span></li>`).join("") || '<li class="muted">No matching live funds.</li>'}
+      </ul>${mf.more}
     </section>`;
 }
 
@@ -1438,6 +1450,7 @@ function viewWatchlist() {
       <section class="card"><p class="muted">You're not following anything yet. Click the ☆ star on any manager, fund or investor to add it here — your watchlist builds a personalised intelligence feed${cloudSync ? " and syncs across your devices" : ""}.</p></section>`;
     return;
   }
+  const wlSig = JSON.stringify([fm.map((x) => x.id), ff.map((x) => x.id)]);
   const listCard = (title, items, type, render) =>
     `<details class="card wl-cat" open><summary class="wl-cat-head"><h2>${title} <span class="muted">(${items.length})</span></h2><span class="wl-caret" aria-hidden="true"></span></summary>${items.length
       ? `<ul class="link-list">${items.map((x) => `<li>${nameCell(type, x.id, render(x))}</li>`).join("")}</ul>`
@@ -1450,8 +1463,8 @@ function viewWatchlist() {
       ${listCard("Funds", ff, "fund", (f) => `${link(`#/fund/${f.id}`, f.name)} <span class="muted small">${esc(managerById[f.managerId].name)}</span>`)}
       ${listCard("Investors", fl, "lp", (l) => `${link(`#/lp/${l.id}`, l.name)} <span class="muted small">${esc(l.type)}</span>`)}
     </div>
-    <section class="card"><h2>News, deals &amp; fundraising <span class="muted">(${feed.length})</span></h2>${feed.length ? byYear(feed, feedRow) : '<p class="muted small">No news, deals or fundraising yet for the managers/funds you follow.</p>'}</section>
-    ${cloItems.length ? `<section class="card"><h2>CLO activity <span class="muted">(${cloItems.length})</span></h2><p class="muted small">Collateralised loan obligation activity for the managers/funds you follow. <a href="#/clos">All CLO activity →</a></p>${byYear(cloItems, feedRow)}</section>` : ""}`;
+    <section class="card"><h2>News, deals &amp; fundraising <span class="muted">(${feed.length})</span></h2>${feed.length ? feedHtml(feed, "watchlist", feedRow, wlSig) : '<p class="muted small">No news, deals or fundraising yet for the managers/funds you follow.</p>'}</section>
+    ${cloItems.length ? `<section class="card"><h2>CLO activity <span class="muted">(${cloItems.length})</span></h2><p class="muted small">Collateralised loan obligation activity for the managers/funds you follow. <a href="#/clos">All CLO activity →</a></p>${feedHtml(cloItems, "watchlist-clo", feedRow, wlSig)}</section>` : ""}`;
 }
 
 // ============================== shared bits ================================
