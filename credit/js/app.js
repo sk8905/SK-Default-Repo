@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260630-12";
+} from "./data.js?v=20260630-13";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260630-12";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260630-13";
 
 const app = document.getElementById("app");
 
@@ -966,6 +966,36 @@ function legalBlock(m) {
   </section>`;
 }
 
+// Best-effort extraction of a named CLO vehicle from a headline/summary, e.g.
+// "Palmer Square CLO 2026-1", "Cordatus XXXVIII", "GLM US CLO 30",
+// "Hayfin Emerald CLO XIII". Returns null when no specific vehicle is named
+// (general CLO news), so those items only show in the CLO news feed.
+function cloName(text) {
+  if (!text) return null;
+  let m = text.match(/\b([A-Z][\w'&.]*(?:\s+(?:[A-Z][\w'&.()/]*|of|the)){0,4}?\s+CLO\s+\d{4}-\d+[A-Z]?)\b/);
+  if (m) return m[1].trim();
+  m = text.match(/\b([A-Z][\w'&.]*(?:\s+[A-Z][\w'&.()/]*){0,4}?\s+CLO\s+(?:[IVXLCDM]{1,9}|\d{1,3}))\b/);
+  if (m) return m[1].trim();
+  m = text.match(/\b([A-Z][a-z]{3,}\s+[IVXLCDM]{1,9})\b/);
+  if (m) return m[1].trim();
+  return null;
+}
+// Reduce a manager's CLO items to a roster of distinct named vehicles, each
+// with how many tracked updates it has and its most recent update.
+function cloRosterFor(items) {
+  const map = new Map();
+  items.forEach((x) => {
+    const name = cloName(x.headline) || cloName(x.summary);
+    if (!name) return;
+    const key = name.toLowerCase();
+    let e = map.get(key);
+    if (!e) { e = { name, date: x.date, url: x.sourceUrl, count: 0 }; map.set(key, e); }
+    e.count++;
+    if (String(x.date) > String(e.date)) { e.date = x.date; e.url = x.sourceUrl; e.name = name; }
+  });
+  return [...map.values()].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+}
+
 function viewManager(id) {
   const m = managerById[id];
   if (!m) return notFound();
@@ -980,6 +1010,7 @@ function viewManager(id) {
     ...dealsForManager(m.id).filter((d) => d.clo).map((d) => ({ ...d, _kind: "deal" })),
     ...news.filter((i) => i.clo).map((i) => ({ ...i, _kind: "intel" })),
   ];
+  const mgrCloRoster = cloRosterFor(mgrClo);
 
   app.innerHTML = `
     ${breadcrumb([["#/managers", "Managers"], [null, m.name]])}
@@ -1009,20 +1040,19 @@ function viewManager(id) {
       : `<p class="muted">${esc(m.fundsNote || "No fund tracked for this manager — see the profile note above (e.g. it is a bank/balance-sheet lender, has no dedicated credit arm, or runs only US/global vehicles).")}</p>`}
     </section>
     <section class="card">
-      <h2>CLOs managed <span class="muted">(${mgrClo.length})</span></h2>
-      <p class="muted small">Collateralised loan obligation vehicles managed by ${esc(m.name)} or its CLO affiliate — issuances, pricings, resets, platforms &amp; funds. <a href="#/clos">All CLO activity →</a></p>
-      ${mgrClo.length ? (() => {
-        const sorted = [...mgrClo].sort((a, b) => String(b.date).localeCompare(String(a.date)));
-        const p = pageList(sorted, "mgr:" + id + ":clo", "");
+      <h2>CLOs managed <span class="muted">(${mgrCloRoster.length})</span></h2>
+      <p class="muted small">Individual collateralised loan obligation vehicles managed by ${esc(m.name)} or its CLO affiliate, identified from tracked issuances, pricings &amp; resets. <a href="#/clos">All CLO activity →</a></p>
+      ${mgrCloRoster.length ? (() => {
+        const p = pageList(mgrCloRoster, "mgr:" + id + ":cloroster", "");
         return `<div class="table-wrap"><table class="data-table">
-        <thead><tr><th>CLO</th><th>Type</th><th>Date</th></tr></thead>
-        <tbody>${p.shown.map((x) => `<tr>
-          <td>${x.sourceUrl ? `<a href="${esc(x.sourceUrl)}" target="_blank" rel="noopener noreferrer"><strong>${esc(x.headline)}</strong> ↗</a>` : `<strong>${esc(x.headline)}</strong>`}</td>
-          <td>${chip(x.type)}</td>
-          <td class="muted small">${fmtDate(x.date)}</td>
+        <thead><tr><th>CLO</th><th>Updates</th><th>Latest</th></tr></thead>
+        <tbody>${p.shown.map((c) => `<tr>
+          <td>${c.url ? `<a href="${esc(c.url)}" target="_blank" rel="noopener noreferrer"><strong>${esc(c.name)}</strong> ↗</a>` : `<strong>${esc(c.name)}</strong>`}</td>
+          <td>${c.count}</td>
+          <td class="muted small">${fmtDate(c.date)}</td>
         </tr>`).join("")}</tbody>
       </table></div>${p.more}`;
-      })() : '<p class="muted">This manager does not manage any tracked CLOs.</p>'}
+      })() : `<p class="muted">${mgrClo.length ? "No individually-named CLO vehicles identified yet — see CLO news below." : "This manager does not manage any tracked CLOs."}</p>`}
     </section>
     ${commitmentsForManager(m.id).length ? `<section class="card"><h2>Known investors <span class="muted">(${commitmentsForManager(m.id).length})</span></h2><ul class="link-list">${commitmentsForManager(m.id).map((c) => `<li>${link(`#/lp/${c.lpId}`, lpById[c.lpId].name)} <span class="muted small">${esc(c.note)}</span></li>`).join("")}</ul></section>` : ""}
     ${ownersFilingsBlock(m)}
@@ -1034,7 +1064,12 @@ function viewManager(id) {
     <section class="card">
       <h2>Fundraising intelligence</h2>
       ${mgrIntel.length ? feedHtml(mgrIntel, "mgr:" + id + ":intel", intelRow, "") : '<p class="muted">No fundraising intelligence items for this manager yet.</p>'}
-    </section>`;
+    </section>
+    ${mgrClo.length ? `<section class="card">
+      <h2>CLO news <span class="muted">(${mgrClo.length})</span></h2>
+      <p class="muted small">Collateralised loan obligation pricings, resets, platforms &amp; funds. <a href="#/clos">All CLO activity →</a></p>
+      ${feedHtml(mgrClo, "mgr:" + id + ":clo", (x) => (x._kind === "deal" ? dealRow(x) : intelRow(x)), "")}
+    </section>` : ""}`;
 }
 
 // ================================ INVESTORS =================================
