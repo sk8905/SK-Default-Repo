@@ -16,8 +16,8 @@
 import {
   items, cases, caseSummaries, practiceAreas, firms, tiers, updateTypes, restructurings,
   firmById, areaById, typeById, tierById, LAST_REVIEWED, LAST_CHECKED, LAST_CHECKED_TIME,
-} from "./data.js?v=20260630-3";
-import { donutChart, columnChart } from "./charts.js?v=20260630-3";
+} from "./data.js?v=20260630-4";
+import { donutChart, columnChart } from "./charts.js?v=20260630-4";
 
 const app = document.getElementById("app");
 
