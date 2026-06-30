@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260630-13";
+} from "./data.js?v=20260630-14";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260630-13";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260630-14";
 
 const app = document.getElementById("app");
 
@@ -980,8 +980,15 @@ function cloName(text) {
   if (m) return m[1].trim();
   return null;
 }
-// Reduce a manager's CLO items to a roster of distinct named vehicles, each
-// with how many tracked updates it has and its most recent update.
+// Best-effort deal size from a headline/summary, e.g. "€406m" / "$726m".
+function cloSize(text) {
+  const m = String(text || "").match(/([€$£])\s?~?\s?(\d[\d,]*(?:\.\d+)?)\s?(bn|billion|m|million)\b/i);
+  if (!m) return null;
+  return m[1] + m[2].replace(/,/g, "") + (/b/i.test(m[3]) ? "bn" : "m");
+}
+// Reduce a manager's CLO items to a roster of distinct named vehicles, each with
+// its vintage (issuance year), disclosed size and the items relating to it.
+// Sorted newest vintage first.
 function cloRosterFor(items) {
   const map = new Map();
   items.forEach((x) => {
@@ -989,11 +996,18 @@ function cloRosterFor(items) {
     if (!name) return;
     const key = name.toLowerCase();
     let e = map.get(key);
-    if (!e) { e = { name, date: x.date, url: x.sourceUrl, count: 0 }; map.set(key, e); }
-    e.count++;
-    if (String(x.date) > String(e.date)) { e.date = x.date; e.url = x.sourceUrl; e.name = name; }
+    if (!e) { e = { name, items: [], date: x.date }; map.set(key, e); }
+    e.items.push(x);
+    if (String(x.date) > String(e.date)) { e.date = x.date; e.name = name; }
   });
-  return [...map.values()].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  return [...map.values()].map((e) => {
+    const byDate = [...e.items].sort((a, b) => String(a.date).localeCompare(String(b.date)));
+    const ny = (e.name.match(/\b(20\d{2})\b/) || [])[1];
+    const vintage = ny || (String(byDate[0].date).match(/^(\d{4})/) || [])[1] || "";
+    let size = null;
+    byDate.some((it) => (size = cloSize(it.headline) || cloSize(it.summary)));
+    return { name: e.name, items: e.items, date: e.date, vintage, size };
+  }).sort((a, b) => String(b.vintage).localeCompare(String(a.vintage)) || String(b.date).localeCompare(String(a.date)));
 }
 
 function viewManager(id) {
@@ -1045,14 +1059,14 @@ function viewManager(id) {
       ${mgrCloRoster.length ? (() => {
         const p = pageList(mgrCloRoster, "mgr:" + id + ":cloroster", "");
         return `<div class="table-wrap"><table class="data-table">
-        <thead><tr><th>CLO</th><th>Updates</th><th>Latest</th></tr></thead>
-        <tbody>${p.shown.map((c) => `<tr>
-          <td>${c.url ? `<a href="${esc(c.url)}" target="_blank" rel="noopener noreferrer"><strong>${esc(c.name)}</strong> ↗</a>` : `<strong>${esc(c.name)}</strong>`}</td>
-          <td>${c.count}</td>
-          <td class="muted small">${fmtDate(c.date)}</td>
+        <thead><tr><th>CLO</th><th>Vintage</th><th>Size</th></tr></thead>
+        <tbody>${p.shown.map((c) => `<tr class="clickable" data-href="#/clo/${m.id}/${encodeURIComponent(c.name)}">
+          <td><strong>${esc(c.name)}</strong></td>
+          <td>${c.vintage || "—"}</td>
+          <td>${c.size ? esc(c.size) : "—"}</td>
         </tr>`).join("")}</tbody>
       </table></div>${p.more}`;
-      })() : `<p class="muted">${mgrClo.length ? "No individually-named CLO vehicles identified yet — see CLO news below." : "This manager does not manage any tracked CLOs."}</p>`}
+      })() : `<p class="muted">${mgrClo.length ? "No individually-named CLO vehicles identified yet — see the full CLO feed." : "This manager does not manage any tracked CLOs."}</p>`}
     </section>
     ${commitmentsForManager(m.id).length ? `<section class="card"><h2>Known investors <span class="muted">(${commitmentsForManager(m.id).length})</span></h2><ul class="link-list">${commitmentsForManager(m.id).map((c) => `<li>${link(`#/lp/${c.lpId}`, lpById[c.lpId].name)} <span class="muted small">${esc(c.note)}</span></li>`).join("")}</ul></section>` : ""}
     ${ownersFilingsBlock(m)}
@@ -1064,12 +1078,33 @@ function viewManager(id) {
     <section class="card">
       <h2>Fundraising intelligence</h2>
       ${mgrIntel.length ? feedHtml(mgrIntel, "mgr:" + id + ":intel", intelRow, "") : '<p class="muted">No fundraising intelligence items for this manager yet.</p>'}
-    </section>
-    ${mgrClo.length ? `<section class="card">
-      <h2>CLO news <span class="muted">(${mgrClo.length})</span></h2>
-      <p class="muted small">Collateralised loan obligation pricings, resets, platforms &amp; funds. <a href="#/clos">All CLO activity →</a></p>
-      ${feedHtml(mgrClo, "mgr:" + id + ":clo", (x) => (x._kind === "deal" ? dealRow(x) : intelRow(x)), "")}
-    </section>` : ""}`;
+    </section>`;
+}
+
+// Drill-down from a manager's CLO roster: the news/activity for one CLO vehicle.
+// Route: #/clo/<managerId>/<encoded CLO name>.
+function viewClo(mid, encName) {
+  const m = managerById[mid];
+  if (!m) return notFound();
+  const name = decodeURIComponent(encName || "");
+  const mgrClo = [
+    ...dealsForManager(mid).filter((d) => d.clo).map((d) => ({ ...d, _kind: "deal" })),
+    ...intelForManager(mid).filter((i) => i.clo).map((i) => ({ ...i, _kind: "intel" })),
+  ];
+  const roster = cloRosterFor(mgrClo);
+  const c = roster.find((x) => x.name === name) || roster.find((x) => x.name.toLowerCase() === name.toLowerCase());
+  if (!c) return notFound();
+  app.innerHTML = `
+    ${breadcrumb([["#/managers", "Managers"], ["#/manager/" + mid, m.name], [null, c.name]])}
+    <div class="detail-head"><div>
+      <h1>${esc(c.name)}</h1>
+      <p class="muted">CLO managed by ${link("#/manager/" + mid, m.name)}${c.vintage ? ` · Vintage ${esc(c.vintage)}` : ""}${c.size ? ` · ${esc(c.size)}` : ""}</p>
+    </div></div>
+    <section class="card">
+      <h2>News &amp; activity <span class="muted">(${c.items.length})</span></h2>
+      <p class="muted small">Tracked issuances, pricings, resets &amp; related news for this CLO. <a href="#/clos">All CLO activity →</a></p>
+      ${feedHtml(c.items, "clo:" + mid + ":" + c.name, (x) => (x._kind === "deal" ? dealRow(x) : intelRow(x)), "")}
+    </section>`;
 }
 
 // ================================ INVESTORS =================================
@@ -1739,6 +1774,7 @@ function router() {
     case "fund": return viewFund(arg);
     case "managers": return viewManagers();
     case "manager": return viewManager(arg);
+    case "clo": return viewClo(arg, hash.split("/")[3]);
     case "lps": return viewLps();
     case "lp": return viewLp(arg);
     case "news": return viewNews();
