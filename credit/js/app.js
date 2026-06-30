@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260630-9";
+} from "./data.js?v=20260630-10";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260630-9";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260630-10";
 
 const app = document.getElementById("app");
 
@@ -1474,17 +1474,28 @@ function viewWatchlist() {
       ${listCard("Funds", ff, "fund", (f) => `${link(`#/fund/${f.id}`, f.name)} <span class="muted small">${esc(managerById[f.managerId].name)}</span>`)}
       ${listCard("Investors", fl, "lp", (l) => `${link(`#/lp/${l.id}`, l.name)} <span class="muted small">${esc(l.type)}</span>`)}
     </div>
+    <div id="wl-panel" class="wl-panel" hidden></div>
     <section class="card"><h2>News, deals &amp; fundraising <span class="muted">(${feed.length})</span></h2>${feed.length ? feedHtml(feed, "watchlist", feedRow, wlSig) : '<p class="muted small">No news, deals or fundraising yet for the managers/funds you follow.</p>'}</section>
     ${cloItems.length ? `<section class="card"><h2>CLO activity <span class="muted">(${cloItems.length})</span></h2><p class="muted small">Collateralised loan obligation activity for the managers/funds you follow. <a href="#/clos">All CLO activity →</a></p>${feedHtml(cloItems, "watchlist-clo", feedRow, wlSig)}</section>` : ""}`;
 
-  // Accordion (only one category open at a time) — mobile only. On desktop the
-  // categories open independently.
+  // Mobile only: the three tiles stay on one line and the open one's content is
+  // rendered into the full-width panel below the row (one open at a time). On
+  // desktop the categories open independently in their own card (panel unused).
   const cats = app.querySelectorAll(".wl-cat");
+  const panel = document.getElementById("wl-panel");
+  const isMobile = () => window.matchMedia(MOBILE_Q).matches;
+  const syncPanel = () => {
+    if (!panel) return;
+    const open = isMobile() ? app.querySelector(".wl-cat[open]") : null;
+    const body = open && open.querySelector(".wl-body");
+    if (body) { panel.innerHTML = body.innerHTML; panel.hidden = false; }
+    else { panel.innerHTML = ""; panel.hidden = true; }
+  };
   cats.forEach((d) => d.addEventListener("toggle", () => {
-    if (d.open && window.matchMedia(MOBILE_Q).matches) {
-      cats.forEach((o) => { if (o !== d) o.open = false; });
-    }
+    if (d.open && isMobile()) cats.forEach((o) => { if (o !== d) o.open = false; });
+    syncPanel();
   }));
+  syncPanel();
 }
 
 // ============================== shared bits ================================
