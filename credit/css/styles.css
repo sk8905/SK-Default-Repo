@@ -130,8 +130,8 @@ h3 { font-size: 1rem; margin: 0; }
 /* ---------- layout ---------- */
 .container { max-width: 1500px; margin: 0 auto; padding: 1.75rem 2rem 3rem; }
 .page-head { margin-bottom: 1.25rem; }
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
-.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; align-items: start; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; align-items: start; }
 /* Collapsible "Latest news" panel on the dashboard — two-column list when open. */
 .news-panel { margin-bottom: 1rem; }
 .news-cols { display: grid; grid-template-columns: 1fr 1fr; column-gap: 1.75rem; }
@@ -165,6 +165,18 @@ h3 { font-size: 1rem; margin: 0; }
   border-radius: var(--radius); padding: 1.1rem 1.25rem; margin-bottom: 1rem; box-shadow: var(--shadow);
 }
 .card-foot { margin-top: .75rem; padding-top: .6rem; border-top: 1px solid var(--border); }
+
+/* Collapsible dashboard widgets (details/summary). Card chrome comes from .card;
+   the summary and body supply the padding. Collapsed by default. */
+.widget { padding: 0; overflow: hidden; }
+.widget-head { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: 1rem 1.25rem; border-radius: var(--radius); }
+.widget-head::-webkit-details-marker { display: none; }
+.widget-head h2 { margin: 0; }
+.widget-head:hover { background: rgba(2, 6, 23, .025); }
+.widget-caret { flex: 0 0 auto; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); margin-bottom: 3px; transition: transform .15s; }
+.widget[open] .widget-caret { transform: rotate(-135deg); margin-bottom: -3px; }
+.widget-body { padding: 0 1.25rem 1.1rem; }
+.grid-3 > .widget, .grid-2 > .widget { margin-bottom: 0; }
 
 /* Collapsible watchlist categories — the heading row is the expand/collapse
    toggle (native <details>); the caret flips and the body hides when closed. */
@@ -207,9 +219,7 @@ h3 { font-size: 1rem; margin: 0; }
 /* Key rates & credit spreads band (static, from /api/rates over FRED + ECB).
    A fixed grid so every tile lines up in columns — 6 across on desktop, 3 on
    mobile — with the source line spanning the full width beneath. */
-.rates-band { display: grid; grid-template-columns: repeat(6, 1fr); align-items: stretch;
-  margin: 0 0 1rem; padding: .55rem .35rem; border: 1px solid var(--border); border-radius: var(--radius);
-  background: var(--surface); box-shadow: var(--shadow); }
+.rates-band { display: grid; grid-template-columns: repeat(6, 1fr); align-items: stretch; }
 .rate-tile { display: flex; flex-direction: column; gap: .12rem; padding: .1rem 1rem;
   border-left: 1px solid var(--border); }
 .rate-tile:nth-child(6n+1) { border-left: none; }

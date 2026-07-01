@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260701-27";
+} from "./data.js?v=20260701-28";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260701-27";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260701-28";
 
 const app = document.getElementById("app");
 
@@ -533,6 +533,13 @@ function mountRatesBand() {
   } catch { /* no fetch (e.g. render shim) — leave placeholder */ }
 }
 
+// A collapsible dashboard widget: a <details> card collapsed by default, with a
+// clickable title bar (summary) + caret. Expand/collapse state is per widget and
+// independent. Content sits in .widget-body.
+function widget(title, body, cls = "") {
+  return `<details class="card widget${cls ? " " + cls : ""}"><summary class="widget-head"><h2>${title}</h2><span class="widget-caret" aria-hidden="true"></span></summary><div class="widget-body">${body}</div></details>`;
+}
+
 function viewDashboard() {
   // Credit-only universe for the headline aggregates (equity-strategy funds are
   // tracked and listed elsewhere but excluded from private-credit market stats).
@@ -586,42 +593,22 @@ function viewDashboard() {
       <p class="muted">European private credit deal flow &amp; market intelligence, with fundraising as a secondary lens · real data compiled from public sources (mid-2026)</p>
       ${focusToggle()}
     </div>
-    <div id="rates-band" class="rates-band" aria-label="Key rates &amp; credit spreads"></div>
+    ${widget("Key rates &amp; credit spreads", '<div id="rates-band" class="rates-band" aria-label="Key rates &amp; credit spreads"></div>', "rates-widget")}
     <div class="kpi-grid">
       ${kpis.map((k) => `<div class="kpi-card clickable" ${k.jump}><div class="kpi-value">${k.value}</div><div class="kpi-label">${k.label}</div><div class="kpi-sub muted">${k.sub}</div></div>`).join("")}
     </div>
 
-    <section class="card feature-card news-panel">
-      <h2>Latest news</h2>
-      <p class="muted small">Manager &amp; investor press across the tracked universe. Click a headline to open it in the news feed.</p>
-      ${newsByDate.length ? `<ul class="compact-list news-cols">${newsByDate.slice(0, 12).map(newsCompact).join("")}</ul>` : '<p class="muted small">No news yet.</p>'}
-      <div class="card-foot">${link("#/news", "View all news →")}</div>
-    </section>
+    ${widget("Latest news", `<p class="muted small">Manager &amp; investor press across the tracked universe. Click a headline to open it in the news feed.</p>${newsByDate.length ? `<ul class="compact-list news-cols">${newsByDate.slice(0, 12).map(newsCompact).join("")}</ul>` : '<p class="muted small">No news yet.</p>'}<div class="card-foot">${link("#/news", "View all news →")}</div>`, "feature-card news-panel")}
 
     <div class="grid-3">
-      <section class="card feature-card">
-        <h2>Latest deal activity</h2>
-        <p class="muted small">Financings, investments, acquisitions, refinancings, restructurings and exits. Click a headline to open it in the deal feed.</p>
-        ${dealsByDate.length ? `<ul class="compact-list">${dealsByDate.slice(0, 12).map((d) => compactRow(d, "deals")).join("")}</ul>` : '<p class="muted small">No deal activity yet.</p>'}
-        <div class="card-foot">${link("#/deals", "View all deal activity →")}</div>
-      </section>
-      <section class="card feature-card">
-        <h2>Latest fundraising intelligence</h2>
-        <p class="muted small">Fund launches, first/final closes, LP mandates, personnel and strategy moves. Click a headline to open it in the fundraising feed.</p>
-        ${intelByDate.length ? `<ul class="compact-list">${intelByDate.slice(0, 12).map((i) => compactRow(i, "intel")).join("")}</ul>` : '<p class="muted small">No items yet.</p>'}
-        <div class="card-foot">${link("#/intel", "View full fundraising intelligence →")}</div>
-      </section>
-      <section class="card feature-card">
-        <h2>Latest CLO news</h2>
-        <p class="muted small">Collateralised loan obligation pricings, resets, platforms, funds &amp; ETFs. Click a headline to open it in the CLOs section.</p>
-        ${cloByDate.length ? `<ul class="compact-list">${cloByDate.slice(0, 12).map((c) => compactRow(c, "clos")).join("")}</ul>` : '<p class="muted small">No CLO news yet.</p>'}
-        <div class="card-foot">${link("#/clos", "View all CLO activity →")}</div>
-      </section>
+      ${widget("Latest deal activity", `<p class="muted small">Financings, investments, acquisitions, refinancings, restructurings and exits. Click a headline to open it in the deal feed.</p>${dealsByDate.length ? `<ul class="compact-list">${dealsByDate.slice(0, 12).map((d) => compactRow(d, "deals")).join("")}</ul>` : '<p class="muted small">No deal activity yet.</p>'}<div class="card-foot">${link("#/deals", "View all deal activity →")}</div>`, "feature-card")}
+      ${widget("Latest fundraising intelligence", `<p class="muted small">Fund launches, first/final closes, LP mandates, personnel and strategy moves. Click a headline to open it in the fundraising feed.</p>${intelByDate.length ? `<ul class="compact-list">${intelByDate.slice(0, 12).map((i) => compactRow(i, "intel")).join("")}</ul>` : '<p class="muted small">No items yet.</p>'}<div class="card-foot">${link("#/intel", "View full fundraising intelligence →")}</div>`, "feature-card")}
+      ${widget("Latest CLO news", `<p class="muted small">Collateralised loan obligation pricings, resets, platforms, funds &amp; ETFs. Click a headline to open it in the CLOs section.</p>${cloByDate.length ? `<ul class="compact-list">${cloByDate.slice(0, 12).map((c) => compactRow(c, "clos")).join("")}</ul>` : '<p class="muted small">No CLO news yet.</p>'}<div class="card-foot">${link("#/clos", "View all CLO activity →")}</div>`, "feature-card")}
     </div>
 
     <div class="grid-2">
-      <section class="card"><h2>Deals by type</h2>${byDealType.length ? donutChart(byDealType) : '<p class="muted small">No deals tracked.</p>'}</section>
-      <section class="card"><h2>Funds by status</h2>${donutChart(byStatus)}</section>
+      ${widget("Deals by type", byDealType.length ? donutChart(byDealType) : '<p class="muted small">No deals tracked.</p>')}
+      ${widget("Funds by status", donutChart(byStatus))}
     </div>`;
   mountRatesBand();
 }
