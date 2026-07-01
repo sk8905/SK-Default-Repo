@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260701-9";
+} from "./data.js?v=20260701-10";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260701-9";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260701-10";
 
 const app = document.getElementById("app");
 
@@ -390,6 +390,27 @@ document.addEventListener("click", (e) => {
   if (!b) return;
   const key = b.getAttribute("data-more");
   pageShown[key] = pageCount(key) + PAGE;
+  const y = window.scrollY;
+  router();
+  window.scrollTo(0, y);
+});
+
+// ---- Target focus (€1–10bn AUM) --------------------------------------------
+// A global toggle that narrows the News/Deals/Fundraising/CLOs/Managers pages to
+// managers (or content whose manager sits) in the €1–10bn AUM band. Persists.
+let targetFocus = false;
+try { targetFocus = localStorage.getItem("meridian.focus") === "1"; } catch { /* ignore */ }
+const inFocusAum = (aum) => aum != null && aum >= 1 && aum <= 10;
+const midInFocus = (mid) => { const m = managerById[mid]; return !!(m && inFocusAum(m.aum)); };
+function focusToggle() {
+  return `<label class="focus-toggle"><input type="checkbox" class="focus-cb" ${targetFocus ? "checked" : ""} aria-label="Target focus: €1–10bn AUM managers"><span class="focus-sw" aria-hidden="true"></span><span>Target focus <span class="muted">· €1–10bn AUM</span></span></label>`;
+}
+// Toggling re-renders the current page with the focus filter applied.
+document.addEventListener("change", (e) => {
+  const cb = e.target.closest(".focus-cb");
+  if (!cb) return;
+  targetFocus = cb.checked;
+  try { localStorage.setItem("meridian.focus", targetFocus ? "1" : "0"); } catch { /* ignore */ }
   const y = window.scrollY;
   router();
   window.scrollTo(0, y);
@@ -873,6 +894,7 @@ function viewManagers() {
   const f = filterState.managers;
   const LOCATIONS = [...new Set(managers.flatMap((m) => hqRegions(m.hq)))].sort();
   const rows = managers.filter((m) =>
+    (!targetFocus || inFocusAum(m.aum)) &&
     (!f.q || m.name.toLowerCase().includes(f.q.toLowerCase()) || m.hq.toLowerCase().includes(f.q.toLowerCase())) &&
     (!f.strategy.length || f.strategy.some((s) => m.strategies.includes(s))) &&
     (!f.location.length || hqRegions(m.hq).some((r) => f.location.includes(r)))
@@ -881,6 +903,7 @@ function viewManagers() {
 
   app.innerHTML = `
     <div class="page-head"><h1>Managers</h1><p class="muted">${rows.length} of ${managers.length} GPs</p></div>
+    ${focusToggle()}
     <input type="checkbox" id="filters-toggle" class="ff-cb" ${mfOpen() ? "checked" : ""}><label for="filters-toggle" class="ff-lab">Filters</label><div class="filters">
       <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Name or HQ…" value="${esc(f.q)}"></label>
       ${multiFilter("managers:strategy", "Strategy", STRATEGIES, f.strategy)}
@@ -896,7 +919,7 @@ function viewManagers() {
           return `<tr class="clickable" data-href="#/manager/${m.id}">
             <td>${nameCell("manager", m.id, `<strong>${esc(m.name)}</strong>`)}</td>
             <td class="muted small">${esc(m.hq)}</td>
-            <td>${m.aumText ? esc(m.aumText) : "€" + m.aum + "bn"}</td>
+            <td>€${m.aum}bn</td>
             <td>${strat}</td>
             <td>${fs.length}</td>
             <td>${live}</td>
@@ -1219,7 +1242,7 @@ function intelRow(i) {
 function viewIntel() {
   const f = filterState.intel;
   // CLO fundraising/platform news is carved out into its own #/clos section.
-  const base = intel.filter((i) => !i.clo);
+  const base = intel.filter((i) => !i.clo && (!targetFocus || midInFocus(i.managerId)));
   const rows = base.filter((i) =>
     (!f.q || (i.headline + i.summary).toLowerCase().includes(f.q.toLowerCase())) &&
     (!f.type.length || f.type.includes(i.type)) &&
@@ -1244,6 +1267,7 @@ function viewIntel() {
 
   app.innerHTML = `
     <div class="page-head"><h1>Fundraising Intelligence</h1><p class="muted">${rows.length} of ${base.length} items · European private credit capital formation · <a href="#/clos">CLOs are in their own section →</a></p></div>
+    ${focusToggle()}
     <div class="split-3070">
       <div class="split-left">
         <section class="card"><h2>Capital raised by strategy <span class="muted">(€bn)</span></h2>${byStrategy.length ? barChart(byStrategy, { unit: "€", width: 540 }) : '<p class="muted small">No data.</p>'}</section>
@@ -1300,7 +1324,7 @@ function dealRow(d) {
 function viewDeals() {
   const f = filterState.deals;
   // CLO transactions are carved out into their own #/clos section.
-  const base = deals.filter((d) => !d.clo);
+  const base = deals.filter((d) => !d.clo && (!targetFocus || midInFocus(d.managerId)));
   // ---- quarter helper (also used by the by-quarter chart drill-down) ----
   const quarterOf = (d) => { const m = /^(\d{4})-(\d{2})/.exec(d || ""); return m ? `${m[1]}-Q${Math.floor((+m[2] - 1) / 3) + 1}` : null; };
   const rows = base.filter((d) =>
@@ -1335,6 +1359,7 @@ function viewDeals() {
 
   app.innerHTML = `
     <div class="page-head"><h1>Deal Activity</h1><p class="muted">${rows.length} of ${base.length} transactions · investments, exits, refinancings, restructurings &amp; distress${f.period ? ` · <strong>${esc(f.period)}</strong> <button type="button" class="link-btn" id="clear-period">clear quarter ✕</button>` : ""} · <a href="#/clos">CLOs are in their own section →</a></p></div>
+    ${focusToggle()}
     <div class="split-3070">
       <div class="split-left">
         <section class="card">
@@ -1398,7 +1423,7 @@ function viewClos() {
   const f = filterState.clos;
   const cloDeals = deals.filter((d) => d.clo).map((d) => ({ ...d, _kind: "deal" }));
   const cloIntel = intel.filter((i) => i.clo).map((i) => ({ ...i, _kind: "intel" }));
-  const all = [...cloDeals, ...cloIntel];
+  const all = [...cloDeals, ...cloIntel].filter((x) => !targetFocus || midInFocus(x.managerId));
   const quarterOf = (d) => { const m = /^(\d{4})-(\d{2})/.exec(d || ""); return m ? `${m[1]}-Q${Math.floor((+m[2] - 1) / 3) + 1}` : null; };
   const rows = all.filter((x) =>
     (!f.q || ((x.headline || "") + (x.summary || "")).toLowerCase().includes(f.q.toLowerCase())) &&
@@ -1433,6 +1458,7 @@ function viewClos() {
 
   app.innerHTML = `
     <div class="page-head"><h1>CLOs</h1><p class="muted">${rows.length} of ${all.length} items · collateralised loan obligation pricings, platforms, funds, ETFs &amp; personnel — carved out of Deals &amp; Fundraising${f.period ? ` · <strong>${esc(f.period)}</strong> <button type="button" class="link-btn" id="clear-period">clear quarter ✕</button>` : ""}</p></div>
+    ${focusToggle()}
     <div class="split-3070">
       <div class="split-left">
         <section class="card">
@@ -1493,12 +1519,13 @@ function viewClos() {
 // (these previously only appeared on each manager's profile and the bell).
 function viewNews() {
   const f = filterState.news;
-  const all = aggregateNews();
+  const all = aggregateNews().filter((x) => !targetFocus || midInFocus(x._mid));
   const rows = all.filter((x) => !f.q || `${x.title || ""} ${x.outlet || ""} ${x._mname || ""}`.toLowerCase().includes(f.q.toLowerCase()));
   const newsRow = (x) => `<div class="intel-row" id="row-${x._id}"><div class="intel-meta"><span class="chip">News</span><span class="muted small">${x.date ? esc(fmtDate(x.date)) : ""}</span></div><div class="intel-body">${x.url ? `<a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer" class="intel-head">${esc(x.title)} ↗</a>` : `<span class="intel-head">${esc(x.title)}</span>`}<p class="muted small news-sum">${newsSummary(x)}</p><div>${link(`#/manager/${x._mid}`, x._mname, "muted small")}${x.outlet ? ` · <span class="muted small">${esc(x.outlet)}</span>` : ""}</div></div></div>`;
 
   app.innerHTML = `
     <div class="page-head"><h1>News</h1><p class="muted">${rows.length} of ${all.length} items · manager &amp; investor press across the tracked universe</p></div>
+    ${focusToggle()}
     <input type="checkbox" id="filters-toggle" class="ff-cb" ${mfOpen() ? "checked" : ""}><label for="filters-toggle" class="ff-lab">Filters</label><div class="filters">
       <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Headline, outlet, manager…" value="${esc(f.q)}"></label>
     </div>
