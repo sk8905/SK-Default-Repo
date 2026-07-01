@@ -31,10 +31,8 @@ export const practiceAreas = [
     blurb: "Restructuring plans, schemes, administrations, directors' duties to creditors, cross-border insolvency." },
   { id: "corporate", name: "Corporate / M&A",            short: "Corporate", color: "#14b8a6",
     blurb: "M&A, public takeovers, equity capital markets, company law and corporate transparency." },
-  { id: "fundsreg",  name: "Funds Regulatory",           short: "Funds Reg", color: "#8b5cf6",
-    blurb: "AIFMD, FCA asset-management rules, fund structuring, marketing and distribution regimes." },
-  { id: "fundtax",   name: "Fund Tax",                   short: "Fund Tax",  color: "#f97316",
-    blurb: "Fund and asset-holding-vehicle taxation, carried interest, investor tax, cross-border tax." },
+  { id: "funds",     name: "Funds",                      short: "Funds",     color: "#8b5cf6",
+    blurb: "Funds regulatory (AIFMD, FCA asset-management rules, structuring, marketing & distribution) and fund tax (fund & asset-holding-vehicle taxation, carried interest, investor and cross-border tax)." },
 ];
 
 // ---- Source firms -----------------------------------------------------------
@@ -226,7 +224,7 @@ export const items = [
   {
     url: "https://www.lw.com/en/insights/2024/07/FCA-Publishes-Final-Rules-for-Reformed-Listing-Regime",
     id: "u022", title: "FCA Publishes Final Rules for Reformed Listing Regime",
-    area: "corporate", areas: ["corporate", "fundsreg"], type: "update", firm: "latham",
+    area: "corporate", areas: ["corporate", "funds"], type: "update", firm: "latham",
     date: "2024-07-29", jurisdiction: "United Kingdom",
     summary: "The FCA's new UK Listing Rules (UKLR) took effect on 29 July 2024, replacing the premium/standard segments with a single 'commercial companies' category, removing mandatory shareholder votes on significant and most related-party transactions, and adopting a more disclosure-based, founder-friendly approach (including permissive dual-class structures). A material shift in the UK's IPO and public-M&A landscape.",
     points: [
@@ -253,7 +251,7 @@ export const items = [
   {
     url: "https://www.cliffordchance.com/content/dam/cliffordchance/briefings/2025/01/eu-aifmd2-impact-and-implementation.pdf",
     id: "u030", title: "EU AIFMD2: Impact and Implementation",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "cliffordchance",
+    area: "funds", areas: ["funds"], type: "update", firm: "cliffordchance",
     date: "2025-01-01", jurisdiction: "European Union",
     summary: "Directive (EU) 2024/927 (AIFMD II) entered into force in April 2024 with most provisions applying from April 2026. It introduces a harmonised framework for loan-originating AIFs (leverage limits, retention, diversification), new delegation and substance reporting, mandatory availability of liquidity-management tools for open-ended funds, and enhanced reporting. UK managers marketing into the EU under NPPR should map the changes now.",
     points: [
@@ -266,7 +264,7 @@ export const items = [
   {
     url: "https://www.simmons-simmons.com/en/publications/clvqtn3h800luug3s5cbbuob4/sdr-and-investment-labels-how-we-can-help",
     id: "u032", title: "SDR and investment labels: how we can help",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "simmons",
+    area: "funds", areas: ["funds"], type: "update", firm: "simmons",
     date: "2024-12-02", jurisdiction: "United Kingdom",
     summary: "The FCA's Sustainability Disclosure Requirements (PS23/16) are phasing in: the anti-greenwashing rule applied from 31 May 2024; the four investment labels and naming-and-marketing rules from 2 December 2024; with ongoing product- and entity-level disclosures following. The briefing covers label criteria (Focus, Improvers, Impact, Mixed Goals), the 70% threshold and the interaction with EU SFDR for cross-border ranges.",
     points: [
@@ -279,7 +277,7 @@ export const items = [
   {
     url: "https://www.macfarlanes.com/insights/102iig5/ltaf-now-accessible-to-retail-investors/",
     id: "u034", title: "LTAF now accessible to retail investors",
-    area: "fundsreg", areas: ["fundsreg"], type: "insight", firm: "macfarlanes",
+    area: "funds", areas: ["funds"], type: "insight", firm: "macfarlanes",
     date: "2024-05-14", jurisdiction: "United Kingdom",
     summary: "Following the FCA's rules broadening distribution of the Long-Term Asset Fund (LTAF) to certain retail investors and DC pension schemes, the LTAF is emerging as the UK's open-ended vehicle for illiquid private-market exposure. The briefing covers the permitted-links and value-for-money interactions, redemption/notice mechanics and how LTAFs sit alongside the Mansion House productive-finance agenda.",
     points: [
@@ -292,7 +290,7 @@ export const items = [
   {
     url: "https://www.macfarlanes.com/what-we-think/102eli5/carried-interest-tax-reform-next-steps-102kglp/",
     id: "u040", title: "Carried interest tax reform: next steps",
-    area: "fundtax", areas: ["fundtax"], type: "update", firm: "macfarlanes",
+    area: "funds", areas: ["funds"], type: "update", firm: "macfarlanes",
     date: "2025-10-30", jurisdiction: "United Kingdom",
     summary: "Following consultation, the Government confirmed that from 6 April 2026 carried interest will be taxed within the income-tax framework, with qualifying carry brought in at an effective rate via a 72.5% multiplier applied to the relevant amount (subject to conditions on co-investment, holding periods and employment-related conditions). A fundamental change to the economics of UK-based fund executives and to fund-formation structuring.",
     points: [
@@ -305,7 +303,7 @@ export const items = [
   {
     url: "https://www.macfarlanes.com/insights/uk-non-dom-reforms/",
     id: "u041", title: "UK non-dom reforms",
-    area: "fundtax", areas: ["fundtax"], type: "update", firm: "macfarlanes",
+    area: "funds", areas: ["funds"], type: "update", firm: "macfarlanes",
     date: "2025-04-06", jurisdiction: "United Kingdom",
     summary: "From 6 April 2025 the remittance basis was abolished and replaced by a residence-based four-year FIG regime for new UK arrivals, with transitional reliefs (temporary repatriation facility; rebasing) and a move to a residence-based IHT system. Highly relevant to internationally mobile fund principals and to the situs/structuring of their carry and personal investments.",
     points: [
@@ -327,7 +325,7 @@ export const items = [
   {
     url: "https://www.simmons-simmons.com/en/publications/clpiuyjig03r2udeo8yvo1ya6/esg-fca-publishes-landmark-uk-sdr-rules",
     id: "u057", title: "ESG – FCA publishes final SDR rules",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "simmons",
+    area: "funds", areas: ["funds"], type: "update", firm: "simmons",
     date: "2023-11-01", jurisdiction: "United Kingdom",
     summary: "The next phase of the FCA's Sustainability Disclosure Requirements brings ongoing product-level disclosures and (for larger firms) entity-level reports online during 2026. The note covers consumer-facing disclosure formatting, the assessment underpinning each label and the data/governance build needed to sustain it.",
     points: ["Ongoing product disclosures now required for labelled funds.", "Entity-level reports phase in for larger firms.", "Sustain the evidence base behind each label."],
@@ -336,7 +334,7 @@ export const items = [
   {
     url: "https://www.macfarlanes.com/media/otvpqdom/the-new-carried-interest-tax-regime-may-2026.pdf",
     id: "u059", title: "The new carried interest tax regime",
-    area: "fundtax", areas: ["fundtax"], type: "update", firm: "macfarlanes",
+    area: "funds", areas: ["funds"], type: "update", firm: "macfarlanes",
     date: "2026-05-01", jurisdiction: "United Kingdom",
     summary: "From 6 April 2026 qualifying carried interest is taxed within the income-tax framework via the 72.5% multiplier, subject to the holding-period and other conditions. The note works through the transitional issues for in-flight carry, co-investment structuring and the position of internationally mobile executives under the new FIG regime.",
     points: ["Carry taxed as multiplied trading income from 6 April 2026.", "72.5% multiplier sets the blended effective rate.", "Revisit co-invest and executive structuring for the new rules."],
@@ -390,7 +388,7 @@ export const items = [
   {
     url: "https://www.kirkland.com/publications/kirkland-alert/2022/07/houst-sme-restructuring-plan",
     id: "u081", title: "Houst: English Court Approves SME Restructuring Plan",
-    area: "ri", areas: ["ri", "fundtax"], type: "insight", firm: "kirkland",
+    area: "ri", areas: ["ri", "funds"], type: "insight", firm: "kirkland",
     date: "2022-07-01", jurisdiction: "England & Wales",
     summary: "Re Houst was the first Part 26A plan to cram down HMRC as a dissenting class, opening the tool to smaller companies. The briefing weighs the cost/benefit versus CVAs and the evidential burden of the relevant alternative for owner-managed businesses.",
     points: ["First plan to cram down HMRC.", "Brings cram-down to the SME market.", "Cost remains a barrier versus CVAs."],
@@ -399,7 +397,7 @@ export const items = [
   {
     url: "https://www.slaughterandmay.com/insights/new-insights/getting-ready-for-pisces-a-new-liquidity-mechanism-for-private-companies/",
     id: "u090", title: "Getting ready for PISCES: A new liquidity mechanism for private companies",
-    area: "corporate", areas: ["corporate", "fundsreg"], type: "update", firm: "slaughtermay",
+    area: "corporate", areas: ["corporate", "funds"], type: "update", firm: "slaughtermay",
     date: "2025-06-10", jurisdiction: "United Kingdom",
     summary: "The Private Intermittent Securities and Capital Exchange System (PISCES) lets private companies arrange periodic trading windows for their shares under a bespoke disclosure regime and a stamp-duty exemption. The note covers the sandbox framework, company eligibility and the implications for PE-backed and employee-owned companies.",
     points: ["Intermittent secondary liquidity for private shares.", "Bespoke disclosure regime; SDRT/stamp-duty exemption.", "Relevant to PE portfolio and employee shareholders."],
@@ -453,7 +451,7 @@ export const items = [
   {
     url: "https://www.slaughterandmay.com/insights/new-insights/frc-publishes-new-stewardship-code-2026-supporting-long-term-sustainable-value/",
     id: "u097", title: "FRC publishes new Stewardship Code 2026: Supporting long term sustainable value?",
-    area: "corporate", areas: ["corporate", "fundsreg"], type: "update", firm: "slaughtermay",
+    area: "corporate", areas: ["corporate", "funds"], type: "update", firm: "slaughtermay",
     date: "2025-06-01", jurisdiction: "United Kingdom",
     summary: "The revised UK Stewardship Code applies from 2026 with a streamlined definition of stewardship, reduced reporting duplication and a new focus on outcomes for asset owners and managers. The note covers the transition for existing signatories and the policy-versus-activity reporting split.",
     points: ["Streamlined stewardship definition and reporting.", "Outcomes focus for owners and managers.", "Eased burden for existing signatories."],
@@ -462,7 +460,7 @@ export const items = [
   {
     url: "https://www.simmons-simmons.com/en/publications/cm4vididm054ougzg5r07i1o8/fca-consults-on-new-rules-for-the-uk-s-cci-retail-disclosure-regime",
     id: "u101", title: "FCA consults on new rules for the UK's CCI retail disclosure regime",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "simmons",
+    area: "funds", areas: ["funds"], type: "update", firm: "simmons",
     date: "2025-04-30", jurisdiction: "United Kingdom",
     summary: "The FCA is replacing the EU-derived PRIIPs KID with a UK Consumer Composite Investments (CCI) disclosure regime — more flexible, outcomes-based product information for retail investors, including on cost and performance. The note covers scope, the cost-disclosure fix for investment trusts and timing.",
     points: ["CCI replaces the PRIIPs KID in the UK.", "Flexible, outcomes-based product disclosure.", "Resolves the investment-trust cost-disclosure issue."],
@@ -471,7 +469,7 @@ export const items = [
   {
     url: "https://www.simmons-simmons.com/en/publications/ckx92m24q1e2i0a479s6f7ybo/fca-signals-reform-for-appointed-representatives-regime",
     id: "u102", title: "FCA signals reform for Appointed Representatives regime",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "simmons",
+    area: "funds", areas: ["funds"], type: "update", firm: "simmons",
     date: "2023-12-08", jurisdiction: "United Kingdom",
     summary: "The FCA's reforms to the appointed-representatives regime require principals to assess, monitor and report on their ARs more rigorously, with annual reviews and enhanced notifications. Relevant to host-AIFM and platform models that rely on ARs for regulatory cover.",
     points: ["Enhanced principal oversight and annual AR reviews.", "New data and notification requirements.", "Affects host-AIFM and platform structures."],
@@ -480,7 +478,7 @@ export const items = [
   {
     url: "https://financialregulation.linklaters.com/post/102iufr/technology-working-group-sets-out-its-vision-for-implementing-uk-fund-tokenisatio",
     id: "u105", title: "Technology Working Group sets out its vision for implementing UK fund tokenisation",
-    area: "fundsreg", areas: ["fundsreg"], type: "insight", firm: "linklaters",
+    area: "funds", areas: ["funds"], type: "insight", firm: "linklaters",
     date: "2024-03-20", jurisdiction: "United Kingdom",
     summary: "The Technology Working Group's blueprint sets out a phased model for tokenising authorised funds in the UK — a baseline using DLT for the register and dealing while keeping mainstream assets and existing law. The briefing covers the operating model and the path to on-chain settlement.",
     points: ["Baseline model tokenises the register and dealing.", "Works within existing fund law.", "Phased path toward on-chain assets and settlement."],
@@ -489,7 +487,7 @@ export const items = [
   {
     url: "https://www.cliffordchance.com/briefings/2021/12/synthetic-securitisations-and-significant-risk-transfer.html",
     id: "u106", title: "Synthetic Securitisations and Significant Risk Transfer",
-    area: "fundsreg", areas: ["fundsreg", "banking"], type: "update", firm: "cliffordchance",
+    area: "funds", areas: ["funds", "banking"], type: "update", firm: "cliffordchance",
     date: "2021-12-01", jurisdiction: "United Kingdom",
     summary: "Updated PRA expectations on significant-risk-transfer (SRT) and synthetic securitisation clarify the recognition of credit-risk transfer for capital relief — a market that has drawn heavy private-credit and fund investment. The note covers structuring, the SRT assessment and the investor angle.",
     points: ["Clarifies capital relief for risk transfer.", "Large private-credit/fund investor base.", "Structuring and SRT-assessment considerations."],
@@ -498,7 +496,7 @@ export const items = [
   {
     url: "https://www.simmons-simmons.com/en/publications/cl7oycyyj6im40a12la7uznd2/top-10-consumer-duty-for-asset-managers",
     id: "u107", title: "Top 10 - Consumer Duty for asset managers",
-    area: "fundsreg", areas: ["fundsreg"], type: "insight", firm: "simmons",
+    area: "funds", areas: ["funds"], type: "insight", firm: "simmons",
     date: "2024-08-14", jurisdiction: "United Kingdom",
     summary: "A briefing on how the Consumer Duty bites on asset managers and fund distributors — fair-value assessments, target-market and distribution-chain obligations, and the interaction with the assessment-of-value rules. Practical steps for manufacturers and platforms in the retail funds chain.",
     points: ["Fair-value assessments across the distribution chain.", "Target-market and consumer-understanding duties.", "Overlaps with assessment-of-value reporting."],
@@ -507,7 +505,7 @@ export const items = [
   {
     url: "https://www.macfarlanes.com/insights/102logv/salaried-member-rules-condition-c-where-are-we-now/",
     id: "u110", title: "Salaried member rules: Condition C – where are we now?",
-    area: "fundtax", areas: ["fundtax"], type: "update", firm: "macfarlanes",
+    area: "funds", areas: ["funds"], type: "update", firm: "macfarlanes",
     date: "2024-03-15", jurisdiction: "United Kingdom",
     summary: "HMRC revised its salaried-members guidance on the Condition C (capital contribution) anti-avoidance angle and continues to litigate Condition B (significant influence) following BlueCrest. The note explains the risk for fund-management LLP members and how to evidence influence and genuine capital at risk.",
     points: ["HMRC tightened then partly reversed Condition C guidance.", "Condition B 'significant influence' remains contested.", "Evidence influence and real capital contributions."],
@@ -546,7 +544,7 @@ export const items = [
   {
     url: "https://www.macfarlanes.com/insights/102n4vx/llp-profit-sharing-arrangements-and-miscellaneous-income-supreme-court-rules-in/",
     id: "u123", title: "LLP profit-sharing arrangements and miscellaneous income: Supreme Court rules in HFFX",
-    area: "fundtax", areas: ["fundtax"], type: "case", firm: "macfarlanes",
+    area: "funds", areas: ["funds"], type: "case", firm: "macfarlanes",
     date: "2026-06-17", jurisdiction: "United Kingdom",
     court: "Supreme Court", citation: "[2026] UKSC 17",
     summary: "The Supreme Court upheld the income-tax treatment of an LLP profit-sharing/'special capital' arrangement that routed trading profits through a corporate member before allocating them to individual members, confirming they were taxable as the members' income. A significant decision on the limits of purposive interpretation and on fund-manager LLP remuneration structuring.",
@@ -556,7 +554,7 @@ export const items = [
   {
     url: "https://www.lw.com/en/insights/the-uk-new-regime-for-carried-interest-taxation-key-updates-in-the-finance-bill",
     id: "u124", title: "The UK New Regime for Carried Interest Taxation: Key Updates in the Finance Bill",
-    area: "fundtax", areas: ["fundtax"], type: "update", firm: "latham",
+    area: "funds", areas: ["funds"], type: "update", firm: "latham",
     date: "2025-12-01", jurisdiction: "United Kingdom",
     summary: "Draft legislation for the April 2026 carried-interest regime confirms carry will be taxed as deemed trading income subject to the 72.5% multiplier, with territorial-scope rules for internationally mobile executives and conditions on qualifying carry. The note works through the residence/territorial limits and the transitional position.",
     points: ["Draft legislation confirms the April 2026 design.", "Territorial-scope rules for mobile executives clarified.", "No new qualifying conditions beyond the multiplier framework."],
@@ -583,7 +581,7 @@ export const items = [
   },
   {
     id: "u131", title: "FCA enforcement? All eyes on supervision",
-    area: "fundsreg", areas: ["fundsreg", "banking"], type: "insight", firm: "linklaters",
+    area: "funds", areas: ["funds", "banking"], type: "insight", firm: "linklaters",
     date: "2026-06-18", jurisdiction: "United Kingdom",
     summary: "Following the 2024 BlueCrest Court of Appeal decision, the FCA can require redress through supervisory tools — OIREQs, Section 166 reviews and business restrictions — without proving breach, causation or loss. Sara Cody of Linklaters argues that the regulator's pivot from formal enforcement to supervisory interventions means asset managers and other regulated firms may face substantial operational burdens without the transparency of published enforcement decisions. The absence of a formal enforcement outcome is no longer a reliable indicator of regulatory approval.",
     points: ["FCA increasingly deploys supervisory tools in place of formal enforcement action.", "Post-BlueCrest, OIREQs allow the FCA to require redress without proving breach or causation.", "Section 166 reviews impose enforcement-level burden on firms without public transparency.", "Low enforcement-outcome counts should not be read as regulatory satisfaction."],
@@ -592,7 +590,7 @@ export const items = [
   },
   {
     id: "u132", title: "FCA proposes raising minimum market-abuse penalty to £150,000; EU derivatives trading obligation suspended",
-    area: "fundsreg", areas: ["fundsreg", "banking"], type: "update", firm: "slaughtermay",
+    area: "funds", areas: ["funds", "banking"], type: "update", firm: "slaughtermay",
     date: "2026-06-18", jurisdiction: "United Kingdom",
     summary: "The FCA published Consultation Paper CP26/19 (15 June 2026) proposing to raise the minimum disciplinary penalty for serious market abuse by individuals from £100,000 to £150,000, with automatic biennial CPI-linked increases and an updated financial hardship threshold; responses close 10 August 2026. The same bulletin covers EU Regulation 2026/1288, which suspended the MiFIR derivatives trading obligation for certain financial counterparties on UK-based trading venues and entered into force on 18 June 2026. HM Treasury published terms of reference for the new Wholesale Digital Markets Champion, charged with coordinating DLT/tokenisation adoption across UK wholesale markets over an 18-month mandate. The EBA launched a consultation on a simplified 2027 EU-wide stress test that reduces data requirements by ~55% and, for the first time, integrates climate risk through transition and physical risk shocks.",
     points: [
@@ -621,7 +619,7 @@ export const items = [
   },
   {
     id: "u134", title: "Bank of England publishes policy statement and draft rules for UK systemic stablecoins",
-    area: "banking", areas: ["banking", "fundsreg"], type: "update", firm: "linklaters",
+    area: "banking", areas: ["banking", "funds"], type: "update", firm: "linklaters",
     date: "2026-06-22", jurisdiction: "England & Wales",
     summary: "On 20 June 2026 the Bank of England published its policy statement and draft Code of Practice (consultation closes 22 September 2026) setting out the proposed regulatory regime for sterling-denominated systemic stablecoins, revising several positions from its November 2025 consultation. Key changes: issuers may now hold up to 70% of backing assets in short-term UK gilts (raised from 60%), with a notification requirement if deposits fall below 25% for five consecutive business days; individual and corporate holding limits are scrapped in favour of a temporary aggregate issuance cap of £40 billion per stablecoin product, to be reviewed periodically and eventually removed; and the Bank will introduce a new backstop liquidity facility allowing eligible issuers to borrow against gilts to meet redemptions at par where private market channels are unavailable. Overseas issuers crossing the systemic threshold must establish a UK subsidiary; the PRA's ban on retail bank stablecoin issuance is maintained.",
     points: [
@@ -725,7 +723,7 @@ export const items = [
   {
     url: "https://www.cliffordchance.com/briefings/2025/10/luxembourg-implements-key-tax-updates-impacting-investment-fund.html",
     id: "u143", title: "Luxembourg implements key tax updates impacting investment fund sector",
-    area: "fundtax", areas: ["fundtax"], type: "insight", firm: "cliffordchance",
+    area: "funds", areas: ["funds"], type: "insight", firm: "cliffordchance",
     date: "2025-10-01", jurisdiction: "United Kingdom",
     summary: "Outlines key Luxembourg tax updates affecting the investment fund sector, including carried interest tax regime changes for fund managers and sponsors.",
     points: [],
@@ -755,7 +753,7 @@ export const items = [
   {
     url: "https://www.slaughterandmay.com/insights/new-insights/tax-and-the-city-review-october-2025/",
     id: "u146", title: "Tax and the City Review - October 2025",
-    area: "fundtax", areas: ["fundtax"], type: "update", firm: "slaughtermay",
+    area: "funds", areas: ["funds"], type: "update", firm: "slaughtermay",
     date: "2025-10-01", jurisdiction: "United Kingdom",
     summary: "Periodic Slaughter and May tax round-up covering recent UK tax developments relevant to funds, including Pillar Two undertaxed payments rule and fund-related measures.",
     points: [],
@@ -795,7 +793,7 @@ export const items = [
   {
     url: "https://www.linklaters.com/en/knowledge/publications/alerts-newsletters-and-guides/2025/august/01/luxembourg-government-proposes-reform-of-carried-interest-tax-regime",
     id: "u150", title: "Luxembourg Government proposes reform of carried interest tax regime",
-    area: "fundtax", areas: ["fundtax"], type: "alert", firm: "linklaters",
+    area: "funds", areas: ["funds"], type: "alert", firm: "linklaters",
     date: "2025-08-01", jurisdiction: "United Kingdom",
     summary: "Linklaters reports on the Luxembourg government's proposed reform of its carried interest tax regime, broadening eligibility and making deal-by-deal carry eligible.",
     points: [],
@@ -855,7 +853,7 @@ export const items = [
   {
     url: "https://www.freshfields.com/en/our-thinking/blogs/risk-and-compliance/fca-pauses-the-extension-of-sdr-to-portfolio-management-102ka9w",
     id: "u156", title: "FCA pauses the extension of SDR to portfolio management",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "freshfields",
+    area: "funds", areas: ["funds"], type: "update", firm: "freshfields",
     date: "2025-06-01", jurisdiction: "United Kingdom",
     summary: "Freshfields reports that on 30 April 2025 the FCA paused plans to extend the SDR and investment labels regime to portfolio management after consultation feedback.",
     points: [],
@@ -865,7 +863,7 @@ export const items = [
   {
     url: "https://www.freshfields.com/en/our-thinking/blogs/risk-and-compliance/fca-sets-out-supervision-priorities-for-asset-managers-and-alternatives-firms-102k39u",
     id: "u157", title: "FCA sets out supervision priorities for asset managers and alternatives firms",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "freshfields",
+    area: "funds", areas: ["funds"], type: "update", firm: "freshfields",
     date: "2025-06-01", jurisdiction: "United Kingdom",
     summary: "Freshfields summarises the FCA's February 2025 portfolio letter setting supervision priorities for asset managers and alternatives firms, including private market valuations, conflicts of interest and a planned AIFMD review.",
     points: [],
@@ -875,7 +873,7 @@ export const items = [
   {
     url: "https://www.freshfields.com/en/our-thinking/blogs/risk-and-compliance/autumn-budget-2025-a-stealthy-smorgasbord-102lwd7",
     id: "u158", title: "Autumn Budget 2025: a stealthy smorgasbord?",
-    area: "fundtax", areas: ["fundtax"], type: "insight", firm: "freshfields",
+    area: "funds", areas: ["funds"], type: "insight", firm: "freshfields",
     date: "2025-06-01", jurisdiction: "United Kingdom",
     summary: "Freshfields reviews Autumn Budget 2025 tax measures, including confirmation that the new carried interest regime will take effect from April 2026 via the Finance Bill.",
     points: [],
@@ -885,7 +883,7 @@ export const items = [
   {
     url: "https://www.aoshearman.com/en/insights/autumn-budget-2025-tax-overview",
     id: "u159", title: "UK Budget 2025 Tax Measures: Legal Insights & Impact",
-    area: "fundtax", areas: ["fundtax", "corporate"], type: "insight", firm: "aoshearman",
+    area: "funds", areas: ["funds", "corporate"], type: "insight", firm: "aoshearman",
     date: "2025-06-01", jurisdiction: "United Kingdom",
     summary: "Overview of the UK Autumn Budget 2025 tax measures and their impact, including measures relevant to funds and fund managers.",
     points: [],
@@ -935,7 +933,7 @@ export const items = [
   {
     url: "https://www.slaughterandmay.com/insights/new-insights/future-regulation-of-alternative-fund-managers-towards-a-more-proportionate-regime/",
     id: "u164", title: "Future regulation of alternative fund managers: towards a more proportionate regime",
-    area: "fundsreg", areas: ["fundsreg"], type: "insight", firm: "slaughtermay",
+    area: "funds", areas: ["funds"], type: "insight", firm: "slaughtermay",
     date: "2025-06-01", jurisdiction: "United Kingdom",
     summary: "Examines the FCA and Treasury's April 2025 proposals to simplify UK AIFMD by tiering how the regime applies to fund managers based on net asset value thresholds.",
     points: [],
@@ -955,7 +953,7 @@ export const items = [
   {
     url: "https://www.linklaters.com/knowledge/articles/alerts-newsletters-and-guides/2025/may/05/funds-regulatory-update---issue-1",
     id: "u166", title: "Funds Regulatory Update - Issue 1",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "linklaters",
+    area: "funds", areas: ["funds"], type: "update", firm: "linklaters",
     date: "2025-05-05", jurisdiction: "United Kingdom",
     summary: "The first issue of Linklaters' Funds Regulatory Update rounds up recent UK and EU regulatory developments affecting asset managers and investment funds.",
     points: [],
@@ -975,7 +973,7 @@ export const items = [
   {
     url: "https://www.linklaters.com/knowledge/publications/alerts-newsletters-and-guides/2025/march/10/new-uk-reserved-investor-fund",
     id: "u168", title: "New UK Reserved Investor Fund",
-    area: "fundsreg", areas: ["fundsreg", "fundtax"], type: "alert", firm: "linklaters",
+    area: "funds", areas: ["funds"], type: "alert", firm: "linklaters",
     date: "2025-03-10", jurisdiction: "United Kingdom",
     summary: "Linklaters explains the new UK Reserved Investor Fund (Contractual Scheme) vehicle and its accompanying tax rules, which take effect from 19 March 2025.",
     points: [],
@@ -995,7 +993,7 @@ export const items = [
   {
     url: "https://www.cliffordchance.com/briefings/2025/03/liquidity-solutions-for-private-funds.html",
     id: "u170", title: "Liquidity solutions for private funds",
-    area: "banking", areas: ["banking", "fundsreg"], type: "insight", firm: "cliffordchance",
+    area: "banking", areas: ["banking", "funds"], type: "insight", firm: "cliffordchance",
     date: "2025-03-01", jurisdiction: "United Kingdom",
     summary: "Covers liquidity solutions for private funds including continuation funds, NAV financing and asset-level financing tools such as margin loans and repos.",
     points: [],
@@ -1005,7 +1003,7 @@ export const items = [
   {
     url: "https://www.slaughterandmay.com/insights/new-insights/tax-and-the-city-review-march-2025/",
     id: "u171", title: "Tax and the City Review - March 2025",
-    area: "fundtax", areas: ["fundtax"], type: "update", firm: "slaughtermay",
+    area: "funds", areas: ["funds"], type: "update", firm: "slaughtermay",
     date: "2025-03-01", jurisdiction: "United Kingdom",
     summary: "Periodic Slaughter and May tax round-up covering recent UK tax developments relevant to funds, including carried interest, Pillar Two, REITs and VAT on fund management.",
     points: [],
@@ -1035,7 +1033,7 @@ export const items = [
   {
     url: "https://www.linklaters.com/en/knowledge/publications/alerts-newsletters-and-guides/2025/january/10/rip-to-priips-hi-to-ccis",
     id: "u174", title: "RIP to PRIIPs. Hi to CCIs.",
-    area: "fundsreg", areas: ["fundsreg"], type: "alert", firm: "linklaters",
+    area: "funds", areas: ["funds"], type: "alert", firm: "linklaters",
     date: "2025-01-10", jurisdiction: "United Kingdom",
     summary: "Linklaters analyses the FCA's proposed Consumer Composite Investments (CCI) regime, which will replace the UK PRIIPs and UCITS disclosure frameworks with a single tailored regime.",
     points: [],
@@ -1055,7 +1053,7 @@ export const items = [
   {
     url: "https://www.linklaters.com/insights/blogs/fintechlinks/2025/january/the-future-of-payments-uk-eu-legal-outlook-for-2025",
     id: "u176", title: "The future of payments – UK/EU legal outlook for 2025",
-    area: "banking", areas: ["banking", "fundsreg"], type: "insight", firm: "linklaters",
+    area: "banking", areas: ["banking", "funds"], type: "insight", firm: "linklaters",
     date: "2025-01-01", jurisdiction: "United Kingdom",
     summary: "Linklaters' FintechLinks blog sets out the UK and EU legal and regulatory outlook for payments in 2025, covering fraud, open banking and payments regulatory reform.",
     points: [],
@@ -1105,7 +1103,7 @@ export const items = [
   {
     url: "https://www.slaughterandmay.com/insights/new-insights/tax-and-the-city-review-november-2024/",
     id: "u181", title: "Tax and the City Review - November 2024",
-    area: "fundtax", areas: ["fundtax"], type: "update", firm: "slaughtermay",
+    area: "funds", areas: ["funds"], type: "update", firm: "slaughtermay",
     date: "2024-11-01", jurisdiction: "United Kingdom",
     summary: "Periodic Slaughter and May tax round-up covering Autumn Budget developments including carried interest reform, the QAHC regime, REITs and the Reserved Investor Fund.",
     points: [],
@@ -1125,7 +1123,7 @@ export const items = [
   {
     url: "https://www.linklaters.com/knowledge/publications/alerts-newsletters-and-guides/2024/october/07/overseas-funds-regime--user-guide",
     id: "u183", title: "Overseas Funds Regime – User Guide",
-    area: "fundsreg", areas: ["fundsreg"], type: "knowhow", firm: "linklaters",
+    area: "funds", areas: ["funds"], type: "knowhow", firm: "linklaters",
     date: "2024-10-07", jurisdiction: "United Kingdom",
     summary: "Linklaters provides a practical user guide to the FCA's Overseas Funds Regime, explaining the recognition process for overseas funds seeking access to UK retail investors.",
     points: [],
@@ -1185,7 +1183,7 @@ export const items = [
   {
     url: "https://www.linklaters.com/en/knowledge/publications/alerts-newsletters-and-guides/2024/july/24/fca-sets-out-its-final-rules-on-implementing-the-overseas-funds-regime",
     id: "u189", title: "FCA sets out its final rules on implementing the Overseas Funds Regime",
-    area: "fundsreg", areas: ["fundsreg"], type: "alert", firm: "linklaters",
+    area: "funds", areas: ["funds"], type: "alert", firm: "linklaters",
     date: "2024-07-24", jurisdiction: "United Kingdom",
     summary: "Linklaters analyses the FCA's final rules (PS24/7) implementing the Overseas Funds Regime, which allows non-UK funds to be recognised and sold to UK retail investors.",
     points: [],
@@ -1215,7 +1213,7 @@ export const items = [
   {
     url: "https://www.cliffordchance.com/insights/resources/blogs/insurance-insights/2024/07/tightening-the-reins-the-fcareview-of-the-appointed-representative-regime-and-impact-on-the-gi-sector.html",
     id: "u192", title: "Tightening the reins: the FCA's review of the Appointed Representative regime and impact on the GI sector",
-    area: "fundsreg", areas: ["fundsreg"], type: "insight", firm: "cliffordchance",
+    area: "funds", areas: ["funds"], type: "insight", firm: "cliffordchance",
     date: "2024-07-01", jurisdiction: "United Kingdom",
     summary: "Discusses the FCA's review of the appointed representative regime and principals' obligations to supervise AR compliance, including under the Consumer Duty.",
     points: [],
@@ -1245,7 +1243,7 @@ export const items = [
   {
     url: "https://www.freshfields.com/en/our-thinking/blogs/risk-and-compliance/autumn-budget-2024-delivering-difficult-decisions-102jn8i",
     id: "u195", title: "Autumn Budget 2024: delivering difficult decisions",
-    area: "fundtax", areas: ["fundtax"], type: "insight", firm: "freshfields",
+    area: "funds", areas: ["funds"], type: "insight", firm: "freshfields",
     date: "2024-06-01", jurisdiction: "United Kingdom",
     summary: "Freshfields analyses the Autumn Budget 2024 tax measures, including increases to capital gains tax rates on carried interest and non-dom reforms replacing the remittance basis with a residence-based regime.",
     points: [],
@@ -1255,7 +1253,7 @@ export const items = [
   {
     url: "https://www.slaughterandmay.com/insights/new-insights/autumn-2024-hr-budget-speedread/",
     id: "u196", title: "Autumn 2024 HR Budget speedread",
-    area: "fundtax", areas: ["fundtax", "corporate"], type: "update", firm: "slaughtermay",
+    area: "funds", areas: ["funds", "corporate"], type: "update", firm: "slaughtermay",
     date: "2024-06-01", jurisdiction: "United Kingdom",
     summary: "Summary of the Autumn 2024 Budget covering tax measures including changes affecting carried interest taxation and non-dom reforms.",
     points: [],
@@ -1295,7 +1293,7 @@ export const items = [
   {
     url: "https://www.cliffordchance.com/briefings/2024/02/the-uk-s-sustainability-disclosure-requirements-regime.html",
     id: "u200", title: "The UK's Sustainability Disclosure Requirements Regime",
-    area: "fundsreg", areas: ["fundsreg"], type: "insight", firm: "cliffordchance",
+    area: "funds", areas: ["funds"], type: "insight", firm: "cliffordchance",
     date: "2024-02-01", jurisdiction: "United Kingdom",
     summary: "Explains the FCA's UK Sustainability Disclosure Requirements (SDR) regime and investment labels applying on a phased basis from 2024.",
     points: [],
@@ -1365,7 +1363,7 @@ export const items = [
   {
     url: "https://www.freshfields.com/en/our-thinking/blogs/risk-and-compliance/regulating-for-growth-the-uks-vision-for-financial-services-in-2025-and-beyo-102jtmo",
     id: "u207", title: "'Regulating for growth' – the UK's vision for financial services in 2025 and beyond",
-    area: "banking", areas: ["banking", "fundsreg"], type: "insight", firm: "freshfields",
+    area: "banking", areas: ["banking", "funds"], type: "insight", firm: "freshfields",
     date: "2025-01-01", jurisdiction: "United Kingdom",
     summary: "Freshfields analyses the UK government's strategy for financial services regulation, framed around supporting growth and competitiveness across the sector.",
     points: [],
@@ -1505,7 +1503,7 @@ export const items = [
   {
     url: "https://www.freshfields.com/en/our-thinking/blogs/sustainability/sustainability-reporting-round-up-news-from-key-markets-102mllq",
     id: "u221", title: "Sustainability Reporting Round-up: news from key markets",
-    area: "corporate", areas: ["corporate", "fundsreg"], type: "update", firm: "freshfields",
+    area: "corporate", areas: ["corporate", "funds"], type: "update", firm: "freshfields",
     date: "2026-02-01", jurisdiction: "United Kingdom",
     summary: "Freshfields rounds up corporate sustainability reporting developments across key markets, including EU Omnibus simplification measures amending the CSRD and CSDDD.",
     points: [],
@@ -1515,7 +1513,7 @@ export const items = [
   {
     url: "https://www.freshfields.com/en/our-thinking/blogs/sustainability/on-the-roadmap-to-sustainable-investing-the-fcas-final-rules-on-sustainabilit-102iubd",
     id: "u222", title: "On the road(map) to sustainable investing: The FCA's final rules on sustainability disclosures and labelling",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "freshfields",
+    area: "funds", areas: ["funds"], type: "update", firm: "freshfields",
     date: "", jurisdiction: "United Kingdom",
     summary: "Freshfields analyses the FCA's final rules on the Sustainability Disclosure Requirements (SDR) and investment labels regime for funds.",
     points: [],
@@ -1695,7 +1693,7 @@ export const items = [
   {
     url: "https://finreg.aoshearman.com/UK-Financial-Conduct-Authority-Publishes-Policy",
     id: "u240", title: "UK Financial Conduct Authority Publishes Policy Statement on Sustainability Disclosure and Labeling Regime",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "aoshearman",
+    area: "funds", areas: ["funds"], type: "update", firm: "aoshearman",
     date: "", jurisdiction: "United Kingdom",
     summary: "Reports the FCA's policy statement finalising the UK Sustainability Disclosure Requirements (SDR) and the ESG product labelling regime for asset managers.",
     points: [],
@@ -1705,7 +1703,7 @@ export const items = [
   {
     url: "https://www.aoshearman.com/en/insights/faqs-fca-launches-guidance-consultation-on-anti-greenwashing-rules",
     id: "u241", title: "FAQs - FCA consultation on anti-greenwashing guidance, plus final rules on Sustainability Disclosure Requirements (SDR) and ESG product labels regime",
-    area: "fundsreg", areas: ["fundsreg"], type: "insight", firm: "aoshearman",
+    area: "funds", areas: ["funds"], type: "insight", firm: "aoshearman",
     date: "", jurisdiction: "United Kingdom",
     summary: "FAQ-style guidance on the FCA's anti-greenwashing rule and the final SDR and ESG product labelling regime for UK funds.",
     points: [],
@@ -1715,7 +1713,7 @@ export const items = [
   {
     url: "https://finreg.aoshearman.com/UK-Financial-Conduct-Authority-Publishes",
     id: "u242", title: "UK Financial Conduct Authority Publishes Guidance on Approach to Recognition of Funds under the Overseas Funds Regime",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "aoshearman",
+    area: "funds", areas: ["funds"], type: "update", firm: "aoshearman",
     date: "2024-09-01", jurisdiction: "United Kingdom",
     summary: "Covers FCA guidance on its approach to recognising overseas funds for marketing to UK retail investors under the Overseas Funds Regime.",
     points: [],
@@ -1725,7 +1723,7 @@ export const items = [
   {
     url: "https://www.aoshearman.com/en/insights/mind-the-gaps-hm-treasury-policy-statement-on-the-appointed-representatives-regime",
     id: "u243", title: "HMT policy statement on the Appointed Representatives Regime: addressing key gaps and proposals for",
-    area: "fundsreg", areas: ["fundsreg"], type: "insight", firm: "aoshearman",
+    area: "funds", areas: ["funds"], type: "insight", firm: "aoshearman",
     date: "2025-08-01", jurisdiction: "United Kingdom",
     summary: "Analyses HM Treasury's August 2025 policy statement on further changes to the UK Appointed Representatives regime and the gaps it seeks to address.",
     points: [],
@@ -1735,7 +1733,7 @@ export const items = [
   {
     url: "https://www.aoshearman.com/en/insights/uk-carried-interest-reform-practical-insights-for-funds-and-fund-managers",
     id: "u244", title: "UK carried interest reform: practical insights for funds and fund managers",
-    area: "fundtax", areas: ["fundtax"], type: "insight", firm: "aoshearman",
+    area: "funds", areas: ["funds"], type: "insight", firm: "aoshearman",
     date: "2026-06-01", jurisdiction: "United Kingdom",
     summary: "Explains the UK carried interest tax reforms taking effect from April 2026, under which carried interest is taxed as trading income, with qualifying carry subject to an effective top rate of 34.1%.",
     points: [],
@@ -1745,7 +1743,7 @@ export const items = [
   {
     url: "https://www.aoshearman.com/en/insights/prompt-tweaks-to-the-qualifying-asset-holding-companies-regime",
     id: "u245", title: "Prompt tweaks to the qualifying asset holding companies regime",
-    area: "fundtax", areas: ["fundtax"], type: "insight", firm: "aoshearman",
+    area: "funds", areas: ["funds"], type: "insight", firm: "aoshearman",
     date: "", jurisdiction: "United Kingdom",
     summary: "Covers technical amendments to the UK qualifying asset holding companies (QAHC) regime, including alignment with the residence-based tax regime.",
     points: [],
@@ -1885,7 +1883,7 @@ export const items = [
   {
     url: "https://www.ashurst.com/en/insights/consumer-composite-investments-replace-uk-priips-412026-33515-pm/",
     id: "u259", title: "Consumer Composite Investments replace UK PRIIPs",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "ashurst",
+    area: "funds", areas: ["funds"], type: "update", firm: "ashurst",
     date: "2026-06-01", jurisdiction: "United Kingdom",
     summary: "Explains how the new UK Consumer Composite Investments (CCI) regime, comprising the CCI (Designated Activities) Regulations 2024 and the FCA's DISC sourcebook, replaces the old PRIIPs framework from 6 April 2026.",
     points: [],
@@ -1935,7 +1933,7 @@ export const items = [
   {
     url: "https://www.hsfkramer.com/insights/2025-08/luxembourg-explaining-the-new-carried-interest-tax-regime",
     id: "u264", title: "Luxembourg: explaining the new carried interest tax regime",
-    area: "fundtax", areas: ["fundtax"], type: "insight", firm: "hsf",
+    area: "funds", areas: ["funds"], type: "insight", firm: "hsf",
     date: "2025-08-01", jurisdiction: "United Kingdom",
     summary: "Explains Luxembourg's new carried interest tax regime, creating tracks for contractual and participation-linked carried interest with reduced or exempt rates.",
     points: [],
@@ -1975,7 +1973,7 @@ export const items = [
   {
     url: "https://www.hsfkramer.com/notes/fsrandcorpcrime/2025-posts/rewiring-the-financial-regulatory-system-the-leeds-reforms-and-mansion-house-2025-speech",
     id: "u268", title: "Rewiring the financial regulatory system: the Leeds Reforms and Mansion House 2025 speech",
-    area: "banking", areas: ["banking", "fundsreg"], type: "update", firm: "hsf",
+    area: "banking", areas: ["banking", "funds"], type: "update", firm: "hsf",
     date: "2025-06-01", jurisdiction: "United Kingdom",
     summary: "Analysis of the Leeds Reforms and the Mansion House 2025 speech and their implications for the UK financial regulatory system, including prudential and asset-management regulation.",
     points: [],
@@ -2015,7 +2013,7 @@ export const items = [
   {
     url: "https://www.hsfkramer.com/notes/tax-uk/2025-posts/autumn-budget-2025-insights-and-analysis",
     id: "u272", title: "Autumn Budget 2025: Insights and analysis",
-    area: "fundtax", areas: ["fundtax"], type: "insight", firm: "hsf",
+    area: "funds", areas: ["funds"], type: "insight", firm: "hsf",
     date: "2025-06-01", jurisdiction: "United Kingdom",
     summary: "Insights and analysis on the tax measures announced in the UK Autumn Budget 2025 and their implications for funds and business.",
     points: [],
@@ -2045,7 +2043,7 @@ export const items = [
   {
     url: "https://www.traverssmith.com/knowledge/knowledge-container/fca-strategy-for-2025-and-beyond/",
     id: "u275", title: "FCA Strategy for 2025 and Beyond",
-    area: "banking", areas: ["banking", "fundsreg"], type: "insight", firm: "traverssmith",
+    area: "banking", areas: ["banking", "funds"], type: "insight", firm: "traverssmith",
     date: "2025-06-01", jurisdiction: "United Kingdom",
     summary: "Analyses the FCA's strategy for 2025 and beyond, including its focus on growth, competitiveness and the future direction of UK financial services regulation.",
     points: [],
@@ -2055,7 +2053,7 @@ export const items = [
   {
     url: "https://www.traverssmith.com/knowledge/knowledge-container/uk-mansion-house-speech-and-the-leeds-reforms-in-search-of-growth/",
     id: "u276", title: "UK Mansion House Speech and the Leeds Reforms: In search of growth",
-    area: "banking", areas: ["banking", "fundsreg"], type: "update", firm: "traverssmith",
+    area: "banking", areas: ["banking", "funds"], type: "update", firm: "traverssmith",
     date: "2025-06-01", jurisdiction: "United Kingdom",
     summary: "Covers the UK Mansion House Speech and Leeds Reforms of 15 July 2025, setting the direction towards targeted deregulation and growth across financial services.",
     points: [],
@@ -2085,7 +2083,7 @@ export const items = [
   {
     url: "https://www.simmons-simmons.com/en/publications/cm9liaeci0068ulzkztwb5xa8/fca-consults-on-further-proposals-for-consumer-composite-investments",
     id: "u279", title: "FCA's Policy Statement on Consumer Composite Investments (CCIs)",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "simmons",
+    area: "funds", areas: ["funds"], type: "update", firm: "simmons",
     date: "2025-06-01", jurisdiction: "United Kingdom",
     summary: "Simmons & Simmons reports on the FCA's further proposals for the Consumer Composite Investments (CCI) retail disclosure regime replacing PRIIPs.",
     points: [],
@@ -2125,7 +2123,7 @@ export const items = [
   {
     url: "https://www.hsfkramer.com/insights/2024-10/uk-labour-autumn-budget-2024",
     id: "u283", title: "UK Autumn Budget 2024 – Key tax and legal points for business",
-    area: "fundtax", areas: ["fundtax", "corporate"], type: "insight", firm: "hsf",
+    area: "funds", areas: ["funds", "corporate"], type: "insight", firm: "hsf",
     date: "2024-10-01", jurisdiction: "United Kingdom",
     summary: "Summarises the key tax and legal measures in the UK Autumn Budget 2024, including abolition of the non-dom remittance basis and changes to carried interest taxation.",
     points: [],
@@ -2165,7 +2163,7 @@ export const items = [
   {
     url: "https://www.ashurst.com/en/insights/autumn-budget-2024-taxation-of-carried-interest-for-uk-executives/",
     id: "u287", title: "Autumn Budget 2024: Taxation of Carried Interest for UK Executives",
-    area: "fundtax", areas: ["fundtax"], type: "update", firm: "ashurst",
+    area: "funds", areas: ["funds"], type: "update", firm: "ashurst",
     date: "2024-06-01", jurisdiction: "United Kingdom",
     summary: "Analyses the Autumn Budget 2024 announcements on carried interest taxation, including the new regime taxing carried interest as trading income from April 2026 unless qualifying conditions are met.",
     points: [],
@@ -2195,7 +2193,7 @@ export const items = [
   {
     url: "https://www.hsfkramer.com/notes/fsrandcorpcrime/2024-posts/fca_consults_on_extending_the_sdr_and_investment_labels_regime_to_portfolio-_managers",
     id: "u290", title: "FCA consults on extending the SDR and investment labels regime to portfolio managers",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "hsf",
+    area: "funds", areas: ["funds"], type: "update", firm: "hsf",
     date: "2024-06-01", jurisdiction: "United Kingdom",
     summary: "Reports on FCA consultation paper CP24/8 proposing to extend the Sustainability Disclosure Requirements and investment labels regime to portfolio managers.",
     points: [],
@@ -2205,7 +2203,7 @@ export const items = [
   {
     url: "https://www.hsfkramer.com/notes/fsrandcorpcrime/2024-posts/FCA-provides-a-limited-extension-to-compliance-with-the-SDR-naming-and-marketing-regime",
     id: "u291", title: "FCA provides a limited extension to compliance with the SDR naming and marketing regime",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "hsf",
+    area: "funds", areas: ["funds"], type: "update", firm: "hsf",
     date: "2024-06-01", jurisdiction: "United Kingdom",
     summary: "Reports that the FCA provided a limited extension for firms seeking to use an investment label or change product names under the SDR naming and marketing rules.",
     points: [],
@@ -2215,7 +2213,7 @@ export const items = [
   {
     url: "https://www.hsfkramer.com/notes/esg/2024-posts/eu-sfdr-taking-a-new-direction-what-to-expect",
     id: "u292", title: "EU Sustainable Finance Disclosure (SFDR) taking a new direction? What to expect for the financial services' industry main disclosure regime in 2025 and beyond",
-    area: "fundsreg", areas: ["fundsreg"], type: "insight", firm: "hsf",
+    area: "funds", areas: ["funds"], type: "insight", firm: "hsf",
     date: "2024-06-01", jurisdiction: "United Kingdom",
     summary: "Considers the future direction of the EU SFDR sustainability disclosure regime and what to expect for the financial services industry in 2025 and beyond.",
     points: [],
@@ -2255,7 +2253,7 @@ export const items = [
   {
     url: "https://www.macfarlanes.com/insights/102l65n/the-autumn-budget-2024-a-private-client-perspective/",
     id: "u296", title: "The Autumn Budget 2024: a private client perspective",
-    area: "fundtax", areas: ["fundtax"], type: "update", firm: "macfarlanes",
+    area: "funds", areas: ["funds"], type: "update", firm: "macfarlanes",
     date: "2024-06-01", jurisdiction: "United Kingdom",
     summary: "Reviews the Autumn Budget 2024 from a private client perspective, including non-dom and carried interest tax changes.",
     points: [],
@@ -2285,7 +2283,7 @@ export const items = [
   {
     url: "https://www.traverssmith.com/knowledge/knowledge-container/fca-updates-its-alternatives-supervisory-strategy/",
     id: "u299", title: "FCA updates its alternatives supervisory strategy",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "traverssmith",
+    area: "funds", areas: ["funds"], type: "update", firm: "traverssmith",
     date: "2024-06-01", jurisdiction: "United Kingdom",
     summary: "Covers the FCA's interim update of 1 March 2024 to its supervisory priorities for alternative asset management firms, including a multi-firm review of private asset valuation practices.",
     points: [],
@@ -2295,7 +2293,7 @@ export const items = [
   {
     url: "https://www.traverssmith.com/knowledge/knowledge-container/autumn-budget-2024-real-estate/",
     id: "u300", title: "Autumn Budget 2024 - Real Estate",
-    area: "fundtax", areas: ["fundtax"], type: "update", firm: "traverssmith",
+    area: "funds", areas: ["funds"], type: "update", firm: "traverssmith",
     date: "2024-06-01", jurisdiction: "United Kingdom",
     summary: "Covers the Autumn Budget 2024 real estate tax measures, including confirmation that the UK will introduce the Reserved Investor Fund (Contractual Scheme) attractive for commercial real estate.",
     points: [],
@@ -2335,7 +2333,7 @@ export const items = [
   {
     url: "https://www.simmons-simmons.com/en/publications/cm4wv7jdj057yugzgtdkzy09g/top-ten-tax-cases-of-2024",
     id: "u304", title: "Top Ten Tax Cases of 2024",
-    area: "fundtax", areas: ["fundtax"], type: "insight", firm: "simmons",
+    area: "funds", areas: ["funds"], type: "insight", firm: "simmons",
     date: "2024-06-01", jurisdiction: "United Kingdom",
     summary: "Simmons & Simmons reviews the ten most significant UK tax cases of 2024 and their implications.",
     points: [],
@@ -2445,7 +2443,7 @@ export const items = [
   {
     url: "https://www.ashurst.com/en/insights/fca-publishes-final-cci-rules/",
     id: "u315", title: "FCA publishes final CCI rules",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "ashurst",
+    area: "funds", areas: ["funds"], type: "update", firm: "ashurst",
     date: "", jurisdiction: "United Kingdom",
     summary: "Reports the FCA's final rules for the new Consumer Composite Investments (CCI) regime replacing the UK PRIIPs framework, with new product summaries replacing KIDs and a more flexible disclosure approach.",
     points: [],
@@ -2455,7 +2453,7 @@ export const items = [
   {
     url: "https://www.ashurst.com/en/insights/ccis-are-the-new-priips-fca-consults-on-new-retail-disclosure-rules/",
     id: "u316", title: "CCIs are the new PRIIPs – FCA consults on new retail disclosure rules",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "ashurst",
+    area: "funds", areas: ["funds"], type: "update", firm: "ashurst",
     date: "", jurisdiction: "United Kingdom",
     summary: "Covers the FCA's consultation on new retail disclosure rules introducing Consumer Composite Investments to replace PRIIPs, including changes in terminology and a more flexible risk scale.",
     points: [],
@@ -2465,7 +2463,7 @@ export const items = [
   {
     url: "https://www.ashurst.com/en/insights/fca-consults-further-on-new-cci-regime/",
     id: "u317", title: "FCA consults further on new CCI regime",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "ashurst",
+    area: "funds", areas: ["funds"], type: "update", firm: "ashurst",
     date: "", jurisdiction: "United Kingdom",
     summary: "Reports on the FCA's further consultation on the new Consumer Composite Investments regime that will replace the UK PRIIPs retail disclosure framework.",
     points: [],
@@ -2475,7 +2473,7 @@ export const items = [
   {
     url: "https://www.ashurst.com/en/insights/fca-consults-on-extending-sdrs-to-portfolio-managers/",
     id: "u318", title: "FCA consults on extending SDRs to portfolio managers",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "ashurst",
+    area: "funds", areas: ["funds"], type: "update", firm: "ashurst",
     date: "", jurisdiction: "United Kingdom",
     summary: "Covers the FCA's consultation on extending the Sustainability Disclosure Requirements and investment labels regime to portfolio managers.",
     points: [],
@@ -2485,7 +2483,7 @@ export const items = [
   {
     url: "https://www.ashurst.com/en/insights/uk-sustainability-disclosure-and-anti-greenwashing-rules-finalised/",
     id: "u319", title: "UK sustainability disclosure and anti-greenwashing rules finalised: PS23/16 published by the FCA",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "ashurst",
+    area: "funds", areas: ["funds"], type: "update", firm: "ashurst",
     date: "", jurisdiction: "United Kingdom",
     summary: "Reports the FCA's final Sustainability Disclosure Requirements and anti-greenwashing rules in PS23/16, including the investment labelling regime.",
     points: [],
@@ -2495,7 +2493,7 @@ export const items = [
   {
     url: "https://www.ashurst.com/en/insights/government-publishes-an-update-on-uk-sustainability-disclosure-requirements/",
     id: "u320", title: "Government publishes an update on UK Sustainability Disclosure Requirements (SDR) and Sustainability Reporting Standards (SRS)",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "ashurst",
+    area: "funds", areas: ["funds"], type: "update", firm: "ashurst",
     date: "", jurisdiction: "United Kingdom",
     summary: "Covers a Government update on the UK Sustainability Disclosure Requirements and Sustainability Reporting Standards, including scope considerations for the Overseas Funds Regime.",
     points: [],
@@ -2585,7 +2583,7 @@ export const items = [
   {
     url: "https://www.ashurst.com/en/insights/luxembourg-proposes-major-overhaul-of-carried-interest-tax-regime/",
     id: "u329", title: "Luxembourg Proposes Major Overhaul of Carried Interest Tax Regime",
-    area: "fundtax", areas: ["fundtax"], type: "update", firm: "ashurst",
+    area: "funds", areas: ["funds"], type: "update", firm: "ashurst",
     date: "", jurisdiction: "United Kingdom",
     summary: "Covers Luxembourg's draft law reforming carried interest taxation, distinguishing contractual and participation-based carry, with contractual carry taxed at roughly a quarter of the standard rate from the 2026 tax year.",
     points: [],
@@ -2625,7 +2623,7 @@ export const items = [
   {
     url: "https://www.macfarlanes.com/insights/102mx31/the-bank-of-englands-private-capital-swes-test-a-blueprint-for-global-regulato/",
     id: "u333", title: "The Bank of England's private capital SWES test - a blueprint for global regulators?",
-    area: "banking", areas: ["banking", "fundsreg"], type: "insight", firm: "macfarlanes",
+    area: "banking", areas: ["banking", "funds"], type: "insight", firm: "macfarlanes",
     date: "2026-06-01", jurisdiction: "United Kingdom",
     summary: "Considers the Bank of England's system-wide exploratory scenario (SWES) test for private capital and whether it could serve as a blueprint for global financial regulators.",
     points: [],
@@ -2735,7 +2733,7 @@ export const items = [
   {
     url: "https://www.macfarlanes.com/insights/102kd47/reserved-investor-fund-rif/",
     id: "u344", title: "Reserved Investor Fund (RIF)",
-    area: "fundsreg", areas: ["fundsreg", "fundtax"], type: "insight", firm: "macfarlanes",
+    area: "funds", areas: ["funds"], type: "insight", firm: "macfarlanes",
     date: "2025-06-03", jurisdiction: "United Kingdom",
     summary: "Explains the new UK Reserved Investor Fund (RIF), an unauthorised collective investment scheme and AIF requiring a UK AIFM and UK depositary.",
     points: [],
@@ -2745,7 +2743,7 @@ export const items = [
   {
     url: "https://www.macfarlanes.com/what-we-think/102eli5/first-proposals-for-uk-aifmd-ii-102k7kt/",
     id: "u345", title: "First proposals for UK AIFMD II",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "macfarlanes",
+    area: "funds", areas: ["funds"], type: "update", firm: "macfarlanes",
     date: "2025-04-07", jurisdiction: "United Kingdom",
     summary: "Covers the FCA's first proposals for reforming UK AIFMD, including a more proportionate approach based on firm size and abolishing the full-scope/sub-threshold distinction.",
     points: [],
@@ -2755,7 +2753,7 @@ export const items = [
   {
     url: "https://www.macfarlanes.com/what-we-think/102eli5/uk-aifmd-reforms-further-divergence-from-the-eu-and-a-potential-relaxation-to-smaller-full-scope-aifm-requirements-102j2vp/",
     id: "u346", title: "UK AIFMD reforms: further divergence from the EU and a potential relaxation to smaller full scope AIFM requirements",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "macfarlanes",
+    area: "funds", areas: ["funds"], type: "update", firm: "macfarlanes",
     date: "2024-03-18", jurisdiction: "United Kingdom",
     summary: "Examines UK AIFMD reform proposals showing further divergence from the EU and potential relaxations for smaller full-scope AIFMs.",
     points: [],
@@ -2765,7 +2763,7 @@ export const items = [
   {
     url: "https://www.macfarlanes.com/what-we-think/102eli5/the-uk-sustainability-disclosure-requirements-and-anti-greenwashing-rule-potential-fca-amendments-102jrc0/",
     id: "u347", title: "The UK Sustainability Disclosure Requirements and anti-greenwashing rule - potential FCA amendments",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "macfarlanes",
+    area: "funds", areas: ["funds"], type: "update", firm: "macfarlanes",
     date: "2024-12-13", jurisdiction: "United Kingdom",
     summary: "Covers potential FCA amendments to the UK Sustainability Disclosure Requirements (SDR) and anti-greenwashing rule to align them with policy intentions.",
     points: [],
@@ -2775,7 +2773,7 @@ export const items = [
   {
     url: "https://www.macfarlanes.com/insights/102mlw9/the-final-uk-sustainability-reporting-standards-and-implications-for-asset-manage/",
     id: "u348", title: "The final UK Sustainability Reporting Standards and implications for asset managers",
-    area: "fundsreg", areas: ["fundsreg"], type: "insight", firm: "macfarlanes",
+    area: "funds", areas: ["funds"], type: "insight", firm: "macfarlanes",
     date: "2026-04-03", jurisdiction: "United Kingdom",
     summary: "Analyses the final UK Sustainability Reporting Standards and their implications for asset managers.",
     points: [],
@@ -2785,7 +2783,7 @@ export const items = [
   {
     url: "https://www.macfarlanes.com/insights/102l708/unpacking-pillar-two-issues-and-planning-for-investment-portfolios/",
     id: "u349", title: "Unpacking Pillar Two: issues and planning for investment portfolios",
-    area: "fundtax", areas: ["fundtax"], type: "insight", firm: "macfarlanes",
+    area: "funds", areas: ["funds"], type: "insight", firm: "macfarlanes",
     date: "", jurisdiction: "United Kingdom",
     summary: "Examines Pillar Two global minimum tax issues and planning considerations for investment portfolios.",
     points: [],
@@ -2795,7 +2793,7 @@ export const items = [
   {
     url: "https://www.macfarlanes.com/insights/102lody/inpatriates-and-carried-interest/",
     id: "u350", title: "Inpatriates and carried interest",
-    area: "fundtax", areas: ["fundtax"], type: "insight", firm: "macfarlanes",
+    area: "funds", areas: ["funds"], type: "insight", firm: "macfarlanes",
     date: "2025-08-01", jurisdiction: "United Kingdom",
     summary: "Considers the interaction between the carried interest tax rules and inpatriates under the UK's reformed regime.",
     points: [],
@@ -2805,7 +2803,7 @@ export const items = [
   {
     url: "https://www.macfarlanes.com/insights/102logx/tax-distributions-and-carry-clawback/",
     id: "u351", title: "Tax distributions and carry clawback",
-    area: "fundtax", areas: ["fundtax"], type: "insight", firm: "macfarlanes",
+    area: "funds", areas: ["funds"], type: "insight", firm: "macfarlanes",
     date: "", jurisdiction: "United Kingdom",
     summary: "Discusses tax distributions and carry clawback arrangements in the context of carried interest taxation.",
     points: [],
@@ -2815,7 +2813,7 @@ export const items = [
   {
     url: "https://www.macfarlanes.com/insights/102jdph/pillar-two-what-investment-funds-need-to-know/",
     id: "u352", title: "Pillar Two: what investment funds need to know",
-    area: "fundtax", areas: ["fundtax"], type: "insight", firm: "macfarlanes",
+    area: "funds", areas: ["funds"], type: "insight", firm: "macfarlanes",
     date: "", jurisdiction: "United Kingdom",
     summary: "Sets out what investment funds need to know about the Pillar Two global minimum tax rules.",
     points: [],
@@ -2825,7 +2823,7 @@ export const items = [
   {
     url: "https://www.macfarlanes.com/insights/102l6ns/preventing-unnecessary-vat-leakage-in-a-private-capital-setting/",
     id: "u353", title: "Preventing unnecessary VAT leakage in a private capital setting",
-    area: "fundtax", areas: ["fundtax"], type: "insight", firm: "macfarlanes",
+    area: "funds", areas: ["funds"], type: "insight", firm: "macfarlanes",
     date: "", jurisdiction: "United Kingdom",
     summary: "Looks at how to prevent unnecessary VAT leakage in private capital structures, including on fund management services.",
     points: [],
@@ -2835,7 +2833,7 @@ export const items = [
   {
     url: "https://www.macfarlanes.com/what-we-think/102eli5/further-transparency-developments-crs-updates-incoming-102lwvg",
     id: "u354", title: "Further transparency developments: CRS updates incoming",
-    area: "fundtax", areas: ["fundtax"], type: "update", firm: "macfarlanes",
+    area: "funds", areas: ["funds"], type: "update", firm: "macfarlanes",
     date: "2025-12-05", jurisdiction: "United Kingdom",
     summary: "Covers further tax transparency developments, including incoming updates to the Common Reporting Standard and the OECD Crypto Asset Reporting Framework.",
     points: [],
@@ -2845,7 +2843,7 @@ export const items = [
   {
     url: "https://www.macfarlanes.com/insights/102l4dy/asset-holding-company-regime-the-ownership-condition/",
     id: "u355", title: "Asset holding company regime: the ownership condition",
-    area: "fundtax", areas: ["fundtax"], type: "insight", firm: "macfarlanes",
+    area: "funds", areas: ["funds"], type: "insight", firm: "macfarlanes",
     date: "", jurisdiction: "United Kingdom",
     summary: "Analyses the ownership condition for entry into the UK qualifying asset holding company (QAHC) regime.",
     points: [],
@@ -2855,7 +2853,7 @@ export const items = [
   {
     url: "https://www.macfarlanes.com/insights/102l6o2/qahcs-quantifying-relevant-interests/",
     id: "u356", title: "QAHCs: quantifying relevant interests",
-    area: "fundtax", areas: ["fundtax"], type: "insight", firm: "macfarlanes",
+    area: "funds", areas: ["funds"], type: "insight", firm: "macfarlanes",
     date: "", jurisdiction: "United Kingdom",
     summary: "Explains how to quantify relevant interests for the purposes of the QAHC ownership condition.",
     points: [],
@@ -2875,7 +2873,7 @@ export const items = [
   {
     url: "https://www.traverssmith.com/knowledge/knowledge-container/aifmd-ii-the-next-phase-of-eu-alternative-investment-fund-regulation/",
     id: "u358", title: "AIFMD II: the next phase of EU alternative investment fund regulation",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "traverssmith",
+    area: "funds", areas: ["funds"], type: "update", firm: "traverssmith",
     date: "2024-03-01", jurisdiction: "United Kingdom",
     summary: "Overview of AIFMD II, which largely comes into force on 16 April 2026, setting out new obligations for EU full-scope AIFMs including loan-origination and open-ended funds.",
     points: [],
@@ -2885,7 +2883,7 @@ export const items = [
   {
     url: "https://www.traverssmith.com/knowledge/knowledge-container/aifmd-ii-the-council-of-the-european-union-provides-its-view/",
     id: "u359", title: "AIFMD II: The Council of the European Union provides its view",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "traverssmith",
+    area: "funds", areas: ["funds"], type: "update", firm: "traverssmith",
     date: "", jurisdiction: "United Kingdom",
     summary: "Reviews the Council of the European Union's position on the AIFMD II proposals and what it means for the next phase of alternative investment fund regulation.",
     points: [],
@@ -2895,7 +2893,7 @@ export const items = [
   {
     url: "https://www.traverssmith.com/knowledge/knowledge-container/buy-side-story-the-fcas-2026-regulatory-priorities-for-the-sector/",
     id: "u360", title: "Buy-Side Story: The FCA's 2026 regulatory priorities for the sector",
-    area: "fundsreg", areas: ["fundsreg"], type: "insight", firm: "traverssmith",
+    area: "funds", areas: ["funds"], type: "insight", firm: "traverssmith",
     date: "2026-03-01", jurisdiction: "United Kingdom",
     summary: "Sets out the FCA's 2026 regulatory priorities for the buy-side, covering asset management supervision and reform of the UK funds regulatory framework.",
     points: [],
@@ -2905,7 +2903,7 @@ export const items = [
   {
     url: "https://www.traverssmith.com/knowledge/knowledge-container/travers-smiths-alternative-insights-a-testing-moment-for-private-markets-regulators/",
     id: "u361", title: "Travers Smith's Alternative Insights: A testing moment for private markets regulators",
-    area: "fundsreg", areas: ["fundsreg"], type: "insight", firm: "traverssmith",
+    area: "funds", areas: ["funds"], type: "insight", firm: "traverssmith",
     date: "", jurisdiction: "United Kingdom",
     summary: "Part of the Alternative Insights series examining the regulatory challenges facing private markets regulators and the future shape of fund regulation.",
     points: [],
@@ -2915,7 +2913,7 @@ export const items = [
   {
     url: "https://www.traverssmith.com/knowledge/knowledge-container/travers-smiths-alternative-insights-the-quest-for-a-long-term-fund-vehicle/",
     id: "u362", title: "Travers Smith's Alternative Insights: The quest for a long-term fund vehicle",
-    area: "fundsreg", areas: ["fundsreg"], type: "insight", firm: "traverssmith",
+    area: "funds", areas: ["funds"], type: "insight", firm: "traverssmith",
     date: "", jurisdiction: "United Kingdom",
     summary: "Explores the development of long-term fund vehicles such as the LTAF and efforts to give UK savers access to private funds.",
     points: [],
@@ -2925,7 +2923,7 @@ export const items = [
   {
     url: "https://www.traverssmith.com/knowledge/knowledge-container/travers-smiths-alternative-insights-helping-uk-savers-access-private-funds",
     id: "u363", title: "Travers Smith's Alternative Insights: Helping UK savers access private funds",
-    area: "fundsreg", areas: ["fundsreg"], type: "insight", firm: "traverssmith",
+    area: "funds", areas: ["funds"], type: "insight", firm: "traverssmith",
     date: "", jurisdiction: "United Kingdom",
     summary: "Examines policy and regulatory moves to help UK savers access private funds, including LTAFs and retail distribution of alternatives.",
     points: [],
@@ -2935,7 +2933,7 @@ export const items = [
   {
     url: "https://www.traverssmith.com/knowledge/knowledge-container/travers-smiths-alternative-insights-policymakers-retail-investors-and-private-funds/",
     id: "u364", title: "Travers Smith's Alternative Insights: Policymakers, retail investors and private funds",
-    area: "fundsreg", areas: ["fundsreg"], type: "insight", firm: "traverssmith",
+    area: "funds", areas: ["funds"], type: "insight", firm: "traverssmith",
     date: "", jurisdiction: "United Kingdom",
     summary: "Discusses how policymakers are approaching retail investor access to private funds and the regulatory framework needed to support it.",
     points: [],
@@ -2945,7 +2943,7 @@ export const items = [
   {
     url: "https://www.traverssmith.com/knowledge/knowledge-container/ready-set-report-the-fca-fires-the-starting-gun-on-uk-sustainability-reporting/",
     id: "u365", title: "Ready, set, report: the FCA fires the starting gun on UK sustainability reporting",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "traverssmith",
+    area: "funds", areas: ["funds"], type: "update", firm: "traverssmith",
     date: "2026-02-05", jurisdiction: "United Kingdom",
     summary: "Covers the FCA's move on UK sustainability reporting, including the first UK Sustainability Reporting Standards based on the ISSB S1 and S2 standards.",
     points: [],
@@ -2955,7 +2953,7 @@ export const items = [
   {
     url: "https://www.traverssmith.com/knowledge/knowledge-container/sustainability-disclosure-requirements-sdr-and-investment-labels-the-new-rules/",
     id: "u366", title: "Sustainability Disclosure Requirements (SDR) and investment labels: the new rules",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "traverssmith",
+    area: "funds", areas: ["funds"], type: "update", firm: "traverssmith",
     date: "", jurisdiction: "United Kingdom",
     summary: "Sets out the FCA's final SDR and investment labels rules, the UK's answer to the EU SFDR, and their application to asset managers.",
     points: [],
@@ -2965,7 +2963,7 @@ export const items = [
   {
     url: "https://www.traverssmith.com/knowledge/knowledge-container/sdr-and-investment-labels-extension-of-the-regime-to-uk-portfolio-managers/",
     id: "u367", title: "SDR and investment labels: extension of the regime to UK portfolio managers",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "traverssmith",
+    area: "funds", areas: ["funds"], type: "update", firm: "traverssmith",
     date: "2024-04-01", jurisdiction: "United Kingdom",
     summary: "Examines the FCA's proposed extension of the SDR and investment labels regime to UK portfolio managers.",
     points: [],
@@ -2975,7 +2973,7 @@ export const items = [
   {
     url: "https://www.traverssmith.com/knowledge/knowledge-container/the-uks-carried-interest-tax-regime/",
     id: "u368", title: "The UK's carried interest tax regime",
-    area: "fundtax", areas: ["fundtax"], type: "update", firm: "traverssmith",
+    area: "funds", areas: ["funds"], type: "update", firm: "traverssmith",
     date: "", jurisdiction: "United Kingdom",
     summary: "Sets out the UK's reformed carried interest tax regime and its interaction with the new inpatriate regime that replaced the non-dom rules from April 2025.",
     points: [],
@@ -2985,7 +2983,7 @@ export const items = [
   {
     url: "https://www.traverssmith.com/knowledge/knowledge-container/welcome-changes-made-to-new-uk-carried-interest-tax-regime/",
     id: "u369", title: "Welcome changes made to new UK carried interest tax regime",
-    area: "fundtax", areas: ["fundtax"], type: "update", firm: "traverssmith",
+    area: "funds", areas: ["funds"], type: "update", firm: "traverssmith",
     date: "2025-12-01", jurisdiction: "United Kingdom",
     summary: "Reviews welcome amendments made to the UK's new carried interest tax regime affecting fund managers and private capital.",
     points: [],
@@ -2995,7 +2993,7 @@ export const items = [
   {
     url: "https://www.traverssmith.com/knowledge/knowledge-container/the-new-carried-interest-regime-what-it-means-for-real-estate-based-strategies/",
     id: "u370", title: "The new carried interest regime: what it means for real estate-based strategies",
-    area: "fundtax", areas: ["fundtax"], type: "insight", firm: "traverssmith",
+    area: "funds", areas: ["funds"], type: "insight", firm: "traverssmith",
     date: "2025-08-27", jurisdiction: "United Kingdom",
     summary: "Analyses the impact of the new UK carried interest tax regime on real estate-based fund strategies.",
     points: [],
@@ -3005,7 +3003,7 @@ export const items = [
   {
     url: "https://www.traverssmith.com/knowledge/knowledge-container/qualifying-asset-holding-company-regime-qahc/",
     id: "u371", title: "Qualifying Asset Holding Company Regime (QAHC)",
-    area: "fundtax", areas: ["fundtax"], type: "knowhow", firm: "traverssmith",
+    area: "funds", areas: ["funds"], type: "knowhow", firm: "traverssmith",
     date: "", jurisdiction: "United Kingdom",
     summary: "Guide to the UK Qualifying Asset Holding Company (QAHC) regime, including its eligibility conditions and treatment of carried interest held in the asset holding company.",
     points: [],
@@ -3015,7 +3013,7 @@ export const items = [
   {
     url: "https://www.traverssmith.com/knowledge/knowledge-container/new-year-tax-checklist-for-private-capital-managers/",
     id: "u372", title: "New year tax checklist for Private Capital Managers",
-    area: "fundtax", areas: ["fundtax"], type: "knowhow", firm: "traverssmith",
+    area: "funds", areas: ["funds"], type: "knowhow", firm: "traverssmith",
     date: "2026-01-01", jurisdiction: "United Kingdom",
     summary: "A new year tax checklist for private capital managers, covering carried interest, non-dom reform and other fund tax developments.",
     points: [],
@@ -3095,7 +3093,7 @@ export const items = [
   {
     url: "https://www.traverssmith.com/knowledge/knowledge-container/ilpa-nav-guidelines-key-takeaways/",
     id: "u380", title: "ILPA NAV Guidelines - Key Takeaways",
-    area: "banking", areas: ["banking", "fundsreg"], type: "update", firm: "traverssmith",
+    area: "banking", areas: ["banking", "funds"], type: "update", firm: "traverssmith",
     date: "2024-08-01", jurisdiction: "United Kingdom",
     summary: "Sets out key takeaways from ILPA's guidelines on the use of NAV facilities by private funds.",
     points: [],
@@ -3145,7 +3143,7 @@ export const items = [
   {
     url: "https://www.simmons-simmons.com/en/publications/clzwp24c0005oujwghk37mpgv/nav-based-facilities-ilpa-publishes-recommendations",
     id: "u385", title: "NAV-based facilities – ILPA publishes recommendations",
-    area: "banking", areas: ["banking", "fundsreg"], type: "update", firm: "simmons",
+    area: "banking", areas: ["banking", "funds"], type: "update", firm: "simmons",
     date: "", jurisdiction: "United Kingdom",
     summary: "Simmons & Simmons reports on ILPA's recommendations on NAV-based facilities used in fund finance, addressing governance, transparency and disclosure for LPs.",
     points: [],
@@ -3215,7 +3213,7 @@ export const items = [
   {
     url: "https://www.simmons-simmons.com/en/publications/cml4yt7r0000ouh5s6yzq09dm/liquidity-management-tools-under-aifmd-ii-what-managers-need-to-know",
     id: "u392", title: "Liquidity management tools under AIFMD II: what managers need to know",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "simmons",
+    area: "funds", areas: ["funds"], type: "update", firm: "simmons",
     date: "", jurisdiction: "United Kingdom",
     summary: "Simmons & Simmons explains the new liquidity management tools rules under AIFMD II and what fund managers need to do to comply.",
     points: [],
@@ -3225,7 +3223,7 @@ export const items = [
   {
     url: "https://www.simmons-simmons.com/en/publications/cm98byp0o00kiupecgsg4pcbo/uk-government-consults-on-amending-its-aifm-regulations",
     id: "u393", title: "UK Government consults on amending its AIFM regulations",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "simmons",
+    area: "funds", areas: ["funds"], type: "update", firm: "simmons",
     date: "", jurisdiction: "United Kingdom",
     summary: "Simmons & Simmons reports on the UK Government's consultation on reforming the AIFM regulatory regime towards a more proportionate framework.",
     points: [],
@@ -3235,7 +3233,7 @@ export const items = [
   {
     url: "https://www.simmons-simmons.com/en/publications/cmd7ji70d016ou1lcaqjx565x/regwatch-quarterly",
     id: "u394", title: "RegWatch Quarterly",
-    area: "fundsreg", areas: ["fundsreg", "banking"], type: "update", firm: "simmons",
+    area: "funds", areas: ["funds", "banking"], type: "update", firm: "simmons",
     date: "", jurisdiction: "United Kingdom",
     summary: "Simmons & Simmons' RegWatch Quarterly bulletin tracking financial services regulatory developments across asset management and broader financial markets.",
     points: [],
@@ -3245,7 +3243,7 @@ export const items = [
   {
     url: "https://www.simmons-simmons.com/en/publications/cmbtie5yh007cuzu4673m8k7v/uk-taxation-of-carried-interest-next-steps",
     id: "u395", title: "UK taxation of carried interest: next steps",
-    area: "fundtax", areas: ["fundtax"], type: "update", firm: "simmons",
+    area: "funds", areas: ["funds"], type: "update", firm: "simmons",
     date: "", jurisdiction: "United Kingdom",
     summary: "Simmons & Simmons sets out the next steps in the reform of the UK taxation of carried interest and the implications for fund managers.",
     points: [],
@@ -3255,7 +3253,7 @@ export const items = [
   {
     url: "https://www.simmons-simmons.com/en/publications/cl4ck1hu9166d0b3526wovakl/oecd-pillar-two-considerations-for-investment-funds",
     id: "u396", title: "OECD Pillar Two: considerations for investment funds",
-    area: "fundtax", areas: ["fundtax"], type: "insight", firm: "simmons",
+    area: "funds", areas: ["funds"], type: "insight", firm: "simmons",
     date: "", jurisdiction: "United Kingdom",
     summary: "Simmons & Simmons examines the OECD Pillar Two minimum tax rules and the specific considerations they raise for investment funds.",
     points: [],
@@ -3265,7 +3263,7 @@ export const items = [
   {
     url: "https://www.simmons-simmons.com/en/publications/clpjjaue103r8udeo13emqs56/hmg-publishes-law-to-replace-priips-with-a-uk-retail-disclosure-regime",
     id: "u397", title: "HMG publishes law to replace PRIIPs with a UK retail disclosure regime",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "simmons",
+    area: "funds", areas: ["funds"], type: "update", firm: "simmons",
     date: "", jurisdiction: "United Kingdom",
     summary: "Simmons & Simmons reports on the UK Government's draft legislation to replace the PRIIPs regime with a new UK retail disclosure framework.",
     points: [],
@@ -3325,7 +3323,7 @@ export const items = [
   {
     url: "https://www.weil.com/-/media/files/pdfs/2026/may/esg-client-briefing-uk-srs-may-2026.pdf",
     id: "u403", title: "UK Sustainability Reporting: A New Standard for Asset Managers",
-    area: "fundsreg", areas: ["fundsreg"], type: "insight", firm: "weil",
+    area: "funds", areas: ["funds"], type: "insight", firm: "weil",
     date: "2026-05-01", jurisdiction: "United Kingdom",
     summary: "A briefing on the UK Sustainability Reporting Standards (UK SRS) issued in 2026 and their implications for asset managers, closely aligned with the ISSB IFRS S1 and S2.",
     points: [],
@@ -3345,7 +3343,7 @@ export const items = [
   {
     url: "https://www.sidley.com/en/insights/newsupdates/2026/05/new-uk-short-selling-regime--analysis-of-final-rules",
     id: "u405", title: "New UK Short Selling Regime – Analysis of Final Rules",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "sidley",
+    area: "funds", areas: ["funds"], type: "update", firm: "sidley",
     date: "2026-05-01", jurisdiction: "United Kingdom",
     summary: "Analyses FCA Policy Statement PS26/5 finalising the new UK Short Selling Rules sourcebook, which replaces the retained EU regime with aggregated net short position disclosure from 13 July 2026.",
     points: [],
@@ -3365,7 +3363,7 @@ export const items = [
   {
     url: "https://www.sidley.com/en/insights/newsupdates/2026/03/uk-eu-investment-management-update-march-2026",
     id: "u407", title: "UK/EU Investment Management Update (March 2026)",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "sidley",
+    area: "funds", areas: ["funds"], type: "update", firm: "sidley",
     date: "2026-03-01", jurisdiction: "United Kingdom",
     summary: "Monthly round-up of UK and EU investment management regulatory developments, including FCA AIFMD reform, SDR sustainability labels and other asset-management measures.",
     points: [],
@@ -3375,7 +3373,7 @@ export const items = [
   {
     url: "https://www.stblaw.com/about-us/publications/view/2026/02/24/uk-securitisation-reform-2026-what-fca-and-pra-proposals-mean-for-market-participants",
     id: "u408", title: "UK Securitisation Reform 2026: What FCA and PRA Proposals Mean for Market Participants",
-    area: "banking", areas: ["banking", "fundsreg"], type: "alert", firm: "simpsonthacher",
+    area: "banking", areas: ["banking", "funds"], type: "alert", firm: "simpsonthacher",
     date: "2026-02-24", jurisdiction: "United Kingdom",
     summary: "Analyses the FCA (CP26/6) and PRA February 2026 consultations proposing a more principles-based UK securitisation framework, including simplified due diligence, revised disclosure/transparency rules and a streamlined CLO reporting template. Assesses the practical impact for originators, sponsors and investors in the UK market.",
     points: [],
@@ -3385,7 +3383,7 @@ export const items = [
   {
     url: "https://www.sidley.com/en/insights/newsupdates/2026/02/2026-uk-eu-investment-management-regulatory-scanner",
     id: "u409", title: "2026 UK/EU Investment Management Regulatory Scanner",
-    area: "fundsreg", areas: ["fundsreg"], type: "insight", firm: "sidley",
+    area: "funds", areas: ["funds"], type: "insight", firm: "sidley",
     date: "2026-02-01", jurisdiction: "United Kingdom",
     summary: "A horizon-scanning guide to 2026 UK and EU investment management regulatory developments spanning AIFMD reform, SDR, the CCI regime and private funds supervision.",
     points: [],
@@ -3425,7 +3423,7 @@ export const items = [
   {
     url: "https://www.kirkland.com/publications/kirkland-alert/2025/12/uk-improves-draft-legislation-relating-to-taxation-of-carried-interests",
     id: "u413", title: "UK Improves Draft Legislation Relating to Taxation of Carried Interest",
-    area: "fundtax", areas: ["fundtax"], type: "alert", firm: "kirkland",
+    area: "funds", areas: ["funds"], type: "alert", firm: "kirkland",
     date: "2025-12-01", jurisdiction: "United Kingdom",
     summary: "Reviews the updated draft carried interest tax legislation published 4 December 2025, refining the July 2025 proposals ahead of the April 2026 regime.",
     points: [],
@@ -3465,7 +3463,7 @@ export const items = [
   {
     url: "https://tax.weil.com/insights/uk-autumn-budget-2025-tax-update/",
     id: "u417", title: "UK Autumn Budget 2025: Tax Update",
-    area: "fundtax", areas: ["fundtax"], type: "update", firm: "weil",
+    area: "funds", areas: ["funds"], type: "update", firm: "weil",
     date: "2025-11-01", jurisdiction: "United Kingdom",
     summary: "A summary of the 2025 Autumn Budget tax measures and their implications for funds, asset managers and private capital.",
     points: [],
@@ -3495,7 +3493,7 @@ export const items = [
   {
     url: "https://www.kirkland.com/publications/kirkland-alert/2025/10/eu-and-uk-regulatory-update-for-fund-sponsors",
     id: "u420", title: "EU and UK Regulatory Update for Fund Sponsors",
-    area: "fundsreg", areas: ["fundsreg"], type: "alert", firm: "kirkland",
+    area: "funds", areas: ["funds"], type: "alert", firm: "kirkland",
     date: "2025-10-01", jurisdiction: "United Kingdom",
     summary: "A combined EU and UK regulatory update for fund sponsors covering developments including the proposed UK AIFMD reforms grouping managers by size and AIFMD II implementation.",
     points: [],
@@ -3575,7 +3573,7 @@ export const items = [
   {
     url: "https://www.sidley.com/en/insights/newsupdates/2025/08/uk-eu-investment-management-update-august-2025",
     id: "u428", title: "UK/EU Investment Management Update (August 2025)",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "sidley",
+    area: "funds", areas: ["funds"], type: "update", firm: "sidley",
     date: "2025-08-01", jurisdiction: "United Kingdom",
     summary: "Monthly round-up covering UK AIFMD reform proposals, the FCA Call for Input on the alternative fund managers regime, SDR and other asset-management regulatory developments.",
     points: [],
@@ -3615,7 +3613,7 @@ export const items = [
   {
     url: "https://www.kirkland.com/publications/kirkland-alert/2025/07/uk-issues-draft-legislation-relating-to-taxation-of-carried-interest",
     id: "u432", title: "UK Issues Draft Legislation Relating to Taxation of Carried Interest",
-    area: "fundtax", areas: ["fundtax"], type: "alert", firm: "kirkland",
+    area: "funds", areas: ["funds"], type: "alert", firm: "kirkland",
     date: "2025-07-01", jurisdiction: "United Kingdom",
     summary: "Examines the July 2025 draft legislation taxing carried interest as trading income, with qualifying profits subject to income tax on 72.5% of the amount, effective from April 2026.",
     points: [],
@@ -3635,7 +3633,7 @@ export const items = [
   {
     url: "https://www.kirkland.com/publications/kirkland-alert/2025/06/carried-interest---uk-tax-update",
     id: "u434", title: "Carried Interest: UK Tax Update",
-    area: "fundtax", areas: ["fundtax"], type: "alert", firm: "kirkland",
+    area: "funds", areas: ["funds"], type: "alert", firm: "kirkland",
     date: "2025-06-01", jurisdiction: "United Kingdom",
     summary: "Updates on the design of the revised UK carried interest tax regime intended to take effect from April 2026, including the qualifying carried interest concept and average holding period test.",
     points: [],
@@ -3695,7 +3693,7 @@ export const items = [
   {
     url: "https://www.whitecase.com/insight-alert/fcas-final-rules-pisces-londons-new-private-share-trading-market",
     id: "u440", title: "FCA's final rules for PISCES: London's new private share trading market",
-    area: "corporate", areas: ["corporate", "fundsreg"], type: "alert", firm: "whitecase",
+    area: "corporate", areas: ["corporate", "funds"], type: "alert", firm: "whitecase",
     date: "2025-06-01", jurisdiction: "United Kingdom",
     summary: "Analyses the FCA's final rules for PISCES, London's new intermittent private company share trading market, expected to be operational by end of 2025.",
     points: [],
@@ -3715,7 +3713,7 @@ export const items = [
   {
     url: "https://tax.weil.com/insights/the-tax-treatment-of-carried-interest-government-response-and-policy-update/",
     id: "u442", title: "The Tax Treatment of Carried Interest – Government Response and Policy Update",
-    area: "fundtax", areas: ["fundtax"], type: "update", firm: "weil",
+    area: "funds", areas: ["funds"], type: "update", firm: "weil",
     date: "2025-06-01", jurisdiction: "United Kingdom",
     summary: "On 5 June 2025 the UK government issued a policy update on its carried interest tax reforms, confirming it would not introduce two previously proposed qualifying conditions.",
     points: [],
@@ -3755,7 +3753,7 @@ export const items = [
   {
     url: "https://www.clearygottlieb.com/news-and-insights/publication-listing/fca-engagement-signals-new-direction-in-esg-disclosures",
     id: "u446", title: "FCA Engagement Signals New Direction in ESG Disclosures",
-    area: "fundsreg", areas: ["fundsreg"], type: "insight", firm: "cleary",
+    area: "funds", areas: ["funds"], type: "insight", firm: "cleary",
     date: "2025-06-01", jurisdiction: "United Kingdom",
     summary: "Examines FCA engagement signalling a shift in the UK approach to ESG and sustainability disclosures relevant to asset managers under the SDR framework.",
     points: [],
@@ -3785,7 +3783,7 @@ export const items = [
   {
     url: "https://www.davispolk.com/insights/client-update/uk-sustainability-disclosure-key-developments",
     id: "u449", title: "UK sustainability disclosure – Key developments",
-    area: "fundsreg", areas: ["fundsreg", "corporate"], type: "update", firm: "davispolk",
+    area: "funds", areas: ["funds", "corporate"], type: "update", firm: "davispolk",
     date: "2025-06-01", jurisdiction: "United Kingdom",
     summary: "Davis Polk tracks UK sustainability disclosure developments, including the FCA's SDR regime and the proposed UK Sustainability Reporting Standards for listed companies.",
     points: [],
@@ -4045,7 +4043,7 @@ export const items = [
   {
     url: "https://www.sidley.com/en/insights/newsupdates/2024/11/uk-budget-update-asset-management",
     id: "u475", title: "UK Budget Update – Asset Management",
-    area: "fundtax", areas: ["fundtax"], type: "update", firm: "sidley",
+    area: "funds", areas: ["funds"], type: "update", firm: "sidley",
     date: "2024-11-01", jurisdiction: "United Kingdom",
     summary: "Analyses the Autumn 2024 Budget for asset managers, including the rise in the carried interest CGT rate to 32% from April 2025 and the planned move of carried interest into the income tax regime with a tax multiplier from April 2026.",
     points: [],
@@ -4065,7 +4063,7 @@ export const items = [
   {
     url: "https://www.davispolk.com/insights/client-update/uk-executive-compensation-round",
     id: "u477", title: "UK executive compensation round-up",
-    area: "fundtax", areas: ["fundtax"], type: "update", firm: "davispolk",
+    area: "funds", areas: ["funds"], type: "update", firm: "davispolk",
     date: "2024-11-01", jurisdiction: "United Kingdom",
     summary: "Following the October 2024 Budget, Davis Polk summarises UK tax changes including the increase in capital gains tax on carried interest to 32% from April 2025 and the move to taxing qualifying carried interest as trading income from April 2026.",
     points: [],
@@ -4095,7 +4093,7 @@ export const items = [
   {
     url: "https://tax.weil.com/insights/uk-autumn-budget-2024-tax-update/",
     id: "u480", title: "UK Autumn Budget 2024: Tax Update",
-    area: "fundtax", areas: ["fundtax"], type: "update", firm: "weil",
+    area: "funds", areas: ["funds"], type: "update", firm: "weil",
     date: "2024-10-01", jurisdiction: "United Kingdom",
     summary: "A summary of the 30 October 2024 Autumn Budget tax measures, including announced changes to the taxation of carried interest in the UK.",
     points: [],
@@ -4115,7 +4113,7 @@ export const items = [
   {
     url: "https://www.sidley.com/en/insights/newsupdates/2024/10/uk-budget-update",
     id: "u482", title: "UK Budget Update",
-    area: "fundtax", areas: ["fundtax"], type: "update", firm: "sidley",
+    area: "funds", areas: ["funds"], type: "update", firm: "sidley",
     date: "2024-10-01", jurisdiction: "United Kingdom",
     summary: "Covers the October 2024 Budget tax measures, including carried interest reform, the abolition of the non-domiciled regime from April 2025 and the new foreign income and gains regime, with QAHC clarifications.",
     points: [],
@@ -4185,7 +4183,7 @@ export const items = [
   {
     url: "https://www.kirkland.com/publications/kirkland-alert/2024/07/uk-carry-tax-all-change",
     id: "u489", title: "UK Carry Tax: All Change",
-    area: "fundtax", areas: ["fundtax"], type: "alert", firm: "kirkland",
+    area: "funds", areas: ["funds"], type: "alert", firm: "kirkland",
     date: "2024-07-01", jurisdiction: "United Kingdom",
     summary: "Analyses the new UK government's plans to overhaul the taxation of carried interest and the implications for fund managers.",
     points: [],
@@ -4205,7 +4203,7 @@ export const items = [
   {
     url: "https://www.kirkland.com/publications/kirkland-alert/2024/06/aifmd-ii-qa-for-fund-sponsors",
     id: "u491", title: "AIFMD II Q&A for Fund Sponsors",
-    area: "fundsreg", areas: ["fundsreg"], type: "alert", firm: "kirkland",
+    area: "funds", areas: ["funds"], type: "alert", firm: "kirkland",
     date: "2024-06-01", jurisdiction: "United Kingdom",
     summary: "A Q&A for fund sponsors on the final text of AIFMD II published in March 2024, covering implementation timing and key obligations including loan origination and liquidity management.",
     points: [],
@@ -4275,7 +4273,7 @@ export const items = [
   {
     url: "https://www.clearygottlieb.com/news-and-insights/publication-listing/a-more-concrete-path-to-a-uk-asset-holding-company-regime-for-alternative-investment-funds",
     id: "u498", title: "A More Concrete Path to a UK Asset Holding Company Regime for Alternative Investment Funds",
-    area: "fundtax", areas: ["fundtax"], type: "insight", firm: "cleary",
+    area: "funds", areas: ["funds"], type: "insight", firm: "cleary",
     date: "2024-06-01", jurisdiction: "United Kingdom",
     summary: "Discusses the development of the UK Qualifying Asset Holding Company (QAHC) regime for alternative investment funds, including ownership conditions and the modified corporation tax treatment.",
     points: [],
@@ -4285,7 +4283,7 @@ export const items = [
   {
     url: "https://www.clearygottlieb.com/news-and-insights/publication-listing/first-steps-towards-uk-regulation-of-esg-ratings-providers-hm-treasury-consults",
     id: "u499", title: "First Steps Towards UK Regulation of ESG Ratings Providers: HM Treasury Consults",
-    area: "fundsreg", areas: ["fundsreg"], type: "alert", firm: "cleary",
+    area: "funds", areas: ["funds"], type: "alert", firm: "cleary",
     date: "2024-06-01", jurisdiction: "United Kingdom",
     summary: "Analyses HM Treasury's proposals to bring ESG ratings providers within the UK FSMA regulatory perimeter, with implications for asset managers relying on ESG ratings.",
     points: [],
@@ -4515,7 +4513,7 @@ export const items = [
   {
     url: "https://www.lw.com/en/insights/leeds-reforms-set-uk-government-agenda-for-financial-services",
     id: "u522", title: "Leeds Reforms Set UK Government Agenda for Financial Services",
-    area: "banking", areas: ["banking", "fundsreg"], type: "insight", firm: "latham",
+    area: "banking", areas: ["banking", "funds"], type: "insight", firm: "latham",
     date: "2025-07-01", jurisdiction: "United Kingdom",
     summary: "Analyses the Leeds Reforms and the government's first Financial Services Growth & Competitiveness Strategy, a deregulatory agenda spanning wholesale and retail markets.",
     points: [],
@@ -4535,7 +4533,7 @@ export const items = [
   {
     url: "https://www.lw.com/en/insights/uk-government-update-on-sustainability-disclosure-requirements-framework",
     id: "u524", title: "UK Government Update on Sustainability Disclosure Requirements Framework",
-    area: "fundsreg", areas: ["fundsreg"], type: "insight", firm: "latham",
+    area: "funds", areas: ["funds"], type: "insight", firm: "latham",
     date: "2024-05-01", jurisdiction: "United Kingdom",
     summary: "Covers the government's updated guidance on the UK Sustainability Disclosure Requirements framework, including the Green Taxonomy, transition plan disclosures and the anti-greenwashing rule.",
     points: [],
@@ -4545,7 +4543,7 @@ export const items = [
   {
     url: "https://www.lw.com/en/insights/the-uks-new-regime-for-carried-interest-taxation-how-the-draft-legislation-stacks-up",
     id: "u525", title: "The UK's New Regime for Carried Interest Taxation — How the Draft Legislation Stacks Up",
-    area: "fundtax", areas: ["fundtax"], type: "insight", firm: "latham",
+    area: "funds", areas: ["funds"], type: "insight", firm: "latham",
     date: "2025-07-01", jurisdiction: "United Kingdom",
     summary: "Analyses the revised draft legislation for the UK's new carried interest regime taxing carry as profits of a deemed trade from 6 April 2026, including workday-based allocation rules for non-residents.",
     points: [],
@@ -4635,7 +4633,7 @@ export const items = [
   {
     url: "https://www.whitecase.com/insight-alert/taxation-asset-holding-companies-new-regime",
     id: "u534", title: "Taxation of Asset Holding Companies – A New Regime",
-    area: "fundtax", areas: ["fundtax"], type: "alert", firm: "whitecase",
+    area: "funds", areas: ["funds"], type: "alert", firm: "whitecase",
     date: "", jurisdiction: "United Kingdom",
     summary: "Explains the UK qualifying asset holding company (QAHC) tax regime for pooled investment arrangements managed by professional investment managers.",
     points: [],
@@ -4725,7 +4723,7 @@ export const items = [
   {
     url: "https://tax.weil.com/carried-interest/carried-interest-uk-tax-reform/",
     id: "u543", title: "Carried Interest: UK Tax Reform",
-    area: "fundtax", areas: ["fundtax"], type: "insight", firm: "weil",
+    area: "funds", areas: ["funds"], type: "insight", firm: "weil",
     date: "2025-01-01", jurisdiction: "United Kingdom",
     summary: "An analysis of the UK government's reform of the tax treatment of carried interest, including the move to an income-based regime for fund executives.",
     points: [],
@@ -4735,7 +4733,7 @@ export const items = [
   {
     url: "https://tax.weil.com/insights/qahcs-and-credit-funds-update-on-regulatory-registration-requirements/",
     id: "u544", title: "QAHCs and Credit Funds – Update on Regulatory Registration Requirements",
-    area: "fundtax", areas: ["fundtax", "fundsreg"], type: "insight", firm: "weil",
+    area: "funds", areas: ["funds"], type: "insight", firm: "weil",
     date: "", jurisdiction: "United Kingdom",
     summary: "An update on regulatory registration requirements affecting qualifying asset holding companies (QAHCs) used by credit funds under the UK asset holding company regime.",
     points: [],
@@ -4745,7 +4743,7 @@ export const items = [
   {
     url: "https://www.ropesgray.com/en/insights/viewpoints/102l0k5/uk-financial-services-reform-strategic-opportunities-for-asset-managers",
     id: "u545", title: "UK Financial Services Reform: Strategic Opportunities for Asset Managers",
-    area: "banking", areas: ["banking", "fundsreg"], type: "insight", firm: "ropesgray",
+    area: "banking", areas: ["banking", "funds"], type: "insight", firm: "ropesgray",
     date: "", jurisdiction: "United Kingdom",
     summary: "Analysis of the UK's financial services reform agenda (Leeds/Mansion House reforms), including a more flexible regulatory framework, faster FCA/PRA authorisations and expanded retail access such as LTAFs in ISAs, and what it means for asset managers.",
     points: [],
@@ -4755,7 +4753,7 @@ export const items = [
   {
     url: "https://www.ropesgray.com/en/insights/viewpoints/102mof5/aifmd-ii-practical-impact-for-credit-funds",
     id: "u546", title: "AIFMD II – Practical Impact for Credit Funds",
-    area: "fundsreg", areas: ["fundsreg", "banking"], type: "insight", firm: "ropesgray",
+    area: "funds", areas: ["funds", "banking"], type: "insight", firm: "ropesgray",
     date: "", jurisdiction: "United Kingdom",
     summary: "Examines the practical impact of AIFMD II on credit fund managers, including loan origination rules, leverage limits and reporting obligations.",
     points: [],
@@ -4785,7 +4783,7 @@ export const items = [
   {
     url: "https://www.ropesgray.com/en/insights/viewpoints/102k9yv/duty-free-the-new-uk-single-tax-on-securities",
     id: "u549", title: "Duty-Free: The New UK Single Tax on Securities",
-    area: "corporate", areas: ["corporate", "fundtax"], type: "insight", firm: "ropesgray",
+    area: "corporate", areas: ["corporate", "funds"], type: "insight", firm: "ropesgray",
     date: "", jurisdiction: "United Kingdom",
     summary: "Examines the UK Government's plan to replace stamp duty and SDRT with a unified single tax on securities transactions, targeted for entry into force from 2027.",
     points: [],
@@ -4805,7 +4803,7 @@ export const items = [
   {
     url: "https://www.ropesgray.com/en/insights/viewpoints/102k28b/fca-portfolio-letter-to-asset-managers-priorities-for-2025",
     id: "u551", title: "FCA Portfolio Letter to Asset Managers: Priorities for 2025",
-    area: "fundsreg", areas: ["fundsreg"], type: "insight", firm: "ropesgray",
+    area: "funds", areas: ["funds"], type: "insight", firm: "ropesgray",
     date: "", jurisdiction: "United Kingdom",
     summary: "Reviews the FCA's February 2025 portfolio letter setting out supervision priorities for asset management and alternatives firms, including private market valuations, conflicts of interest and continuation vehicles.",
     points: [],
@@ -4815,7 +4813,7 @@ export const items = [
   {
     url: "https://www.ropesgray.com/en/insights/viewpoints/102khd1/consultation-on-uk-aifm-regulation-industry-groups-raise-questions-over-fca-thre",
     id: "u552", title: "Consultation on UK AIFM Regulation: Industry Groups Raise Questions Over FCA Three-Tier Proposals and Propose Further Reduction of Regulatory Burden",
-    area: "fundsreg", areas: ["fundsreg"], type: "insight", firm: "ropesgray",
+    area: "funds", areas: ["funds"], type: "insight", firm: "ropesgray",
     date: "", jurisdiction: "United Kingdom",
     summary: "Analyses industry responses to the HM Treasury/FCA consultation on the future regulation of UK alternative investment fund managers, including the proposed three-tier approach and AUM thresholds.",
     points: [],
@@ -4825,7 +4823,7 @@ export const items = [
   {
     url: "https://www.ropesgray.com/en/insights/viewpoints/102k8qe/potentially-significant-changes-expected-for-uk-fund-managers",
     id: "u553", title: "Potentially significant changes expected for UK fund managers",
-    area: "fundsreg", areas: ["fundsreg"], type: "insight", firm: "ropesgray",
+    area: "funds", areas: ["funds"], type: "insight", firm: "ropesgray",
     date: "", jurisdiction: "United Kingdom",
     summary: "Examines HM Treasury's April 2025 consultation on simplifying the UK regulatory framework for alternative investment fund managers, including revised thresholds and a more proportionate regime.",
     points: [],
@@ -4835,7 +4833,7 @@ export const items = [
   {
     url: "https://www.ropesgray.com/en/insights/viewpoints/102kaig/fca-pauses-sdr-extension-to-portfolio-managers-due-to-industry-concerns",
     id: "u554", title: "FCA Pauses SDR Extension to Portfolio Managers Due to Industry Concerns",
-    area: "fundsreg", areas: ["fundsreg"], type: "insight", firm: "ropesgray",
+    area: "funds", areas: ["funds"], type: "insight", firm: "ropesgray",
     date: "", jurisdiction: "United Kingdom",
     summary: "Reports that the FCA put on hold its plans to extend the Sustainability Disclosure Requirements regime to portfolio managers following industry concerns over scope, timing and interaction with other frameworks.",
     points: [],
@@ -4845,7 +4843,7 @@ export const items = [
   {
     url: "https://www.ropesgray.com/en/insights/viewpoints/102mfbp/fca-priorities-for-2026-what-investment-managers-should-focus-on",
     id: "u555", title: "FCA Priorities for 2026: What Investment Managers Should Focus On",
-    area: "fundsreg", areas: ["fundsreg"], type: "insight", firm: "ropesgray",
+    area: "funds", areas: ["funds"], type: "insight", firm: "ropesgray",
     date: "", jurisdiction: "United Kingdom",
     summary: "Sets out the FCA's 2026 supervisory priorities for investment managers and what asset management and alternatives firms should focus on to prepare.",
     points: [],
@@ -4855,7 +4853,7 @@ export const items = [
   {
     url: "https://www.ropesgray.com/en/insights/viewpoints/102iv69/private-capital-uk-and-eu-tax-initiatives-to-be-aware-of-in-2024",
     id: "u556", title: "Private capital: UK and EU tax initiatives to be aware of in 2024",
-    area: "fundtax", areas: ["fundtax"], type: "insight", firm: "ropesgray",
+    area: "funds", areas: ["funds"], type: "insight", firm: "ropesgray",
     date: "", jurisdiction: "United Kingdom",
     summary: "Surveys UK and EU tax initiatives affecting private capital in 2024, including carried interest, the QAHC regime, stamp tax modernisation and the non-dom regime.",
     points: [],
@@ -4865,7 +4863,7 @@ export const items = [
   {
     url: "https://www.ropesgray.com/en/insights/viewpoints/102miof/legal-lingo-carried-interest-taxation-dont-get-carried-away",
     id: "u557", title: "Legal Lingo: Carried Interest Taxation - Don’t Get Carried Away!",
-    area: "fundtax", areas: ["fundtax"], type: "insight", firm: "ropesgray",
+    area: "funds", areas: ["funds"], type: "insight", firm: "ropesgray",
     date: "", jurisdiction: "United Kingdom",
     summary: "Explains the UK's reformed carried interest tax regime, including the phased CGT increase to 32% from April 2025 and the move to income tax treatment at approximately 34.1% from April 2026.",
     points: [],
@@ -4925,7 +4923,7 @@ export const items = [
   {
     url: "https://www.macfarlanes.com/what-we-think/in-depth/2026/investment-management-update-june-2026/",
     id: "u563", title: "Investment Management Update — June 2026",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "macfarlanes",
+    area: "funds", areas: ["funds"], type: "update", firm: "macfarlanes",
     date: "2026-06-17", jurisdiction: "United Kingdom",
     summary: "Macfarlanes' monthly investment management briefing covering UK and EU regulatory developments in June 2026, including FCA fund authorisation updates, AIFMD II implementation progress, and emerging ESG disclosure requirements for UK asset managers.",
     points: [],
@@ -4955,7 +4953,7 @@ export const items = [
   {
     url: "https://www.sidley.com/en/insights/newsupdates/2026/06/uk-and-eu-investment-management-update-june-2026",
     id: "u566", title: "UK/EU Investment Management Update (June 2026)",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "sidley",
+    area: "funds", areas: ["funds"], type: "update", firm: "sidley",
     date: "2026-06-17", jurisdiction: "United Kingdom / European Union",
     summary: "Sidley Austin's monthly investment management update covering UK and EU regulatory developments, including FCA CP26/16 on asset registration delegation for authorised AIF depositaries, HMT/FCA progress on replacing UK AIFMD with a streamlined three-tier AIFM framework, the EU AIFMD delegated regulation on liquidity management tools (in force 19 March 2026, applying from 16 April 2026), and ESMA's final report on the 2025 common supervisory action on compliance and audit functions of UCITS managers and AIFMs.",
     points: [
@@ -4969,7 +4967,7 @@ export const items = [
   },
   {
     id: "u567", title: "The Financial Services and Markets Bill 2026–27: key reforms",
-    area: "banking", areas: ["banking", "fundsreg"], type: "update", firm: "simmons",
+    area: "banking", areas: ["banking", "funds"], type: "update", firm: "simmons",
     date: "2026-06-11", jurisdiction: "United Kingdom",
     summary: "Simmons & Simmons analyses the Financial Services and Markets Bill 2026–27, introduced following the King's Speech, which proposes a package of reforms to UK financial regulation including changes to the FCA's objectives, the ringfencing regime, the senior managers and certification regime (SMCR), and the Payment Systems Regulator.",
     points: [
@@ -4999,7 +4997,7 @@ export const items = [
   {
     url: "https://www.macfarlanes.com/what-we-think/in-depth/2026/investment-management-update-june-2026/",
     id: "u569", title: "Investment Management Update — June 2026",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "macfarlanes",
+    area: "funds", areas: ["funds"], type: "update", firm: "macfarlanes",
     date: "2026-06-25", jurisdiction: "United Kingdom",
     summary: "Macfarlanes' June 2026 investment management update covers the FCA's Policy Statement PS26/8 on reformed AIFM authorisation categories, confirming the new three-tier sub-threshold/full-scope/self-managed structure replacing the existing MiFID opt-in regime; FCA feedback on its consumer duty review for asset-management firms (TR26/3); and guidance from the European Securities and Markets Authority on notification requirements for non-EU AIFMs marketing into EU member states.",
     points: [
@@ -5013,7 +5011,7 @@ export const items = [
   {
     url: "https://www.linklaters.com/en/insights/publications/2026/june/sfdr-20-commission-publishes-revised-sustainable-finance-disclosure-framework",
     id: "u570", title: "SFDR 2.0: European Commission publishes revised sustainable finance disclosure framework",
-    area: "fundsreg", areas: ["fundsreg"], type: "alert", firm: "linklaters",
+    area: "funds", areas: ["funds"], type: "alert", firm: "linklaters",
     date: "2026-06-18", jurisdiction: "European Union",
     summary: "Linklaters analyses the European Commission's June 2026 proposal for a revised Sustainable Finance Disclosure Regulation (SFDR 2.0), which replaces the existing Article 8/9 product classification with a new voluntary product-label system and harmonised disclosure templates. The proposal introduces three labelling tiers (Transition, Sustainable and Impact), mandates entity-level sustainability statements and eliminates the 'do not significantly harm' concept in favour of outcome-based disclosures.",
     points: [
@@ -5028,7 +5026,7 @@ export const items = [
   {
     url: "https://www.slaughterandmay.com/insights/clients-and-friends-memos/corporate-and-professional-accountability-act-2026-section-250-directors-sustainability-duty/",
     id: "u571", title: "Corporate and Professional Accountability Act 2026: section 250 — directors' sustainability duty",
-    area: "corporate", areas: ["corporate", "fundsreg"], type: "update", firm: "slaughtermay",
+    area: "corporate", areas: ["corporate", "funds"], type: "update", firm: "slaughtermay",
     date: "2026-06-23", jurisdiction: "United Kingdom",
     summary: "Slaughter and May's briefing on section 250 of the Corporate and Professional Accountability Act 2026 (CPA 2026), which imposes a new statutory duty on directors of large UK-registered companies to assess, monitor and disclose material climate-related and sustainability risks in the company's strategic report, modelled on IFRS Sustainability Disclosure Standards S1 and S2. The duty applies for financial years beginning on or after 1 January 2027 and replaces the existing voluntary TCFD-aligned disclosure framework under the UK Corporate Governance Code.",
     points: [
@@ -5059,7 +5057,7 @@ export const items = [
   {
     url: "https://www.slaughterandmay.com/insights/financial-regulation-weekly-bulletin/financial-regulation-weekly-bulletin-25-june-2026/",
     id: "u573", title: "Financial Regulation Weekly Bulletin — 25 June 2026",
-    area: "banking", areas: ["banking", "fundsreg"], type: "update", firm: "slaughtermay",
+    area: "banking", areas: ["banking", "funds"], type: "update", firm: "slaughtermay",
     date: "2026-06-25", jurisdiction: "United Kingdom / European Union",
     summary: "Slaughter and May's weekly financial regulation bulletin of 25 June 2026 covers: EU Council's SFDR 2.0 negotiating position (exempting professional-investor AIFs from categorisation); PRA CP9/26 on Basel 3.1 IMA adjustments; BoE sterling stablecoin policy statement (reserves up to 70% interest-bearing, £40bn issuance guardrail); RPIB consultation on next-generation UK payments infrastructure; BoE private markets stress test scenarios; EBA Pillar 3 final ITS on ESG/shadow banking disclosures; CRR equivalence repeal commencement; CCP Global Fire Drill 2025 findings; US-UK OFSI/OFAC joint sanctions guidance; FATF Rec 16 payment-transparency consultation; FCA SIPPs CP26/20; and CACEIS UK public censure.",
     points: [
@@ -5120,7 +5118,7 @@ export const items = [
   {
     url: "https://www.davispolk.com/insights/client-update/investment-management-funds-regulatory-update-june-2026",
     id: "u577", title: "Investment Management & Funds Regulatory Update - June 2026",
-    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "davispolk",
+    area: "funds", areas: ["funds"], type: "update", firm: "davispolk",
     date: "2026-06-30", jurisdiction: "United States",
     summary: "Davis Polk's June 2026 funds regulatory update covers an increase in the SEC's 'qualified client' AUM and net-worth thresholds (effective June 29, 2026), a proposed DOL rule expanding 401(k) access to alternative investments, and SEC examination findings on adviser conflicts of interest (cash sweep/revenue sharing, mutual fund share-class selection, Form ADV disclosure gaps), plus a $100 million SEC settlement over an alleged trade cherry-picking scheme.",
     points: [
@@ -5151,7 +5149,7 @@ export const items = [
   {
     url: "https://www.traverssmith.com/knowledge/knowledge-container/sfdr-20-council-of-the-eu-negotiating-position-broadly-welcome-changes-but-will-they-survive-trilogue/",
     id: "u579", title: "SFDR 2.0 – Council of the EU Negotiating Position: Broadly Welcome Changes, But Will They Survive Trilogue?",
-    area: "fundsreg", areas: ["fundsreg"], type: "alert", firm: "traverssmith",
+    area: "funds", areas: ["funds"], type: "alert", firm: "traverssmith",
     date: "2026-06-29", jurisdiction: "European Union",
     summary: "This briefing analyses the Council of the European Union's agreed negotiating position on SFDR 2.0 (published 24 June 2026), which substantially amends the European Commission's original November 2025 legislative proposal to reform the EU Sustainable Finance Disclosure Regulation, including a reinstated opt-out for AIFs marketed exclusively to per se professional investors and a longer 24-month implementation period.",
     points: [
@@ -5205,7 +5203,7 @@ export const cases = [
     date: "2024-12-18", area: "ri", url: "https://www.bailii.org/uk/cases/UKSC/2024/39.html",
     summary: "Cross-border insolvency and the immovables rule: a foreign bankruptcy trustee cannot reach English land of the bankrupt." },
   { id: "c02", name: "Centrica Overseas Holdings Ltd v HMRC", citation: "[2024] UKSC 25", court: "Supreme Court",
-    date: "2024-07-16", area: "fundtax", url: "https://www.bailii.org/uk/cases/UKSC/2024/25.html",
+    date: "2024-07-16", area: "funds", url: "https://www.bailii.org/uk/cases/UKSC/2024/25.html",
     summary: "Management-expenses deductibility: expenses of a capital disposal were not deductible 'expenses of management'." },
   { id: "c03", name: "RTI Ltd v MUR Shipping BV", citation: "[2024] UKSC 18", court: "Supreme Court",
     date: "2024-05-15", area: "banking", url: "https://www.bailii.org/uk/cases/UKSC/2024/18.html",
@@ -5220,10 +5218,10 @@ export const cases = [
     date: "2024-01-23", area: "ri", url: "https://www.bailii.org/ew/cases/EWCA/Civ/2024/24.html",
     summary: "First appellate guidance on Part 26A restructuring plans and the cross-class cram down; sets the fair-allocation framework." },
   { id: "c07", name: "Vermilion Holdings Ltd v HMRC", citation: "[2023] UKSC 37", court: "Supreme Court",
-    date: "2023-10-25", area: "fundtax", url: "https://www.bailii.org/uk/cases/UKSC/2023/37.html",
+    date: "2023-10-25", area: "funds", url: "https://www.bailii.org/uk/cases/UKSC/2023/37.html",
     summary: "Employment-related securities: a 'deeming' provision applied so an option was an employment-related security." },
   { id: "c08", name: "R (PACCAR Inc) v Competition Appeal Tribunal", citation: "[2023] UKSC 28", court: "Supreme Court",
-    date: "2023-07-26", area: "fundsreg", url: "https://www.bailii.org/uk/cases/UKSC/2023/28.html",
+    date: "2023-07-26", area: "funds", url: "https://www.bailii.org/uk/cases/UKSC/2023/28.html",
     summary: "Litigation funding agreements that take a share of damages are damages-based agreements — unenforceable unless compliant." },
   { id: "c09", name: "Philipp v Barclays Bank UK plc", citation: "[2023] UKSC 25", court: "Supreme Court",
     date: "2023-07-12", area: "banking", url: "https://www.bailii.org/uk/cases/UKSC/2023/25.html",
@@ -5232,7 +5230,7 @@ export const cases = [
     date: "2023-09-20", area: "corporate", url: "https://www.bailii.org/uk/cases/UKSC/2023/32.html",
     summary: "Scope of arbitration agreements: the bribery/illegality claims fell outside the arbitration clauses." },
   { id: "c11", name: "News Corp UK & Ireland Ltd v HMRC", citation: "[2023] UKSC 7", court: "Supreme Court",
-    date: "2023-02-22", area: "fundtax", url: "https://www.bailii.org/uk/cases/UKSC/2023/7.html",
+    date: "2023-02-22", area: "funds", url: "https://www.bailii.org/uk/cases/UKSC/2023/7.html",
     summary: "VAT zero-rating: digital editions of newspapers were not 'newspapers' for the historic zero-rate." },
   { id: "c12", name: "BTI 2014 LLC v Sequana SA", citation: "[2022] UKSC 25", court: "Supreme Court",
     date: "2022-10-05", area: "ri", url: "https://www.bailii.org/uk/cases/UKSC/2022/25.html",
@@ -5274,18 +5272,18 @@ export const cases = [
     date: "2025-02-26", area: "ri", url: "https://www.bailii.org/uk/cases/UKSC/2025/2.html",
     summary: "Section 423 can reach a transaction dealing with assets owned by a company the debtor controls, not just the debtor's own assets." },
   { id: "c25", name: "Hargreaves Property Holdings Ltd v HMRC", citation: "[2024] EWCA Civ 365", court: "Court of Appeal",
-    date: "2024-04-12", area: "fundtax", url: "https://www.bailii.org/ew/cases/EWCA/Civ/2024/365.html",
+    date: "2024-04-12", area: "funds", url: "https://www.bailii.org/ew/cases/EWCA/Civ/2024/365.html",
     summary: "Withholding tax on 'yearly interest': arrangements failed to avoid the obligation; UK-source and short-interest points clarified." },
   { id: "c26", name: "HMRC v Professional Game Match Officials Ltd", citation: "[2024] UKSC 29", court: "Supreme Court",
-    date: "2024-09-16", area: "fundtax", url: "https://www.bailii.org/uk/cases/UKSC/2024/29.html",
+    date: "2024-09-16", area: "funds", url: "https://www.bailii.org/uk/cases/UKSC/2024/29.html",
     summary: "Employment-status test: mutuality of obligation and control within individual engagements can create employment for tax." },
   { id: "c28", name: "Test Claimants in the FII Group Litigation v HMRC", citation: "[2021] UKSC 31", court: "Supreme Court",
-    date: "2021-07-23", area: "fundtax", url: "https://www.bailii.org/uk/cases/UKSC/2021/31.html",
+    date: "2021-07-23", area: "funds", url: "https://www.bailii.org/uk/cases/UKSC/2021/31.html",
     summary: "Long-running cross-border dividend-taxation litigation; limitation and mistake-of-law principles for tax restitution claims." },
 
   // ---- 2025 / 2026 judgments ----
   { id: "c29", name: "HMRC v HFFX LLP; Atkins v HMRC", citation: "[2026] UKSC 17", court: "Supreme Court",
-    date: "2026-06-17", area: "fundtax", url: "https://www.bailii.org/uk/cases/UKSC/2026/17.html",
+    date: "2026-06-17", area: "funds", url: "https://www.bailii.org/uk/cases/UKSC/2026/17.html",
     summary: "LLP deferred-remuneration / 'special capital' scheme: trading profits routed through a corporate member were taxable as the individual members' income; marks the limits of purposive tax interpretation." },
   { id: "c30", name: "Saipem SpA v Petrofac Ltd; Re Petrofac Ltd", citation: "[2025] EWCA Civ 821", court: "Court of Appeal",
     date: "2025-07-01", area: "ri", url: "https://www.bailii.org/ew/cases/EWCA/Civ/2025/821.html",
@@ -5321,7 +5319,7 @@ export const cases = [
     date: "2026-06-24", area: "ri", url: "https://caselaw.nationalarchives.gov.uk/ewhc/ch/2026/1563",
     summary: "Mr Justice Adam Johnson sanctions a creditor scheme of arrangement under s.899 CA 2006 for German fibre-optic group Deutsche Glasfaser (~€7bn debt), bifurcating debt into opco/holdco tranches and injecting €400m super-senior capital; creditors voted 100% in favour; a companion judgment to the convening hearing [2026] EWHC 1467 (Ch) and confirms English court jurisdiction for large cross-border German restructurings." },
   { id: "c41", name: "Musst Holdings Ltd v Astra Asset Management UK Ltd & Anor", citation: "[2026] EWHC 1599 (Ch)", court: "High Court (Ch)",
-    date: "2026-06-26", area: "fundsreg", url: "https://www.bailii.org/ew/cases/EWHC/Ch/2026/1599.html",
+    date: "2026-06-26", area: "funds", url: "https://www.bailii.org/ew/cases/EWHC/Ch/2026/1599.html",
     summary: "Further judgment in the long-running Musst/Astra litigation (introduction-fee dispute against an AIFM); addresses whether litigation costs incurred in earlier related proceedings can be claimed as a head of damages (costs as damages)." },
   { id: "c42", name: "Gordian Holdings Ltd v Sofroniou", citation: "[2026] EWHC 1602 (KB)", court: "High Court (KB)",
     date: "2026-06-26", area: "ri", url: "https://www.bailii.org/ew/cases/EWHC/KB/2026/1602.html",
@@ -5348,7 +5346,7 @@ export const cases = [
     date: "2026-06-30", area: "ri", url: "https://caselaw.nationalarchives.gov.uk/ewca/civ/2026/831",
     summary: "The Court of Appeal upheld the use of multi-claimant claim forms for over 5,000 motor finance discretionary commission mis-selling claims against eight lenders, confirming such consolidated case management is a permissible 'convenient disposal' under CPR 7.3." },
   { id: "c50", name: "Commissioners for HMRC v BlueCrest Capital Management (UK) LLP", citation: "[2026] UKSC 18", court: "Supreme Court",
-    date: "2026-07-01", area: "fundtax", url: "https://caselaw.nationalarchives.gov.uk/uksc/2026/18",
+    date: "2026-07-01", area: "funds", url: "https://caselaw.nationalarchives.gov.uk/uksc/2026/18",
     summary: "The Supreme Court held that 'significant influence over the affairs of the partnership' under the salaried-members Condition B (Finance Act 2014) must derive from legally enforceable rights under the LLP agreement and statutory framework, not from informal or de facto arrangements, remitting HMRC's ~£142m PAYE/~£55.3m NIC dispute with BlueCrest's LLP members to the tribunal below." },
   { id: "c51", name: "Skatteforvaltningen v MCML Ltd", citation: "[2026] UKSC 19", court: "Supreme Court",
     date: "2026-07-01", area: "banking", url: "https://caselaw.nationalarchives.gov.uk/uksc/2026/19",
@@ -5405,7 +5403,7 @@ export const caseSummaries = {
   c38: "Hipgnosis Music Limited alleged its former director, Merck Mercuriadis, diverted the company's business of acquiring music royalty catalogues by pursuing an essentially identical model through Hipgnosis Songs Fund Limited (HSFL2), which completed a successful £202 million IPO in July 2018 after the original vehicle failed. Adam Johnson J held that Mercuriadis breached the s.175 CA 2006 duty to avoid conflicts of interest: the corporate opportunity had not been approved or abandoned by the company, and he exploited it through different corporate structures for personal gain, engaging the continuing duties imposed by s.170(2)(a) CA 2006 on former directors. The successor vehicle HSFL2 and its associated management company were found to be accessories to the breach and jointly liable to account for profits. The decision is an important modern statement on the corporate opportunity doctrine and the reach of post-directorship fiduciary obligations under English law.",
   c39: "Bank of India sought to enforce a personal guarantee signed by Nirav Modi — the fugitive Indian diamantaire held at HMP Thameside — securing USD $4.1 million owed by his company Firestar Diamond FZE. The Commercial Court (Tinkler DJ) rejected Modi's argument that the guarantee was void under Indian foreign-exchange regulations (FEMA): the Reserve Bank of India may grant retrospective approval, and the obligation to obtain it rests on the guarantor, not the bank. The court also confirmed that SOFR-based rates replace synthetic LIBOR under the facility documentation following that benchmark's cessation in September 2024, and held that Modi had been validly served with the October 2025 demand notice. Judgment was entered for Bank of India in full.",
   c40: "Deutsche Glasfaser Group GmbH — Germany's leading FTTH fibre-optic infrastructure provider — faced €162m in interest due 30 June 2026 and proposed a creditor scheme of arrangement under s.899 CA 2006 bifurcating its ~€7bn of existing debt into structurally senior opco debt and structurally subordinated holdco debt, alongside a new €400m super-senior facility and an €845m equity injection from EQT and OMERS. Mr Justice Adam Johnson sanctioned the scheme on 24 June 2026, noting that 98 of 100 creditors attended the meeting and voted unanimously in favour, with scheme-scenario recovery (60.8–91.8 cents/€) materially superior to a distressed liquidation (34.2–48.8 cents/€). A last-minute German tax ruling received on 16 June 2026 introduced conditionality over the implementation mechanism, but the court held this did not prevent sanction; the scheme remains binding pending resolution of that point by 24 August 2026. This is a companion to [2026] EWHC 1467 (Ch) (the convening hearing) and confirms the continuing utility of English Part 26 schemes — distinct from Part 26A restructuring plans — for cross-border restructurings of German-incorporated groups with English law-governed facilities.",
-  c41: "Musst Holdings Ltd brought a long-running introduction-fee dispute against Astra Asset Management UK Ltd, an alternative investment fund manager (AIFM). In this further judgment the Chancery Division considered whether costs that Musst incurred in earlier, related proceedings between the same parties can be claimed as a head of consequential loss (costs as damages) in the main action, rather than being governed exclusively by the costs regime of those earlier proceedings. The decision is relevant to fundsreg litigation where multi-stage disputes generate inter-related costs exposure.",
+  c41: "Musst Holdings Ltd brought a long-running introduction-fee dispute against Astra Asset Management UK Ltd, an alternative investment fund manager (AIFM). In this further judgment the Chancery Division considered whether costs that Musst incurred in earlier, related proceedings between the same parties can be claimed as a head of consequential loss (costs as damages) in the main action, rather than being governed exclusively by the costs regime of those earlier proceedings. The decision is relevant to funds-regulatory litigation where multi-stage disputes generate inter-related costs exposure.",
   c42: "Gordian Holdings Ltd brought further proceedings against Sofroniou in which it alleged transactions defrauding creditors within s.423 Insolvency Act 1986 and sought to enforce personal guarantee obligations. The dispute arises out of Bank of Cyprus lending and is connected to earlier Commercial Court proceedings at [2021] EWHC 235 (Comm). The judgment addresses the scope of s.423 claims and guarantee enforcement in the context of alleged creditor-defrauding transactions.",
   c43: "Songa Shipping SE (as lender) sought to enforce settlement-payment obligations under a bilateral loan agreement; Gardsea Ltd (as borrower) argued that the contractual requirement to pay on a 'Banking Day' fell to be computed by reference to both London and New York banking days, which on the facts of the payment instructions created a notional 37–38-hour window straddling time zones. Henshaw J held that 'Banking Day' in a multi-centre finance agreement is properly construed by reference to the time zone of the place of performance of the relevant payment obligation — here, London, where the payment was to be made — rather than by reference to the opening of the earliest financial centre and the closing of the latest. The decision aligns with LMA standard-form definitions and restores clarity to cross-border multi-currency facilities, confirming that settlement-day-count arithmetic should not introduce latency or ambiguity by spanning time zones.",
   c44: "Barclays Bank UK plc sought judicial review of a Financial Ombudsman Service (FOS) determination that the FOS had jurisdiction to consider a retail customer's complaint, notwithstanding that the complaint had been brought more than six months after Barclays' final response letter — outside the DISP 2.8.2 time-bar. The FOS had purported to exercise a discretion to accept the out-of-time complaint on grounds of exceptional circumstances. Lane J granted the judicial review application, quashing the FOS determination and holding that the six-month DISP 2.8.2 time-bar is a mandatory jurisdictional condition that circumscribes the FOS's compulsory jurisdiction; the FOS has no general discretion to waive it except in the circumstances expressly identified in the DISP sourcebook. The decision is significant for financial institutions facing high volumes of complaints lodged after DISP time-limits, particularly in the context of PPI and motor-finance redress exercises.",

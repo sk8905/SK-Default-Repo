@@ -240,11 +240,13 @@ the source of truth for the prompt.
 >      every run.
 >    - If Credit's data changed (any of the above), set `DATA_UPDATED` to today.
 >
-> 3. LEGAL — `legal/js/data.js` (English law). Cover the five practice areas only:
->    banking, ri, corporate, fundsreg, fundtax.
+> 3. LEGAL — `legal/js/data.js` (English law). Cover the four practice areas only:
+>    banking, ri, corporate, funds. (`funds` covers both funds-regulatory and
+>    fund-tax topics — the two were merged into one "Funds" area 2026-07-01; do NOT
+>    use the old `fundsreg`/`fundtax` ids.)
 >    - **Legal alerts** → append to the `items` array (id `u<next>`) from the
 >      tracked firms'/chambers' own insights/client-alert pages: title; area (one
->      of the five); areas (array); type (one of case/update/alert/insight/
+>      of the four); areas (array); type (one of case/update/alert/insight/
 >      knowhow); firm (MUST be one of: aoshearman, cliffordchance, freshfields,
 >      linklaters, slaughtermay, ashurst, hsf, macfarlanes, traverssmith, simmons,
 >      latham, kirkland, whitecase, weil, sidley, cleary, ropesgray,
