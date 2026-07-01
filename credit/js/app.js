@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260701-29";
+} from "./data.js?v=20260701-30";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260701-29";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260701-30";
 
 const app = document.getElementById("app");
 
@@ -533,13 +533,6 @@ function mountRatesBand() {
   } catch { /* no fetch (e.g. render shim) — leave placeholder */ }
 }
 
-// A collapsible dashboard widget: a <details> card collapsed by default, with a
-// clickable title bar (summary) + caret. Expand/collapse state is per widget and
-// independent. Content sits in .widget-body.
-function widget(title, body, cls = "") {
-  return `<details class="card widget${cls ? " " + cls : ""}"><summary class="widget-head"><h2>${title}</h2><span class="widget-caret" aria-hidden="true"></span></summary><div class="widget-body">${body}</div></details>`;
-}
-
 function viewDashboard() {
   // Credit-only universe for the headline aggregates (equity-strategy funds are
   // tracked and listed elsewhere but excluded from private-credit market stats).
@@ -593,8 +586,13 @@ function viewDashboard() {
       <p class="muted">European private credit deal flow &amp; market intelligence, with fundraising as a secondary lens · real data compiled from public sources (mid-2026)</p>
       ${focusToggle()}
     </div>
-    ${widget("Key rates &amp; credit spreads", '<div id="rates-band" class="rates-band" aria-label="Key rates &amp; credit spreads"></div>', "rates-widget")}
-    ${widget("Key metrics", `<div class="kpi-grid">${kpis.map((k) => `<div class="kpi-card clickable" ${k.jump}><div class="kpi-value">${k.value}</div><div class="kpi-label">${k.label}</div><div class="kpi-sub muted">${k.sub}</div></div>`).join("")}</div>`)}
+    <details class="rk-toggle">
+      <summary class="rk-toggle-head">Key rates &amp; metrics <span class="rk-caret" aria-hidden="true"></span></summary>
+      <div class="rk-toggle-body">
+        <div id="rates-band" class="rates-band" aria-label="Key rates &amp; credit spreads"></div>
+        <div class="kpi-grid">${kpis.map((k) => `<div class="kpi-card clickable" ${k.jump}><div class="kpi-value">${k.value}</div><div class="kpi-label">${k.label}</div><div class="kpi-sub muted">${k.sub}</div></div>`).join("")}</div>
+      </div>
+    </details>
 
     <section class="card feature-card news-panel">
       <h2>Latest news</h2>

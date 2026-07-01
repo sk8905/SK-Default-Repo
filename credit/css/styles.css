@@ -166,17 +166,18 @@ h3 { font-size: 1rem; margin: 0; }
 }
 .card-foot { margin-top: .75rem; padding-top: .6rem; border-top: 1px solid var(--border); }
 
-/* Collapsible dashboard widgets (details/summary). Card chrome comes from .card;
-   the summary and body supply the padding. Collapsed by default. */
-.widget { padding: 0; overflow: hidden; }
-.widget-head { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: 1rem 1.25rem; border-radius: var(--radius); }
-.widget-head::-webkit-details-marker { display: none; }
-.widget-head h2 { margin: 0; }
-.widget-head:hover { background: rgba(2, 6, 23, .025); }
-.widget-caret { flex: 0 0 auto; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); margin-bottom: 3px; transition: transform .15s; }
-.widget[open] .widget-caret { transform: rotate(-135deg); margin-bottom: -3px; }
-.widget-body { padding: 0 1.25rem 1.1rem; }
-.widget-body .kpi-grid { margin-bottom: 0; }
+/* Collapsed-by-default "Key rates & metrics" toggle — a plain text button (no
+   card) that reveals the rates band + KPI tiles. Kept compact when collapsed. */
+.rk-toggle { margin: 0 0 1rem; }
+.rk-toggle > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: .45rem;
+  width: fit-content; font-weight: 700; font-size: .95rem; color: var(--primary); padding: .15rem .1rem; }
+.rk-toggle > summary::-webkit-details-marker { display: none; }
+.rk-toggle > summary:hover { text-decoration: underline; }
+.rk-caret { width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
+  transform: rotate(45deg); margin-bottom: 3px; transition: transform .15s; }
+.rk-toggle[open] .rk-caret { transform: rotate(-135deg); margin-bottom: -2px; }
+.rk-toggle-body { margin-top: .8rem; }
+.rk-toggle-body .kpi-grid { margin-bottom: 0; }
 
 /* Collapsible watchlist categories — the heading row is the expand/collapse
    toggle (native <details>); the caret flips and the body hides when closed. */
@@ -219,7 +220,9 @@ h3 { font-size: 1rem; margin: 0; }
 /* Key rates & credit spreads band (static, from /api/rates over FRED + ECB).
    A fixed grid so every tile lines up in columns — 6 across on desktop, 3 on
    mobile — with the source line spanning the full width beneath. */
-.rates-band { display: grid; grid-template-columns: repeat(6, 1fr); align-items: stretch; }
+.rates-band { display: grid; grid-template-columns: repeat(6, 1fr); align-items: stretch;
+  margin: 0 0 1rem; padding: .55rem .35rem; border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); box-shadow: var(--shadow); }
 .rate-tile { display: flex; flex-direction: column; gap: .12rem; padding: .1rem 1rem;
   border-left: 1px solid var(--border); }
 .rate-tile:nth-child(6n+1) { border-left: none; }
