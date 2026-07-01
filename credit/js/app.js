@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260701-12";
+} from "./data.js?v=20260701-13";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260701-12";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260701-13";
 
 const app = document.getElementById("app");
 
@@ -22,6 +22,13 @@ const eur = (m) => (m == null ? "Undisclosed" : "€" + (m >= 1000 ? (m / 1000).
 const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const pct = (n) => (n == null ? "Undisclosed" : Math.round(n) + "%");
 const fmtDate = (d) => new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+// Format a €bn AUM figure: €Xtn above 1,000bn, €Xm below 1bn, else €Xbn.
+const fmtAum = (n) => {
+  if (n == null) return "—";
+  if (n >= 1000) return `€${(n / 1000).toFixed(n % 1000 === 0 ? 0 : 1)}tn`;
+  if (n < 1) return `€${Math.round(n * 1000)}m`;
+  return `€${n}bn`;
+};
 // Calendar quarter (e.g. "2025-Q2") from a fund's close/as-of date; null if only
 // the year is known (we don't invent a quarter).
 const fundQuarter = (f) => {
@@ -402,8 +409,9 @@ let targetFocus = false;
 try { targetFocus = localStorage.getItem("meridian.focus") === "1"; } catch { /* ignore */ }
 const inFocusAum = (aum) => aum != null && aum >= 1 && aum <= 10;
 // Gate on total group/parent AUM, not the (often credit-only) sleeve figure, so
-// a boutique inside a large group falls outside the €1–10bn target band.
-const focusAumOf = (m) => (m ? (m.groupAum != null ? m.groupAum : m.aum) : null);
+// a boutique inside a large group falls outside the €1–10bn target band. Banks/
+// originators (notAum) carry no AUM and never qualify.
+const focusAumOf = (m) => (!m || m.notAum ? null : (m.aumTotal != null ? m.aumTotal : m.aum));
 const mInFocus = (m) => inFocusAum(focusAumOf(m));
 const midInFocus = (mid) => mInFocus(managerById[mid]);
 function focusToggle() {
@@ -447,7 +455,8 @@ const SORT_COLUMNS = {
   managers: {
     name: { type: "txt", get: (m) => m.name },
     hq: { type: "txt", get: (m) => m.hq },
-    aum: { type: "num", get: (m) => m.aum },
+    aumTotal: { type: "num", get: (m) => (m.notAum ? null : (m.aumTotal != null ? m.aumTotal : m.aum)) },
+    aumCredit: { type: "num", get: (m) => (m.aumCredit != null ? m.aumCredit : null) },
     funds: { type: "num", get: (m) => fundsByManager(m.id).length },
     live: { type: "num", get: (m) => fundsByManager(m.id).filter((x) => !x.evergreen && !x.lifecycle && x.status !== "Final Close").length },
   },
@@ -918,7 +927,7 @@ function viewManagers() {
       ${multiFilter("managers:location", "Location", LOCATIONS, f.location)}
     </div>
     <div class="table-wrap"><table class="data-table">
-      <thead><tr>${sortTh("managers", "name", "Manager")}${sortTh("managers", "hq", "HQ")}${sortTh("managers", "aum", "AUM")}<th>Strategies</th>${sortTh("managers", "funds", "Funds")}${sortTh("managers", "live", "In market")}</tr></thead>
+      <thead><tr>${sortTh("managers", "name", "Manager")}${sortTh("managers", "hq", "HQ")}${sortTh("managers", "aumTotal", "Total AUM")}${sortTh("managers", "aumCredit", "Credit AUM")}<th>Strategies</th>${sortTh("managers", "funds", "Funds")}${sortTh("managers", "live", "In market")}</tr></thead>
       <tbody>
         ${sorted.map((m) => {
           const fs = fundsByManager(m.id);
@@ -927,13 +936,14 @@ function viewManagers() {
           return `<tr class="clickable" data-href="#/manager/${m.id}">
             <td>${nameCell("manager", m.id, `<strong>${esc(m.name)}</strong>`)}</td>
             <td class="muted small">${esc(m.hq)}</td>
-            <td>€${m.aum}bn</td>
+            <td>${m.notAum ? '<span class="muted small">n/a</span>' : fmtAum(m.aumTotal != null ? m.aumTotal : m.aum)}</td>
+            <td>${m.aumCredit != null ? fmtAum(m.aumCredit) : '<span class="muted small">—</span>'}</td>
             <td>${strat}</td>
             <td>${fs.length}</td>
             <td>${live}</td>
           </tr>`;
         }).join("")}
-        ${rows.length === 0 ? '<tr><td colspan="6" class="empty">No managers match these filters.</td></tr>' : ""}
+        ${rows.length === 0 ? '<tr><td colspan="7" class="empty">No managers match these filters.</td></tr>' : ""}
       </tbody>
     </table></div>`;
   wireFilters("managers");
