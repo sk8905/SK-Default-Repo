@@ -68,6 +68,11 @@ h3 { font-size: 1rem; margin: 0; }
   /* Let the nav fill the row so the Watchlist tab can sit at the right margin. */
   .mainnav { flex: 1 1 auto; }
   .nav-link.nav-right { margin-left: auto; }
+  /* Pin the signed-in identity, refresh status and bell to the far-right corner
+     (out of flow, mirroring the logo on the left) so the Watchlist tab can align
+     with the content's right margin without them trailing behind it. */
+  .topbar-right { position: absolute; right: 4rem; top: 50%; transform: translateY(-50%); }
+  .notif { position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%); }
 }
 .nav-link {
   color: #cbd5e1; padding: .5rem .85rem; border-radius: 6px; font-weight: 500;
@@ -199,9 +204,20 @@ h3 { font-size: 1rem; margin: 0; }
 }
 
 /* ---------- KPIs ---------- */
-/* Live rates & credit spreads band (TradingView ticker-tape embed). */
-.rates-band { margin: 0 0 1rem; min-height: 46px; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--surface); box-shadow: var(--shadow); }
-.rates-band .tradingview-widget-copyright { font-size: .7rem; padding: 0 .5rem; }
+/* Key rates & credit spreads band (static, from /api/rates over FRED). */
+.rates-band { display: flex; flex-wrap: wrap; align-items: stretch; gap: .5rem; margin: 0 0 1rem;
+  min-height: 44px; padding: .5rem .75rem; border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); box-shadow: var(--shadow); }
+.rate-tile { display: flex; flex-direction: column; gap: .05rem; padding: 0 .9rem; flex: 0 0 auto;
+  border-right: 1px solid var(--border); justify-content: center; }
+.rate-tile:last-of-type { border-right: none; }
+.rate-label { text-transform: uppercase; letter-spacing: .4px; font-size: .68rem; }
+.rate-val { font-weight: 700; font-size: .95rem; color: var(--ink); }
+.rate-chg { font-size: .72rem; font-weight: 600; }
+.rate-chg.up { color: #059669; }
+.rate-chg.down { color: #dc2626; }
+.rate-chg.flat { color: var(--muted); }
+.rate-src { margin-left: auto; align-self: center; }
 .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
 .kpi-card { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--primary);
   border-radius: var(--radius); padding: 1rem 1.1rem; box-shadow: var(--shadow); }

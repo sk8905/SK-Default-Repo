@@ -99,9 +99,57 @@ function handleMe(request) {
   return json({ email });
 }
 
+// Key rates & credit spreads for the Credit dashboard. Pulled server-side (so
+// there's no CORS issue and no browser-visible key) from FRED's public, keyless
+// CSV endpoint (fredgraph.csv) — one source that carries all six series. Results
+// are edge-cached for 30 min since these are daily fixings.
+const RATE_SERIES = [
+  { id: "DGS10", label: "US 10Y", unit: "%" },
+  { id: "SOFR", label: "SOFR", unit: "%" },
+  { id: "IUDSOIA", label: "SONIA", unit: "%" },
+  { id: "EUR3MTD156N", label: "3M EURIBOR", unit: "%" },
+  { id: "BAMLC0A0CM", label: "US IG OAS", unit: "bp" },
+  { id: "BAMLH0A0HYM2", label: "US HY OAS", unit: "bp" },
+];
+
+async function fredLast(id) {
+  const r = await fetch(`https://fred.stlouisfed.org/graph/fredgraph.csv?id=${id}`, {
+    cf: { cacheTtl: 1800, cacheEverything: true },
+  });
+  if (!r.ok) throw new Error("fred " + r.status);
+  const rows = (await r.text()).trim().split(/\r?\n/).slice(1)
+    .map((l) => l.split(","))
+    .filter((c) => c.length >= 2 && c[1] !== "" && c[1] !== ".");
+  const last = rows[rows.length - 1], prev = rows[rows.length - 2];
+  const val = last ? parseFloat(last[1]) : null;
+  const prevVal = prev ? parseFloat(prev[1]) : null;
+  return {
+    value: Number.isFinite(val) ? val : null,
+    change: (Number.isFinite(val) && Number.isFinite(prevVal)) ? +(val - prevVal).toFixed(4) : null,
+    asOf: last ? last[0] : null,
+  };
+}
+
+async function handleRates(request, env, ctx) {
+  const cache = caches.default;
+  const cacheKey = new Request(new URL("/api/rates", request.url).toString());
+  const cached = await cache.match(cacheKey);
+  if (cached) return cached;
+  const data = await Promise.all(RATE_SERIES.map(async (s) => {
+    try { return { ...s, ...(await fredLast(s.id)) }; }
+    catch { return { ...s, value: null, change: null, asOf: null }; }
+  }));
+  const resp = new Response(JSON.stringify({ rates: data }), {
+    headers: { "content-type": "application/json", "cache-control": "public, max-age=1800" },
+  });
+  if (ctx && ctx.waitUntil) ctx.waitUntil(cache.put(cacheKey, resp.clone()));
+  return resp;
+}
+
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    if (url.pathname === "/api/rates") return handleRates(request, env, ctx);
     if (url.pathname === "/api/watchlist") return handleWatchlist(request, env);
     if (url.pathname === "/api/saved") return handleSaved(request, env);
     if (url.pathname === "/api/me") return handleMe(request);

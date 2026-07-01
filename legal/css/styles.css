@@ -80,6 +80,11 @@ img, svg { max-width: 100%; }
   /* Let the nav fill the row so the Saved tab can sit at the right margin. */
   .mainnav { flex: 1 1 auto; }
   .nav-link.nav-right { margin-left: auto; }
+  /* Pin the signed-in identity, refresh status and bell to the far-right corner
+     (out of flow, mirroring the logo on the left) so the Saved tab can align
+     with the content's right margin without them trailing behind it. */
+  .topbar-right { position: absolute; right: 4rem; top: 50%; transform: translateY(-50%); }
+  .notif { position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%); }
 }
 .nav-link { color: #cbd5e1; padding: .5rem .85rem; border-radius: 6px; font-weight: 500; white-space: nowrap; }
 .nav-link:hover, .nav-link:focus-visible { color: #fff; text-decoration: none; background: rgba(255,255,255,.08); }
