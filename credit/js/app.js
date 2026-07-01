@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260701-4";
+} from "./data.js?v=20260701-5";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260701-4";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260701-5";
 
 const app = document.getElementById("app");
 
@@ -588,7 +588,7 @@ function fundTable(rows, key, sig) {
       <thead><tr>${sortTh("funds", "name", "Fund")}${sortTh("funds", "manager", "Manager")}${sortTh("funds", "strategy", "Strategy")}${sortTh("funds", "geo", "Geography")}${sortTh("funds", "status", "Status")}${sortTh("funds", "target", "Target")}${sortTh("funds", "progress", "Progress", "prog-col")}</tr></thead>
       <tbody>
         ${rows.map((x) => `<tr class="clickable" data-href="#/fund/${x.id}">
-          <td>${nameCell("fund", x.id, `<strong>${esc(x.name)}</strong><div class="muted small fund-sub">${x.vintage} · ${esc(x.domicile)} · ${completenessPill(x)}</div>`)}</td>
+          <td>${nameCell("fund", x.id, `<strong>${esc(x.name)}</strong>`)}</td>
           <td>${link(`#/manager/${x.managerId}`, managerById[x.managerId].name)}</td>
           <td>${chip(x.strategy)}</td>
           <td>${esc(x.geoFocus)}</td>
