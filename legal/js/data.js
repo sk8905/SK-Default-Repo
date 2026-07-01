@@ -15,13 +15,13 @@
 // `LAST_REVIEWED` whenever you refresh the data.
 // =============================================================================
 
-export const LAST_REVIEWED = "2026-06-29";
+export const LAST_REVIEWED = "2026-07-01";
 // When the refresh routine last ran (even if nothing new) — shown as "Last refresh".
-export const LAST_CHECKED = "2026-06-30";
+export const LAST_CHECKED = "2026-07-01";
 // Time-of-day the routine last ran, pre-formatted WITH a timezone label (e.g.
 // "05:22 BST") so it renders the same regardless of the viewer's browser timezone.
 // Set every run alongside LAST_CHECKED — two runs a day (~06:00 / ~12:00).
-export const LAST_CHECKED_TIME = "12:02 BST";
+export const LAST_CHECKED_TIME = "05:16 BST";
 
 // ---- Practice areas ---------------------------------------------------------
 export const practiceAreas = [
@@ -5102,6 +5102,68 @@ export const items = [
     tags: ["payments", "retail payments", "Bank of England", "FCA", "stablecoins", "digital pound", "AI payments", "financial services regulation", "banking"],
     dateEstimated: false,
   },
+  {
+    url: "https://www.davispolk.com/insights/client-update/fdic-proposes-overhaul-idi-resolution-planning-rule",
+    id: "u576", title: "FDIC Proposes Overhaul of IDI Resolution Planning Rule",
+    area: "banking", areas: ["banking"], type: "alert", firm: "davispolk",
+    date: "2026-06-30", jurisdiction: "United States",
+    summary: "The FDIC proposed a significant overhaul of its insured depository institution (IDI) resolution planning rule, streamlining submission requirements to focus on information the FDIC considers most critical, with a comment deadline of August 31, 2026. Davis Polk's alert compares the current and proposed frameworks and provides a content-requirements checklist.",
+    points: [
+      "FDIC proposal narrows IDI resolution plan submissions to core/critical information only",
+      "Comment period runs through August 31, 2026",
+      "Visual memo compares existing vs. proposed content requirements",
+      "Directly affects resolution/recovery planning obligations for insured depository institutions",
+    ],
+    tags: ["FDIC", "resolution planning", "IDI", "bank regulation", "banking"],
+    dateEstimated: false,
+  },
+  {
+    url: "https://www.davispolk.com/insights/client-update/investment-management-funds-regulatory-update-june-2026",
+    id: "u577", title: "Investment Management & Funds Regulatory Update - June 2026",
+    area: "fundsreg", areas: ["fundsreg"], type: "update", firm: "davispolk",
+    date: "2026-06-30", jurisdiction: "United States",
+    summary: "Davis Polk's June 2026 funds regulatory update covers an increase in the SEC's 'qualified client' AUM and net-worth thresholds (effective June 29, 2026), a proposed DOL rule expanding 401(k) access to alternative investments, and SEC examination findings on adviser conflicts of interest (cash sweep/revenue sharing, mutual fund share-class selection, Form ADV disclosure gaps), plus a $100 million SEC settlement over an alleged trade cherry-picking scheme.",
+    points: [
+      "Qualified client AUM threshold raised from $1.1M to $1.4M; net worth test raised from $2.2M to $2.7M, effective June 29, 2026",
+      "DOL proposed rule would expand access to alternative investments in 401(k) plans",
+      "SEC Division of Examinations flagged deficiencies in cash management/revenue sharing and mutual fund share-class selection practices",
+      "$100 million SEC settlement over alleged cherry-picking of favorable trade allocations",
+    ],
+    tags: ["investment management", "funds regulation", "SEC", "qualified client", "DOL", "private funds"],
+    dateEstimated: false,
+  },
+  {
+    url: "https://www.fintechanddigitalassets.com/2026/06/the-race-is-on-fca-publishes-final-rules-for-uk-cryptoasset-regime/",
+    id: "u578", title: "The Race Is On: FCA Publishes Final Rules for UK Cryptoasset Regime",
+    area: "ri", areas: ["ri", "banking"], type: "update", firm: "latham",
+    date: "2026-06-30", jurisdiction: "United Kingdom",
+    summary: "On June 30, 2026, the UK Financial Conduct Authority published final rules for cryptoasset regulation across five policy statements: trading venue admissions/disclosure/market abuse regime, stablecoin issuer reserve/redemption requirements, custody of regulated cryptoasset activities, prudential capital/liquidity/risk-management requirements, and application of existing FCA Handbook provisions (including consumer duty and operational resilience) to cryptoasset firms.",
+    points: [
+      "FCA issued five policy statements (PS26/9 through PS26/13) covering the full lifecycle of UK cryptoasset regulation",
+      "New market abuse regime and issuer disclosure obligations apply to qualifying cryptoassets on trading venues",
+      "Stablecoin issuers face new reserve and redemption requirements",
+      "Firms will need to meet new prudential capital adequacy and liquidity standards",
+      "Existing FCA Handbook consumer protection and operational resilience rules extended to crypto firms",
+    ],
+    tags: ["FCA", "cryptoasset regulation", "UK", "stablecoins", "market abuse", "prudential regulation"],
+    dateEstimated: false,
+  },
+  {
+    url: "https://www.traverssmith.com/knowledge/knowledge-container/sfdr-20-council-of-the-eu-negotiating-position-broadly-welcome-changes-but-will-they-survive-trilogue/",
+    id: "u579", title: "SFDR 2.0 – Council of the EU Negotiating Position: Broadly Welcome Changes, But Will They Survive Trilogue?",
+    area: "fundsreg", areas: ["fundsreg"], type: "alert", firm: "traverssmith",
+    date: "2026-06-29", jurisdiction: "European Union",
+    summary: "This briefing analyses the Council of the European Union's agreed negotiating position on SFDR 2.0 (published 24 June 2026), which substantially amends the European Commission's original November 2025 legislative proposal to reform the EU Sustainable Finance Disclosure Regulation, including a reinstated opt-out for AIFs marketed exclusively to per se professional investors and a longer 24-month implementation period.",
+    points: [
+      "Council reinstates an opt-out from SFDR 2.0 for AIFs marketed exclusively to MiFID per se professional clients",
+      "Closed-ended funds fully raised before SFDR 2.0 takes effect remain excluded from the new framework",
+      "Three product categories retained: Article 7 'Transition', Article 8 'ESG Basics', Article 9 'Sustainable'",
+      "Council proposes a 24-month implementation period (longer than the Commission's original 18 months), pushing likely final implementation to mid/late 2029",
+      "Next step is the European Parliament settling its own position before trilogue discussions, expected to start late 2026",
+    ],
+    tags: ["SFDR", "SFDR 2.0", "sustainable finance", "AIFMD", "funds regulation", "ESG", "EU"],
+    dateEstimated: false,
+  },
 ];
 
 // ---- Recent cases published on BAILII -------------------------------------
@@ -5239,6 +5301,21 @@ export const cases = [
   { id: "c44", name: "Barclays Bank UK plc v Financial Ombudsman Service Ltd", citation: "[2026] EWHC 1555 (Admin)", court: "High Court (Admin)",
     date: "2026-06-23", area: "banking", url: "https://www.bailii.org/ew/cases/EWHC/Admin/2026/1555.html",
     summary: "Administrative Court grants judicial review of a Financial Ombudsman Service determination that it had jurisdiction over a retail complaint brought more than six months after the firm's final response, holding that the DISP 2.8.2 six-month time-bar is a mandatory jurisdictional precondition the FOS cannot waive otherwise than in accordance with the express terms of DISP." },
+  { id: "c45", name: "JSC Commercial Bank Privatbank v Kolomoisky & Ors", citation: "[2026] EWHC 1617 (Ch)", court: "High Court (Ch)",
+    date: "2026-06-29", area: "banking", url: "https://caselaw.nationalarchives.gov.uk/ewhc/ch/2026/1617",
+    summary: "Mr Justice Trower ruled that once the Court of Appeal dismissed the Kolomoisky defendants' appeal against the ~US$3bn PrivatBank judgment, the contractual ring-fencing protecting certain funds from enforcement terminated completely, including for legal fees incurred but unpaid before that date." },
+  { id: "c46", name: "Ocorian Trustee (UK) Ltd & Anor v Chandarana & Ors", citation: "[2026] EWHC 1635 (Comm)", court: "High Court (Comm)",
+    date: "2026-06-30", area: "banking", url: "https://caselaw.nationalarchives.gov.uk/ewhc/comm/2026/1635",
+    summary: "The Commercial Court largely discharged proprietary tracing injunctions over ~£9m in misapplied bridging-loan funds, finding most recipients were bona fide purchasers who had given value through accord and satisfaction, save for one defendant with proximity to the lender." },
+  { id: "c47", name: "Re Cross Transport Ltd (In Administration)", citation: "[2026] EWHC 1636 (Ch)", court: "High Court (Ch)",
+    date: "2026-06-30", area: "banking", url: "https://caselaw.nationalarchives.gov.uk/ewhc/ch/2026/1636",
+    summary: "ICC Judge Jones held that administrators may pay litigation funder and administration expenses ahead of 'protected moratorium creditors' under the CIGA 2020 moratorium regime, since the statutory 'super-priority' duty does not require absolute pre-payment." },
+  { id: "c48", name: "Various Claimants v Entain Plc", citation: "[2026] EWHC 1622 (KB)", court: "High Court (KB)",
+    date: "2026-06-30", area: "ri", url: "https://caselaw.nationalarchives.gov.uk/ewhc/kb/2026/1622",
+    summary: "In a £1.6bn+ FSMA securities-fraud claim over alleged undisclosed bribery in Entain's Turkish operations, Mr Justice Trower (Financial List) ordered a split trial separating defendant-side liability issues from claimant-side reliance, causation and quantum issues." },
+  { id: "c49", name: "Black Horse Ltd v Angel & Ors", citation: "[2026] EWCA Civ 831", court: "Court of Appeal",
+    date: "2026-06-30", area: "ri", url: "https://caselaw.nationalarchives.gov.uk/ewca/civ/2026/831",
+    summary: "The Court of Appeal upheld the use of multi-claimant claim forms for over 5,000 motor finance discretionary commission mis-selling claims against eight lenders, confirming such consolidated case management is a permissible 'convenient disposal' under CPR 7.3." },
 ];
 
 // ---- Lightweight lookups ----------------------------------------------------
@@ -5295,6 +5372,11 @@ export const caseSummaries = {
   c42: "Gordian Holdings Ltd brought further proceedings against Sofroniou in which it alleged transactions defrauding creditors within s.423 Insolvency Act 1986 and sought to enforce personal guarantee obligations. The dispute arises out of Bank of Cyprus lending and is connected to earlier Commercial Court proceedings at [2021] EWHC 235 (Comm). The judgment addresses the scope of s.423 claims and guarantee enforcement in the context of alleged creditor-defrauding transactions.",
   c43: "Songa Shipping SE (as lender) sought to enforce settlement-payment obligations under a bilateral loan agreement; Gardsea Ltd (as borrower) argued that the contractual requirement to pay on a 'Banking Day' fell to be computed by reference to both London and New York banking days, which on the facts of the payment instructions created a notional 37–38-hour window straddling time zones. Henshaw J held that 'Banking Day' in a multi-centre finance agreement is properly construed by reference to the time zone of the place of performance of the relevant payment obligation — here, London, where the payment was to be made — rather than by reference to the opening of the earliest financial centre and the closing of the latest. The decision aligns with LMA standard-form definitions and restores clarity to cross-border multi-currency facilities, confirming that settlement-day-count arithmetic should not introduce latency or ambiguity by spanning time zones.",
   c44: "Barclays Bank UK plc sought judicial review of a Financial Ombudsman Service (FOS) determination that the FOS had jurisdiction to consider a retail customer's complaint, notwithstanding that the complaint had been brought more than six months after Barclays' final response letter — outside the DISP 2.8.2 time-bar. The FOS had purported to exercise a discretion to accept the out-of-time complaint on grounds of exceptional circumstances. Lane J granted the judicial review application, quashing the FOS determination and holding that the six-month DISP 2.8.2 time-bar is a mandatory jurisdictional condition that circumscribes the FOS's compulsory jurisdiction; the FOS has no general discretion to waive it except in the circumstances expressly identified in the DISP sourcebook. The decision is significant for financial institutions facing high volumes of complaints lodged after DISP time-limits, particularly in the context of PPI and motor-finance redress exercises.",
+  c45: "PrivatBank had obtained a judgment of roughly US$3 billion against Igor Kolomoisky and Gennadiy Bogolyubov, with a bespoke ring-fencing arrangement protecting designated funds from enforcement so the defendants could fund their appeal. When the Court of Appeal dismissed that appeal on 22 May 2026, a contractual trigger disapplied the ring-fencing, and the dispute concerned whether legal fees already incurred but not yet paid before that date could still be discharged from the protected accounts. Mr Justice Trower held the termination was complete and unqualified, so unpaid pre-existing invoices could not be paid from the ring-fenced funds after the disapplication event. The decision is significant for practitioners structuring litigation-funding ring-fence/carve-out provisions in major asset-recovery and enforcement litigation, showing courts will give full effect to plain disapplication triggers over arguments of unfairness to defendants' legal teams.",
+  c46: "Claimants sought to continue interim proprietary injunctions over roughly £9 million that had been advanced by a finance company for mortgage loan origination, improperly redirected by a law firm to a bridging lender, and then distributed to several individual defendants as purported 'investment returns'. The court considered whether the claimants could still trace the funds and defeat a bona fide purchaser for value defence, given that most defendants had received the money as unsolicited windfalls rather than under any contract. Deputy Judge Charles Hollander KC held that defendants who retained early, uncontracted repayments without objection had given consideration through accord and satisfaction, and that notice only crystallised when injunctions were served in April 2026 — discharging the injunction against most defendants but maintaining it against one defendant closely connected to the lender. The decision illustrates the practical limits of proprietary tracing remedies against downstream recipients of misapplied loan finance where funds have been commingled and distributed as apparent investment proceeds.",
+  c47: "Cross Transport Ltd had entered a statutory moratorium under the Corporate Insolvency and Governance Act 2020 before moving into administration, leaving HMRC as both a protected moratorium creditor and preferential creditor for a substantial sum, against modest remaining assets and a litigation claim that a funder had agreed to back. The issue was whether Paragraph 64A of Schedule B1 to the Insolvency Act 1986, which requires administrators to discharge protected moratorium debts, prevented them from first paying litigation funder costs and administration expenses needed to pursue value-generating litigation. ICC Judge Jones held that the paragraph 64A duty confers super-priority status on protected moratorium creditors rather than mandating literal pre-payment ahead of all other expenses, so administrators retain discretion to fund litigation pragmatically consistent with their fiduciary duties. The ruling gives helpful guidance to insolvency practitioners on funding litigation recoveries in moratorium-linked administrations, an increasingly important restructuring tool since CIGA 2020.",
+  c48: "Institutional and retail shareholders brought claims exceeding £1.6 billion against gambling group Entain Plc under sections 90 and 90A of the Financial Services and Markets Act 2000, alleging that prospectuses and market disclosures over roughly twelve years concealed bribery payments connected to Turkish operations and that senior managers knowingly withheld this information. The key case-management question was whether to bifurcate the trial, and if so, how to allocate reliance, causation, limitation and quantum issues between phases. Mr Justice Trower, sitting in the Financial List, ordered a split trial: Trial One will determine defendant-side issues (misstatement, omission and director knowledge) and standing, while Trial Two will address claimant-side reliance, causation, limitation and quantum, with disclosure on Trial Two issues required before Trial One begins. As one of the largest FSMA section 90A securities-litigation claims progressing through the Financial List, the case-management approach adopted here is likely to be influential for the conduct of other large multi-claimant securities fraud actions against listed companies.",
+  c49: "More than 5,000 individual claimants who financed vehicle purchases brought unfair-relationship claims under sections 140A-B of the Consumer Credit Act 1974 against eight motor finance companies, alleging undisclosed discretionary commission arrangements with dealers in breach of FCA CONC rules. The procedural question was whether such mass claims could properly be brought and managed via single multi-claimant claim forms per defendant under CPR 7.3's 'convenient disposal' test, or whether they needed to be split into individual actions. Lord Justice Coulson, applying and extending the Court of Appeal's approach in Morris v Williams, upheld the High Court's case-management decision permitting the consolidated claim forms, holding that convenient disposal can encompass lead-case and common-issue management even though ultimate unfairness findings remain fact-specific to each claimant. The decision is highly significant for the ongoing wave of motor finance discretionary commission litigation following the FCA's redress scheme, confirming that mass claims of this kind can proceed efficiently through consolidated case management rather than requiring thousands of separate claims.",
 };
 
 export const restructurings = [
