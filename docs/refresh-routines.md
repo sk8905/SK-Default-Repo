@@ -45,6 +45,21 @@ the source of truth for the prompt.
   public source. Never fabricate: set unknown fields to `null`, mark estimates with
   `estimated: true`, and keep each new/edited record's `sources` pointing to real
   URLs. Reuse existing field names exactly (see a neighbouring record as a template).
+- **Private-credit scope — exclude equity-only entities.** Meridian Credit tracks
+  European **private credit** only. Do NOT add a manager (or its funds) whose
+  business is purely **equity** — private-equity/buyout, equity real estate, equity
+  infrastructure, or growth/venture equity — even if it turns up in a deal or raise.
+  Only add a manager that runs a genuine private-**credit** strategy (senior/direct
+  lending, unitranche, mezzanine/junior debt, distressed & special-situations
+  *credit*, opportunistic credit, structured credit/CLO, asset-based lending, real
+  estate **debt**, infrastructure **debt**, NAV/fund finance, specialty finance); a
+  new fund is in-scope only if it is a credit fund. An existing *credit* manager's
+  equity-side *group* news may still be recorded as `webNews` (Category B is not
+  re-scoped here) — but never create a standalone equity-only manager or fund.
+  **Never re-add these equity-only firms** (deliberately removed 2026-07-01): **EQT,
+  PAI Partners, TDR Capital, Astorg, BlackRock Private Equity Partners, Amro
+  Partners, Equitix, Greycoat Real Estate.** If a candidate deal/raise is attributed
+  only to one of these, skip the item rather than re-creating the manager.
 - **Sourcing.** Prefer primary/verifiable public sources. Most firm/manager sites
   block automated fetching, so enumerate new article URLs with `site:<domain>` web
   searches and verify dates. Skip data-aggregators (GuruFocus, Tracxn, ZoomInfo,
@@ -204,7 +219,13 @@ the source of truth for the prompt.
 >    - **Add new managers / funds** → if a deal or raise involves a manager or fund
 >      not yet tracked, add it (only with a verifiable public source; never
 >      fabricate — set unknown fields to `null`, mark estimates with
->      `estimated: true`):
+>      `estimated: true`). **First apply the private-credit scope test (see the
+>      "Private-credit scope" invariant): skip any equity-only firm — PE/buyout,
+>      equity real estate/infrastructure, growth/venture equity — and NEVER re-add
+>      the removed equity-only firms (EQT, PAI Partners, TDR Capital, Astorg,
+>      BlackRock Private Equity Partners, Amro Partners, Equitix, Greycoat Real
+>      Estate); add a manager only if it runs a private-credit strategy, and a fund
+>      only if it is a credit fund.**
 >      - New manager → append to `managers` (id `m<next>`): name, hq, founded, aum
 >        (€bn number) + aumText, strategies (array), description, asOf, owners,
 >        financials, headcount, news: [], sources (≥1 real URL).
