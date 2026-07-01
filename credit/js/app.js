@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260701-15";
+} from "./data.js?v=20260701-16";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260701-15";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260701-16";
 
 const app = document.getElementById("app");
 
@@ -664,6 +664,7 @@ function viewFunds() {
   const f = filterState.funds;
   const inMarket = (x) => !x.evergreen && (x.status === "Open" || x.status === "First Close");
   const rows = funds.filter((x) =>
+    (!targetFocus || midInFocus(x.managerId)) &&
     (!f.q || (x.name + managerById[x.managerId].name).toLowerCase().includes(f.q.toLowerCase())) &&
     (!f.strategy.length || f.strategy.includes(x.strategy)) &&
     (!f.status.length || f.status.some((s) => (s === "in-market" ? inMarket(x) : fundCategory(x) === s))) &&
@@ -685,6 +686,7 @@ function viewFunds() {
 
   app.innerHTML = `
     <div class="page-head"><h1>Funds in Market</h1><p class="muted">${rows.length} of ${funds.length} funds${f.period ? ` · closing ${esc(f.period)}` : ""}</p></div>
+    ${focusToggle()}
     ${periodBanner}
     <input type="checkbox" id="filters-toggle" class="ff-cb" ${mfOpen() ? "checked" : ""}><label for="filters-toggle" class="ff-lab">Filters</label><div class="filters">
       <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Fund or manager…" value="${esc(f.q)}"></label>
