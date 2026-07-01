@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260701-13";
+} from "./data.js?v=20260701-14";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260701-13";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260701-14";
 
 const app = document.getElementById("app");
 
@@ -1284,7 +1284,7 @@ function viewIntel() {
   const trend = quarters.map((q) => ({ label: "'" + q.slice(2), value: qCounts[q] || 0, nav: { jump: "funds", period: q } }));
 
   app.innerHTML = `
-    <div class="page-head"><h1>Fundraising Intelligence</h1><p class="muted">${rows.length} of ${base.length} items · European private credit capital formation · <a href="#/clos">CLOs are in their own section →</a></p></div>
+    <div class="page-head"><h1>Fundraising Intelligence</h1><p class="muted">${rows.length} of ${base.length} items · European private credit capital formation</p></div>
     ${focusToggle()}
     <div class="split-3070">
       <div class="split-left">
@@ -1376,7 +1376,7 @@ function viewDeals() {
     .sort((a, b) => b.value - a.value).slice(0, 10);
 
   app.innerHTML = `
-    <div class="page-head"><h1>Deal Activity</h1><p class="muted">${rows.length} of ${base.length} transactions · investments, exits, refinancings, restructurings &amp; distress${f.period ? ` · <strong>${esc(f.period)}</strong> <button type="button" class="link-btn" id="clear-period">clear quarter ✕</button>` : ""} · <a href="#/clos">CLOs are in their own section →</a></p></div>
+    <div class="page-head"><h1>Deal Activity</h1><p class="muted">${rows.length} of ${base.length} transactions · investments, exits, refinancings, restructurings &amp; distress${f.period ? ` · <strong>${esc(f.period)}</strong> <button type="button" class="link-btn" id="clear-period">clear quarter ✕</button>` : ""}</p></div>
     ${focusToggle()}
     <div class="split-3070">
       <div class="split-left">
@@ -1475,7 +1475,7 @@ function viewClos() {
   const feedRow = (x) => x._kind === "deal" ? dealRow(x) : intelRow(x);
 
   app.innerHTML = `
-    <div class="page-head"><h1>CLOs</h1><p class="muted">${rows.length} of ${all.length} items · collateralised loan obligation pricings, platforms, funds, ETFs &amp; personnel — carved out of Deals &amp; Fundraising${f.period ? ` · <strong>${esc(f.period)}</strong> <button type="button" class="link-btn" id="clear-period">clear quarter ✕</button>` : ""}</p></div>
+    <div class="page-head"><h1>CLOs</h1><p class="muted">${rows.length} of ${all.length} items · collateralised loan obligation pricings, platforms, funds, ETFs &amp; personnel${f.period ? ` · <strong>${esc(f.period)}</strong> <button type="button" class="link-btn" id="clear-period">clear quarter ✕</button>` : ""}</p></div>
     ${focusToggle()}
     <div class="split-3070">
       <div class="split-left">
