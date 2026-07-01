@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260701-5";
+} from "./data.js?v=20260701-6";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260701-5";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260701-6";
 
 const app = document.getElementById("app");
 
@@ -335,7 +335,7 @@ function investorsForFund(f) {
 // Dropdown filters hold ARRAYS of selected values (multi-select). An empty
 // array means "All". `period` stays a single string (chart drill-down).
 const filterState = {
-  funds: { q: "", strategy: [], status: [], geo: [], period: "", sort: { key: "status", dir: "asc" } },
+  funds: { q: "", strategy: [], status: ["in-market"], geo: [], period: "", sort: { key: "status", dir: "asc" } },
   managers: { q: "", strategy: [], location: [], sort: { key: "name", dir: "asc" } },
   lps: { q: "", type: [], strategy: [], sort: { key: "name", dir: "asc" } },
   intel: { q: "", type: [], year: [] },
@@ -616,7 +616,7 @@ function viewFunds() {
   // Pre-marketing (the Status column shows each fund's status; the Status filter
   // narrows it) rather than being split into separate section tables.
   const body = rows.length
-    ? fundTable(rows, "funds", JSON.stringify(f))
+    ? fundTable(rows)
     : '<p class="empty">No funds match these filters.</p>';
 
   const periodBanner = f.period
@@ -856,7 +856,6 @@ function viewManagers() {
     (!f.location.length || hqRegions(m.hq).some((r) => f.location.includes(r)))
   );
   const sorted = applySort(rows, "managers");
-  const { shown, more } = pageList(sorted, "managers", JSON.stringify(f));
 
   app.innerHTML = `
     <div class="page-head"><h1>Managers</h1><p class="muted">${rows.length} of ${managers.length} GPs</p></div>
@@ -868,7 +867,7 @@ function viewManagers() {
     <div class="table-wrap"><table class="data-table">
       <thead><tr>${sortTh("managers", "name", "Manager")}${sortTh("managers", "hq", "HQ")}${sortTh("managers", "aum", "AUM")}<th>Strategies</th>${sortTh("managers", "funds", "Funds")}${sortTh("managers", "live", "In market")}</tr></thead>
       <tbody>
-        ${shown.map((m) => {
+        ${sorted.map((m) => {
           const fs = fundsByManager(m.id);
           const live = fs.filter((x) => !x.evergreen && !x.lifecycle && x.status !== "Final Close").length;
           const strat = m.strategies.slice(0, 2).map((s) => chip(s)).join(" ") + (m.strategies.length > 2 ? ` <span class="muted small">+${m.strategies.length - 2}</span>` : "") || '<span class="muted small">—</span>';
@@ -883,7 +882,7 @@ function viewManagers() {
         }).join("")}
         ${rows.length === 0 ? '<tr><td colspan="6" class="empty">No managers match these filters.</td></tr>' : ""}
       </tbody>
-    </table></div>${more}`;
+    </table></div>`;
   wireFilters("managers");
 }
 
@@ -1074,6 +1073,11 @@ function viewManager(id) {
     <section class="card">
       <h2>Fundraising intelligence</h2>
       ${mgrIntel.length ? feedHtml(mgrIntel, "mgr:" + id + ":intel", intelRow, "") : '<p class="muted">No fundraising intelligence items for this manager yet.</p>'}
+    </section>
+    <section class="card">
+      <h2>CLOs</h2>
+      <p class="muted small">News about ${esc(m.name)}'s CLOs — issuances, pricings, resets, platforms &amp; funds. <a href="#/clos">All CLO activity →</a></p>
+      ${mgrClo.length ? feedHtml(mgrClo, "mgr:" + id + ":clo", (x) => (x._kind === "deal" ? dealRow(x) : intelRow(x)), "") : '<p class="muted">No CLO news for this manager yet.</p>'}
     </section>`;
 }
 
@@ -1112,7 +1116,6 @@ function viewLps() {
     (!f.strategy.length || f.strategy.some((s) => l.strategies.includes(s)))
   );
   const sorted = applySort(rows, "lps");
-  const { shown, more } = pageList(sorted, "lps", JSON.stringify(f));
 
   app.innerHTML = `
     <div class="page-head"><h1>Investors / Allocators</h1><p class="muted">${rows.length} of ${lps.length} LPs</p></div>
@@ -1124,14 +1127,14 @@ function viewLps() {
     <div class="table-wrap"><table class="data-table">
       <thead><tr>${sortTh("lps", "name", "Investor")}${sortTh("lps", "type", "Type")}${sortTh("lps", "hq", "HQ")}${sortTh("lps", "aum", "AUM")}${sortTh("lps", "pc", "PC alloc.")}${sortTh("lps", "ticket", "Typical ticket")}${sortTh("lps", "mandate", "Mandate")}</tr></thead>
       <tbody>
-        ${shown.map((l) => `<tr class="clickable" data-href="#/lp/${l.id}">
+        ${sorted.map((l) => `<tr class="clickable" data-href="#/lp/${l.id}">
           <td>${nameCell("lp", l.id, `<strong>${esc(l.name)}</strong>`)}</td><td>${esc(l.type)}</td><td>${esc(l.hq)}</td>
           <td>€${l.aum}bn</td><td>${pct(l.pcAllocationPct)}</td><td>${eur(l.typicalTicket)}</td>
           <td>${chip(l.mandateStatus, mandateClass(l.mandateStatus))}</td>
         </tr>`).join("")}
         ${rows.length === 0 ? '<tr><td colspan="7" class="empty">No investors match these filters.</td></tr>' : ""}
       </tbody>
-    </table></div>${more}`;
+    </table></div>`;
   wireFilters("lps");
 }
 
