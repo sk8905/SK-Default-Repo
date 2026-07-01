@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260701-10";
+} from "./data.js?v=20260701-11";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260701-10";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260701-11";
 
 const app = document.getElementById("app");
 
@@ -487,21 +487,23 @@ function sortTh(view, key, label, extraClass = "") {
 function viewDashboard() {
   // Credit-only universe for the headline aggregates (equity-strategy funds are
   // tracked and listed elsewhere but excluded from private-credit market stats).
-  const creditFunds = funds.filter((f) => !isEquity(f));
+  // The Target-focus toggle narrows every aggregate/feed below to managers in the
+  // €1–10bn AUM band.
+  const creditFunds = funds.filter((f) => !isEquity(f) && (!targetFocus || midInFocus(f.managerId)));
   const nowD = new Date();
   const curQ = `${nowD.getFullYear()}-Q${Math.floor(nowD.getMonth() / 3) + 1}`;
   const quarterOf = (d) => { const m = /^(\d{4})-(\d{2})/.exec(d || ""); return m ? `${m[1]}-Q${Math.floor((+m[2] - 1) / 3) + 1}` : null; };
   // CLO items are carved out into #/clos, so they're excluded from the Deal
   // Activity and Fundraising aggregates/feeds on the dashboard too.
-  const dealsNoClo = deals.filter((d) => !d.clo);
-  const intelNoClo = intel.filter((i) => !i.clo);
+  const dealsNoClo = deals.filter((d) => !d.clo && (!targetFocus || midInFocus(d.managerId)));
+  const intelNoClo = intel.filter((i) => !i.clo && (!targetFocus || midInFocus(i.managerId)));
 
   // ---- headline KPIs ----
   const dealsThisQuarter = dealsNoClo.filter((d) => quarterOf(d.date) === curQ).length;
   const openProcesses = creditFunds.filter((f) => !f.evergreen && (f.status === "Open" || f.status === "First Close")).length;
   const closesThisQuarter = creditFunds.filter((f) => isClose(f) && fundQuarter(f) === curQ).length;
   const cloClosesThisQuarter = [...deals.filter((d) => d.clo), ...intel.filter((i) => i.clo)]
-    .filter((c) => quarterOf(c.date) === curQ).length;
+    .filter((c) => (!targetFocus || midInFocus(c.managerId)) && quarterOf(c.date) === curQ).length;
   const kpis = [
     { label: "Deals this quarter", value: dealsThisQuarter, sub: curQ, jump: 'data-jump="deals"' },
     { label: "Open fundraising processes", value: openProcesses, sub: "funds currently in market", jump: 'data-jump="funds" data-status="in-market"' },
@@ -518,9 +520,10 @@ function viewDashboard() {
   const intelByDate = [...intelNoClo].sort((a, b) => String(b.date).localeCompare(String(a.date)));
   // CLO items live in their own #/clos section; surface the most recent here too.
   const cloByDate = [...deals.filter((d) => d.clo), ...intel.filter((i) => i.clo)]
+    .filter((c) => !targetFocus || midInFocus(c.managerId))
     .sort((a, b) => String(b.date).localeCompare(String(a.date)));
   // Latest press across the tracked universe (manager news + webNews), deduped.
-  const newsByDate = aggregateNews();
+  const newsByDate = aggregateNews().filter((x) => !targetFocus || midInFocus(x._mid));
   // Match the deal/fundraising sleeves: the headline opens the item in the News
   // tab, with a link to the original source below it.
   const newsCompact = (x) => {
@@ -532,6 +535,7 @@ function viewDashboard() {
     <div class="page-head">
       <h1>Credit Intelligence</h1>
       <p class="muted">European private credit deal flow &amp; market intelligence, with fundraising as a secondary lens · real data compiled from public sources (mid-2026)</p>
+      ${focusToggle()}
     </div>
     <div class="kpi-grid">
       ${kpis.map((k) => `<div class="kpi-card clickable" ${k.jump}><div class="kpi-value">${k.value}</div><div class="kpi-label">${k.label}</div><div class="kpi-sub muted">${k.sub}</div></div>`).join("")}
