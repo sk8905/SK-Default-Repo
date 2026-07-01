@@ -122,8 +122,7 @@ img, svg { max-width: 100%; }
 @media (max-width: 760px) {
   .ff-lab {
     display: inline-flex; align-items: center; gap: .4rem; cursor: pointer; user-select: none;
-    font-weight: 600; font-size: .9rem; color: var(--ink); margin-bottom: .75rem;
-    padding: .5rem .8rem; border: 1px solid var(--line); border-radius: 8px; background: var(--surface);
+    font-weight: 700; font-size: .95rem; color: var(--muted); margin-bottom: .75rem; padding: .15rem .1rem;
   }
   .ff-lab::after { content: "▾"; color: var(--muted); font-size: .8rem; }
   .ff-cb:checked ~ .ff-lab::after { content: "▴"; }
