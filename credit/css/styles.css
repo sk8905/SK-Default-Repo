@@ -199,6 +199,9 @@ h3 { font-size: 1rem; margin: 0; }
 }
 
 /* ---------- KPIs ---------- */
+/* Live rates & credit spreads band (TradingView ticker-tape embed). */
+.rates-band { margin: 0 0 1rem; min-height: 46px; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--surface); box-shadow: var(--shadow); }
+.rates-band .tradingview-widget-copyright { font-size: .7rem; padding: 0 .5rem; }
 .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
 .kpi-card { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--primary);
   border-radius: var(--radius); padding: 1rem 1.1rem; box-shadow: var(--shadow); }

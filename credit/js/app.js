@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260701-21";
+} from "./data.js?v=20260701-22";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260701-21";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260701-22";
 
 const app = document.getElementById("app");
 
@@ -493,6 +493,48 @@ function sortTh(view, key, label, extraClass = "") {
 }
 
 // ================================ DASHBOARD =================================
+// Live rates & credit band shown at the top of the dashboard — a TradingView
+// "ticker tape" embed. Credit-relevant instruments: US/EU/UK govvies, the core
+// reference rates (SOFR/SONIA/EURIBOR), ICE BofA IG/HY option-adjusted spreads,
+// and the liquid IG/HY credit ETFs as live proxies. The script is injected after
+// innerHTML (scripts set via innerHTML don't run); if the embed can't load, the
+// band just stays empty. Any symbol TradingView can't resolve is silently
+// dropped rather than breaking the strip.
+const RATES_SYMBOLS = [
+  { proName: "TVC:US10Y", title: "US 10Y" },
+  { proName: "TVC:US02Y", title: "US 2Y" },
+  { proName: "FRED:SOFR", title: "SOFR" },
+  { proName: "FRED:IUDSOIA", title: "SONIA" },
+  { proName: "FRED:EUR3MTD156N", title: "EURIBOR 3M" },
+  { proName: "TVC:DE10Y", title: "Bund 10Y" },
+  { proName: "TVC:GB10Y", title: "Gilt 10Y" },
+  { proName: "FRED:BAMLC0A0CM", title: "US IG OAS" },
+  { proName: "FRED:BAMLH0A0HYM2", title: "US HY OAS" },
+  { proName: "AMEX:HYG", title: "HY ETF · HYG" },
+  { proName: "AMEX:LQD", title: "IG ETF · LQD" },
+];
+function mountRatesTicker() {
+  try {
+    const el = document.getElementById("tv-ticker");
+    if (!el || el.dataset.mounted) return;
+    el.dataset.mounted = "1";
+    el.innerHTML = '<div class="tradingview-widget-container__widget"></div>';
+    const s = document.createElement("script");
+    s.type = "text/javascript";
+    s.async = true;
+    s.src = "https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js";
+    s.textContent = JSON.stringify({
+      symbols: RATES_SYMBOLS,
+      showSymbolLogo: false,
+      isTransparent: true,
+      displayMode: "adaptive",
+      colorTheme: "light",
+      locale: "en",
+    });
+    el.appendChild(s);
+  } catch { /* embed unavailable — leave the band empty */ }
+}
+
 function viewDashboard() {
   // Credit-only universe for the headline aggregates (equity-strategy funds are
   // tracked and listed elsewhere but excluded from private-credit market stats).
@@ -546,6 +588,7 @@ function viewDashboard() {
       <p class="muted">European private credit deal flow &amp; market intelligence, with fundraising as a secondary lens · real data compiled from public sources (mid-2026)</p>
       ${focusToggle()}
     </div>
+    <div id="tv-ticker" class="rates-band tradingview-widget-container" aria-label="Live key rates &amp; credit spreads"></div>
     <div class="kpi-grid">
       ${kpis.map((k) => `<div class="kpi-card clickable" ${k.jump}><div class="kpi-value">${k.value}</div><div class="kpi-label">${k.label}</div><div class="kpi-sub muted">${k.sub}</div></div>`).join("")}
     </div>
@@ -582,6 +625,7 @@ function viewDashboard() {
       <section class="card"><h2>Deals by type</h2>${byDealType.length ? donutChart(byDealType) : '<p class="muted small">No deals tracked.</p>'}</section>
       <section class="card"><h2>Funds by status</h2>${donutChart(byStatus)}</section>
     </div>`;
+  mountRatesTicker();
 }
 
 // ================================== FUNDS ===================================
