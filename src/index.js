@@ -106,9 +106,6 @@ function handleMe(request) {
 // discontinued). Results are edge-cached 30 min (these are daily fixings), but
 // only when fully populated so a transient upstream miss can't stick.
 const RATE_SERIES = [
-  { label: "US 10Y", unit: "%", src: "fred", id: "DGS10" },
-  { label: "SOFR", unit: "%", src: "fred", id: "SOFR" },
-  { label: "SONIA", unit: "%", src: "fred", id: "IUDSOIA" },
   // EURIBOR is published on TARGET business days; ECB's business-daily frequency
   // code is "B" (not "D"). Try business-daily, then daily, then monthly average
   // as a guaranteed fallback so the tile always resolves.
@@ -117,6 +114,9 @@ const RATE_SERIES = [
     "D.U2.EUR.RT.MM.EURIBOR3MD_.HSTA",
     "M.U2.EUR.RT.MM.EURIBOR3MD_.HSTA",
   ] },
+  { label: "SOFR", unit: "%", src: "fred", id: "SOFR" },
+  { label: "SONIA", unit: "%", src: "fred", id: "IUDSOIA" },
+  { label: "US 10Y", unit: "%", src: "fred", id: "DGS10" },
   { label: "US IG OAS", unit: "bp", src: "fred", id: "BAMLC0A0CM" },
   { label: "US HY OAS", unit: "bp", src: "fred", id: "BAMLH0A0HYM2" },
 ];
@@ -180,7 +180,7 @@ async function ecbSeries(keys) {
 async function handleRates(request, env, ctx) {
   const cache = caches.default;
   // Versioned key so a previously-cached partial response is ignored.
-  const cacheKey = new Request(new URL("/api/rates?v=3", request.url).toString());
+  const cacheKey = new Request(new URL("/api/rates?v=4", request.url).toString());
   const cached = await cache.match(cacheKey);
   if (cached) return cached;
   // Only the last ~60 days, so each FRED CSV is small and fast.
