@@ -109,16 +109,27 @@ const RATE_SERIES = [
   { label: "US 10Y", unit: "%", src: "fred", id: "DGS10" },
   { label: "SOFR", unit: "%", src: "fred", id: "SOFR" },
   { label: "SONIA", unit: "%", src: "fred", id: "IUDSOIA" },
-  { label: "3M EURIBOR", unit: "%", src: "ecb", key: "D.U2.EUR.RT.MM.EURIBOR3MD_.HSTA" },
+  // EURIBOR is published on TARGET business days; ECB's business-daily frequency
+  // code is "B" (not "D"). Try business-daily, then daily, then monthly average
+  // as a guaranteed fallback so the tile always resolves.
+  { label: "3M EURIBOR", unit: "%", src: "ecb", keys: [
+    "B.U2.EUR.RT.MM.EURIBOR3MD_.HSTA",
+    "D.U2.EUR.RT.MM.EURIBOR3MD_.HSTA",
+    "M.U2.EUR.RT.MM.EURIBOR3MD_.HSTA",
+  ] },
   { label: "US IG OAS", unit: "bp", src: "fred", id: "BAMLC0A0CM" },
   { label: "US HY OAS", unit: "bp", src: "fred", id: "BAMLH0A0HYM2" },
 ];
 
-// Fetch text with one retry; small CSVs so this is cheap.
+// Fetch text with one retry; small CSVs so this is cheap. Only 200s are cached
+// (no cacheEverything) so a transient 404 is never held.
 async function fetchText(url) {
   for (let i = 0; i < 2; i++) {
     try {
-      const r = await fetch(url, { cf: { cacheTtl: 1800, cacheEverything: true } });
+      const r = await fetch(url, {
+        headers: { "accept": "text/csv, application/json, */*", "user-agent": "Meridian/1.0 (+workers)" },
+        cf: { cacheTtl: 900 },
+      });
       if (r.ok) return await r.text();
     } catch { /* retry */ }
   }
@@ -148,34 +159,39 @@ async function fredSeries(id, cosd) {
   return lastTwo(pairs);
 }
 
-async function ecbSeries(key) {
-  const txt = await fetchText(`https://data-api.ecb.europa.eu/service/data/FM/${key}?lastNObservations=6&format=csvdata`);
-  if (!txt) return { value: null, change: null, asOf: null };
-  const lines = txt.trim().split(/\r?\n/);
-  const h = lines[0].split(",");
-  const ti = h.indexOf("TIME_PERIOD"), vi = h.indexOf("OBS_VALUE");
-  if (ti < 0 || vi < 0) return { value: null, change: null, asOf: null };
-  const pairs = lines.slice(1)
-    .map((l) => l.split(","))
-    .filter((c) => c[vi] !== undefined && c[vi] !== "")
-    .map((c) => [c[ti], c[vi]]);
-  return lastTwo(pairs);
+async function ecbSeries(keys) {
+  for (const key of keys) {
+    const txt = await fetchText(`https://data-api.ecb.europa.eu/service/data/FM/${key}?lastNObservations=6&format=csvdata`);
+    if (!txt) continue;
+    const lines = txt.trim().split(/\r?\n/);
+    if (lines.length < 2) continue;
+    const h = lines[0].split(",");
+    const ti = h.indexOf("TIME_PERIOD"), vi = h.indexOf("OBS_VALUE");
+    if (ti < 0 || vi < 0) continue;
+    const pairs = lines.slice(1)
+      .map((l) => l.split(","))
+      .filter((c) => c[vi] !== undefined && c[vi] !== "")
+      .map((c) => [c[ti], c[vi]]);
+    if (pairs.length) return lastTwo(pairs);
+  }
+  return { value: null, change: null, asOf: null };
 }
 
 async function handleRates(request, env, ctx) {
   const cache = caches.default;
   // Versioned key so a previously-cached partial response is ignored.
-  const cacheKey = new Request(new URL("/api/rates?v=2", request.url).toString());
+  const cacheKey = new Request(new URL("/api/rates?v=3", request.url).toString());
   const cached = await cache.match(cacheKey);
   if (cached) return cached;
   // Only the last ~60 days, so each FRED CSV is small and fast.
   const cosd = new Date(Date.now() - 60 * 864e5).toISOString().slice(0, 10);
   const data = await Promise.all(RATE_SERIES.map(async (s) => {
-    const r = s.src === "ecb" ? await ecbSeries(s.key) : await fredSeries(s.id, cosd);
+    const r = s.src === "ecb" ? await ecbSeries(s.keys) : await fredSeries(s.id, cosd);
     return { label: s.label, unit: s.unit, value: r.value, change: r.change, asOf: r.asOf };
   }));
   const resp = new Response(JSON.stringify({ rates: data }), {
-    headers: { "content-type": "application/json", "cache-control": "public, max-age=1800" },
+    // Short browser cache (band also caches in-module per load); edge does the heavy lifting.
+    headers: { "content-type": "application/json", "cache-control": "public, max-age=300" },
   });
   // Only cache once every series resolved, so a transient miss doesn't stick 30 min.
   if (ctx && ctx.waitUntil && data.every((d) => d.value != null)) {
