@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260701-17";
+} from "./data.js?v=20260701-18";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260701-17";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260701-18";
 
 const app = document.getElementById("app");
 
@@ -993,23 +993,20 @@ function newsItemRow(x) {
   return `<div class="intel-row"><div class="intel-meta"><span class="muted small">${esc(x.outlet || "")}</span><span class="muted small">${x.date ? esc(fmtDate(x.date)) : ""}</span></div><div class="intel-body"><a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer" class="intel-head">${esc(x.title)}</a></div></div>`;
 }
 
-function newsBlock(m) {
-  // Combine curated news with the manager's own website announcements (webNews),
-  // de-duplicated by URL then title.
-  const all = [...(m.news || []), ...(m.webNews || [])];
-  const seen = new Set();
-  const n = all.filter((x) => {
-    const k = (x.url || x.title || "").toLowerCase().split(/[?#]/)[0].replace(/\/$/, "");
-    if (!k || seen.has(k)) return false;
-    seen.add(k);
-    return true;
-  });
-  return `<section class="card">
-    <h2>In the news</h2>
-    ${n.length
-      ? feedHtml(n, "mgr:" + m.id + ":news", newsItemRow, "")
-      : '<p class="muted small">No curated news yet for this manager. (When populated, items are drawn from the manager\'s own website plus the Financial Times, Bloomberg, Wall Street Journal, Yahoo Finance and other reputable outlets.)'}
-  </section>`;
+// Dedup key for a manager's combined news feed: a specific source URL when one
+// exists, else the normalized headline/title — so an event captured as both a
+// press item and a structured deal/intel collapses to a single row. Generic
+// landing URLs (a bare domain, /news, /press-releases, …) are ignored so they
+// don't wrongly merge unrelated items that share the same landing page.
+function feedDedupKey(x) {
+  const u = (x.url || x.sourceUrl || "").toLowerCase().split(/[?#]/)[0].replace(/\/+$/, "");
+  const generic = !u || /^https?:\/\/[^/]+$/.test(u) || /\/(news-insights|news|press-releases|media|insights|press)$/.test(u);
+  if (!generic) return "u:" + u;
+  return "t:" + (x.title || x.headline || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+}
+// Render one row of the manager's combined feed by its tagged kind.
+function mgrFeedRow(x) {
+  return x._kind === "deal" ? dealRow(x) : x._kind === "intel" ? intelRow(x) : newsItemRow(x);
 }
 
 // Senior legal team — general counsel and other senior legal counsel, with the
@@ -1076,15 +1073,29 @@ function viewManager(id) {
   const fs = fundsByManager(id).sort((a, b) => b.vintage - a.vintage);
   const news = intelForManager(id);
   const liveFunds = fs.filter((x) => !x.evergreen && !x.lifecycle && x.status !== "Final Close").length;
-  // CLO activity is carved into its own section per manager; the Deal activity
-  // and Fundraising sections exclude clo:true items (consistent with #/clos).
-  const mgrDeals = dealsForManager(m.id).filter((d) => !d.clo);
-  const mgrIntel = news.filter((i) => !i.clo);
+  // The CLO roster still needs this manager's CLO items (deals + intel tagged clo).
   const mgrClo = [
     ...dealsForManager(m.id).filter((d) => d.clo).map((d) => ({ ...d, _kind: "deal" })),
     ...news.filter((i) => i.clo).map((i) => ({ ...i, _kind: "intel" })),
   ];
   const mgrCloRoster = cloRosterFor(mgrClo);
+  // One comprehensive, date-sorted feed for the manager AND its funds/CLOs:
+  // press (news + webNews), deal activity, fundraising intelligence and CLO
+  // items together, de-duplicated so an event captured as both a press item and
+  // a structured deal/intel shows once (the structured record wins).
+  const fundIds = new Set(fs.map((f) => f.id));
+  const belongs = (x) => x.managerId === id || (x.fundId && fundIds.has(x.fundId));
+  const mgrFeed = (() => {
+    const items = [
+      ...deals.filter(belongs).map((d) => ({ ...d, _kind: "deal" })),
+      ...intel.filter(belongs).map((i) => ({ ...i, _kind: "intel" })),
+      ...[...(m.news || []), ...(m.webNews || [])].map((x) => ({ ...x, _kind: "news" })),
+    ];
+    const seen = new Set();
+    return items
+      .filter((x) => { const k = feedDedupKey(x); if (seen.has(k)) return false; seen.add(k); return true; })
+      .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+  })();
 
   app.innerHTML = `
     ${breadcrumb([["#/managers", "Managers"], [null, m.name]])}
@@ -1097,11 +1108,11 @@ function viewManager(id) {
     ${sources(m)}
     <div class="kpi-grid">
       <div class="kpi-card"><div class="kpi-value kpi-aum">${m.aumText ? esc(m.aumText) : "€" + m.aum + "bn"}</div><div class="kpi-label">Assets under management</div></div>
-      <div class="kpi-card"><div class="kpi-value">${fs.length}</div><div class="kpi-label">Funds tracked</div></div>
-      <div class="kpi-card"><div class="kpi-value">${liveFunds}</div><div class="kpi-label">In market now</div></div>
+      <div class="kpi-card${fs.length ? " clickable" : ""}"${fs.length ? ' data-scroll="mgr-funds"' : ""}><div class="kpi-value">${fs.length}</div><div class="kpi-label">Funds tracked</div></div>
+      <div class="kpi-card${fs.length ? " clickable" : ""}"${fs.length ? ' data-scroll="mgr-funds"' : ""}><div class="kpi-value">${liveFunds}</div><div class="kpi-label">In market now</div></div>
       <div class="kpi-card"><div class="kpi-value">${m.founded}</div><div class="kpi-label">Founded</div></div>
     </div>
-    <section class="card">
+    <section class="card" id="mgr-funds">
       <h2>Funds <span class="muted">(${fs.length})</span></h2>
       ${fs.length ? (() => { const p = pageList(fs, "mgr:" + m.id + ":funds", ""); return `<div class="table-wrap"><table class="data-table">
         <thead><tr><th>Fund</th><th>Strategy</th><th>Geography</th><th>Vintage</th><th>Status</th><th>Target</th><th class="prog-col">Progress</th></tr></thead>
@@ -1132,17 +1143,11 @@ function viewManager(id) {
     ${ownersFilingsBlock(m)}
     ${legalBlock(m)}
 
-    <div class="section-divider"><span>News, deals &amp; intelligence</span></div>
-    ${newsBlock(m)}
-    ${mgrDeals.length ? `<section class="card"><h2>Deal activity <span class="muted">(${mgrDeals.length})</span></h2>${feedHtml(mgrDeals, "mgr:" + id + ":deals", dealRow, "")}</section>` : ""}
+    <div class="section-divider"><span>News</span></div>
     <section class="card">
-      <h2>Fundraising intelligence</h2>
-      ${mgrIntel.length ? feedHtml(mgrIntel, "mgr:" + id + ":intel", intelRow, "") : '<p class="muted">No fundraising intelligence items for this manager yet.</p>'}
-    </section>
-    <section class="card">
-      <h2>CLOs</h2>
-      <p class="muted small">News about ${esc(m.name)}'s CLOs — issuances, pricings, resets, platforms &amp; funds. <a href="#/clos">All CLO activity →</a></p>
-      ${mgrClo.length ? feedHtml(mgrClo, "mgr:" + id + ":clo", (x) => (x._kind === "deal" ? dealRow(x) : intelRow(x)), "") : '<p class="muted">No CLO news for this manager yet.</p>'}
+      <h2>News <span class="muted">(${mgrFeed.length})</span></h2>
+      <p class="muted small">All tracked press, deal, fundraising &amp; CLO activity for ${esc(m.name)} and its funds/CLOs, newest first.</p>
+      ${mgrFeed.length ? feedHtml(mgrFeed, "mgr:" + id + ":all", mgrFeedRow, "") : '<p class="muted">No news yet for this manager.</p>'}
     </section>`;
 }
 
@@ -1781,6 +1786,12 @@ app.addEventListener("click", (e) => {
     const target = "#/" + route;
     if (location.hash === target) router();
     else location.hash = target;
+    return;
+  }
+  const scroll = e.target.closest("[data-scroll]");
+  if (scroll) {
+    const t = document.getElementById(scroll.getAttribute("data-scroll"));
+    if (t) t.scrollIntoView({ behavior: "smooth", block: "start" });
     return;
   }
   const row = e.target.closest("[data-href]");
