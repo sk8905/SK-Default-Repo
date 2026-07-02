@@ -16,8 +16,8 @@
 import {
   items, cases, caseSummaries, practiceAreas, firms, tiers, updateTypes, restructurings,
   firmById, areaById, typeById, tierById, LAST_REVIEWED, LAST_CHECKED, LAST_CHECKED_TIME,
-} from "./data.js?v=20260702-3";
-import { donutChart, columnChart } from "./charts.js?v=20260702-3";
+} from "./data.js?v=20260702-4";
+import { donutChart, columnChart } from "./charts.js?v=20260702-4";
 
 const app = document.getElementById("app");
 
@@ -234,22 +234,36 @@ function itemRow(it) {
 
 // A BAILII judgment as a list row — same Credit-style layout, AI summary inline,
 // linking out to bailii.org.
+// Collapsed by default — the CASE NAME (inside <summary>) is the expand/collapse
+// toggle; the Save button sits top-right of that line (always visible; the global
+// handler preventDefaults so it saves without toggling). Expanding reveals the AI
+// summary and the court/citation/BAILII footer.
 function caseRow(c) {
   const summary = caseSummaries[c.id] || c.summary || "";
   const saved = getSaved().has(c.id);
+  const compact = [esc(c.court), c.citation ? `<span class="cite">${esc(c.citation)}</span>` : ""].filter(Boolean).join(" · ");
   return `<div class="feed-row" id="row-${esc(c.id)}">
     <div class="feed-meta">
       <div class="chips">${areaChip(c.area)}</div>
       <span class="feed-date">${fmtDate(c.date)}</span>
     </div>
     <div class="feed-body">
-      <a class="feed-title" href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">${esc(c.name)} ↗</a>
-      <p class="feed-summary"><span class="ai-tag">✦ AI summary</span> ${esc(summary)}</p>
-      <div class="feed-foot">
-        <span>${esc(c.court)}</span> · <span class="cite">${esc(c.citation)}</span> · <a href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">View judgment on BAILII ↗</a>
-        <button class="save-btn ${saved ? "is-saved" : ""}" data-save="${esc(c.id)}"
-          aria-pressed="${saved}" title="${saved ? "Remove from saved" : "Save this case"}">${saved ? "★ Saved" : "☆ Save"}</button>
-      </div>
+      <details class="rx-det">
+        <summary class="rx-summary">
+          <span class="rx-title-line">
+            <span class="feed-title rx-name">${esc(c.name)}</span>
+            <button class="save-btn rx-save ${saved ? "is-saved" : ""}" data-save="${esc(c.id)}"
+              aria-pressed="${saved}" title="${saved ? "Remove from saved" : "Save this case"}">${saved ? "★ Saved" : "☆ Save"}</button>
+          </span>
+          ${compact ? `<span class="rx-compact">${compact}</span>` : ""}
+        </summary>
+        <div class="rx-expand">
+          <p class="feed-summary"><span class="ai-tag">✦ AI summary</span> ${esc(summary)}</p>
+          <div class="feed-foot">
+            <a href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">View judgment on BAILII ↗</a>
+          </div>
+        </div>
+      </details>
     </div>
   </div>`;
 }
@@ -549,7 +563,10 @@ function viewCases() {
           <input id="case-search" type="search" placeholder="Search cases, citations…"
             value="${esc(caseFilter.q)}" aria-label="Search case law" autocomplete="off"/>
         </div>
-        <div id="case-count" class="result-count" aria-live="polite"></div>
+        <div class="rx-bar">
+          <div id="case-count" class="result-count" aria-live="polite"></div>
+          <button type="button" class="link-btn" id="case-toggle-all" aria-expanded="false">Expand all</button>
+        </div>
         <section class="card"><div id="case-results" class="feed"></div></section>
       </section>
     </div>
@@ -572,18 +589,37 @@ function viewCases() {
     renderCaseResults();
   });
 
+  app.querySelector("#case-toggle-all").addEventListener("click", (e) => {
+    const dets = app.querySelectorAll(".rx-det");
+    const anyClosed = [...dets].some((d) => !d.open);
+    dets.forEach((d) => { d.open = anyClosed; });
+    e.currentTarget.textContent = anyClosed ? "Collapse all" : "Expand all";
+    e.currentTarget.setAttribute("aria-expanded", String(anyClosed));
+  });
+
   renderCaseResults();
 
-  // Deep-link from the dashboard "Recent cases" list: scroll to & flash the case.
+  // Deep-link from the dashboard "Recent cases" list (or a shared URL): scroll to,
+  // open & flash it — revealing later pages first if needed.
   const focusId = parseHashQuery().case;
-  if (focusId) {
-    const el = document.getElementById("row-" + focusId);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-      el.classList.add("flash");
-      setTimeout(() => el.classList.remove("flash"), 2200);
-    }
+  if (focusId) focusCaseRow(focusId);
+}
+
+// Jump to a specific case: scroll to it, open it and flash it. If it's beyond the
+// current page, reveal all cases first so the jump always lands.
+function focusCaseRow(id) {
+  let el = document.getElementById("row-" + id);
+  if (!el) {
+    pageShown.cases = cases.length;
+    renderCaseResults();
+    el = document.getElementById("row-" + id);
   }
+  if (!el) return;
+  const det = el.querySelector(".rx-det");
+  if (det) det.open = true;
+  el.scrollIntoView({ behavior: "smooth", block: "center" });
+  el.classList.add("flash");
+  setTimeout(() => el.classList.remove("flash"), 2200);
 }
 
 function renderCaseResults() {
@@ -602,6 +638,8 @@ function renderCaseResults() {
   }).sort(byDateDesc);
   countEl.textContent = `${matched.length} case${matched.length === 1 ? "" : "s"}`;
   el.innerHTML = matched.length ? feedHtml(matched, "cases", caseRow, JSON.stringify(caseFilter)) : `<div class="empty">No cases match these filters.</div>`;
+  const allBtn = document.getElementById("case-toggle-all");
+  if (allBtn) { allBtn.textContent = "Expand all"; allBtn.setAttribute("aria-expanded", "false"); allBtn.style.display = matched.length ? "" : "none"; }
 }
 
 // =============================================================================
@@ -703,6 +741,32 @@ function rxOutcomeShort(o) {
   return "Sanctioned";
 }
 
+// Outcome as a verb phrase for the composed summary sentence.
+function rxOutcomeVerb(o) {
+  const t = (o || "").toLowerCase();
+  if (t.includes("refus")) return "was refused sanction";
+  if (t.includes("overturn") || (t.includes("appeal") && t.includes("allow"))) return "was sanctioned but overturned on appeal";
+  if (t.includes("upheld") || (t.includes("appeal") && t.includes("dismiss"))) return "was sanctioned and later upheld on appeal";
+  if (t.includes("conven")) return "is at the convening stage";
+  if (t.includes("withdraw")) return "was withdrawn";
+  return "was sanctioned";
+}
+
+// A short narrative summary composed from the matter's own fields (company, type,
+// the debt/deal description and outcome) — mirrors the AI-summary line shown on
+// case-law rows. Facts only; no fabrication beyond joining existing fields.
+function rxSummary(r) {
+  const kind = r.type === "scheme" ? "a Part 26 scheme of arrangement" : "a Part 26A restructuring plan";
+  let deal = "";
+  if (r.debt) {
+    const d = r.debt.trim();
+    // A bare figure ("~€7bn", ">$9bn") vs. a descriptive clause.
+    const bare = d.length < 16 && /[£$€\d]/.test(d) && !/\s[a-z]{4,}/i.test(d.replace(/(bn|m|billion|million)/ig, ""));
+    deal = bare ? ` The restructuring concerned debt of ${d}.` : ` ${d.replace(/[.;]\s*$/, "")}.`;
+  }
+  return `${r.company} pursued ${kind}.${deal} The ${r.type === "scheme" ? "scheme" : "plan"} ${rxOutcomeVerb(r.outcome)}.`;
+}
+
 // A restructuring matter as a feed row — same layout as the alerts/case-law
 // feeds: type chip + date in the meta column, company title (linking to the
 // judgment), key detail lines, and a muted footer with the citation and links.
@@ -713,7 +777,7 @@ function rxRow(r) {
   const features = (r.features || []).length
     ? `<ul class="rx-features">${r.features.map((f) => `<li>${esc(f)}</li>`).join("")}</ul>` : "";
   const lines = [
-    r.debt ? `<p class="feed-summary">${esc(r.debt)}</p>` : "",
+    `<p class="feed-summary"><span class="ai-tag">✦ AI summary</span> ${esc(rxSummary(r))}</p>`,
     (r.creditors || []).length ? `<p class="rx-line"><span class="rx-lbl">Largest creditors</span> ${esc(r.creditors.join("; "))}</p>` : "",
     (r.advisers || []).length ? `<p class="rx-line"><span class="rx-lbl">Company advised by</span> ${esc(r.advisers.join(", "))}</p>` : "",
     features,
@@ -812,18 +876,10 @@ function viewRestructurings() {
   });
   renderRxResults();
 
-  // Deep-link from a notification: scroll to, expand & flash the matter.
-  const focusId = q.m;
-  if (focusId) {
-    const el = document.getElementById("row-" + focusId);
-    if (el) {
-      const det = el.querySelector(".rx-det");
-      if (det) det.open = true;
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-      el.classList.add("flash");
-      setTimeout(() => el.classList.remove("flash"), 2200);
-    }
-  }
+  // Deep-link from the dashboard / a notification: scroll to, expand & flash the
+  // matter. If it's paged out of the first page, reveal all matters and retry so
+  // the jump always lands.
+  if (q.m) focusRxMatter(q.m);
 }
 
 function renderRxResults() {
@@ -840,13 +896,30 @@ function renderRxResults() {
       if (!hay.includes(rxFilter.q.trim().toLowerCase())) return false;
     }
     return true;
-  });
+  }).sort(byDateDesc);
   const plans = matched.filter((r) => r.type === "plan").length;
   const schemes = matched.filter((r) => r.type === "scheme").length;
   countEl.textContent = `${matched.length} matter${matched.length !== 1 ? "s" : ""} · ${plans} plan${plans !== 1 ? "s" : ""}, ${schemes} scheme${schemes !== 1 ? "s" : ""}`;
   el.innerHTML = matched.length ? feedHtml(matched, "rx", rxRow, JSON.stringify(rxFilter)) : '<p class="empty">No matters match these filters.</p>';
   const allBtn = document.getElementById("rx-toggle-all");
   if (allBtn) { allBtn.textContent = "Expand all"; allBtn.setAttribute("aria-expanded", "false"); allBtn.style.display = matched.length ? "" : "none"; }
+}
+
+// Jump to a specific matter (from a dashboard link or notification): scroll to it,
+// open it and flash it. If it's beyond the current page, reveal all matters first.
+function focusRxMatter(id) {
+  let el = document.getElementById("row-" + id);
+  if (!el) {
+    pageShown.rx = restructurings.length;
+    renderRxResults();
+    el = document.getElementById("row-" + id);
+  }
+  if (!el) return;
+  const det = el.querySelector(".rx-det");
+  if (det) det.open = true;
+  el.scrollIntoView({ behavior: "smooth", block: "center" });
+  el.classList.add("flash");
+  setTimeout(() => el.classList.remove("flash"), 2200);
 }
 
 // =============================================================================
