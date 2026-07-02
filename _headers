@@ -1,0 +1,24 @@
+# Static-asset HTTP headers for Cloudflare Workers Assets.
+#
+# The app HTML documents must ALWAYS revalidate so a fresh deploy's index.html —
+# and the bumped ?v= asset references it carries — is picked up immediately,
+# instead of a stale cached HTML page pinning the old ?v= JS/CSS/data. These
+# documents are served directly by the asset system BEFORE the Worker runs, so
+# the Worker cannot set their cache headers; this file does.
+#
+# no-cache = the browser/edge may store the page but MUST revalidate with the
+# origin before using it (ETag → cheap 304 when unchanged), so a new deploy shows
+# up on the next load. Fingerprinted JS/CSS/data are versioned by their ?v= tokens
+# and keep the default long cache — only these HTML entry points are pinned here.
+/
+  Cache-Control: no-cache
+/index.html
+  Cache-Control: no-cache
+/credit/
+  Cache-Control: no-cache
+/credit/index.html
+  Cache-Control: no-cache
+/legal/
+  Cache-Control: no-cache
+/legal/index.html
+  Cache-Control: no-cache

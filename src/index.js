@@ -318,15 +318,16 @@ export default {
       const dest = to.startsWith("/") ? to : "/";
       return Response.redirect(new URL(dest, url.origin).toString(), 302);
     }
-    // Everything else: serve the static site. Force HTML documents to always
-    // revalidate (ETag-based, so unchanged HTML is a cheap 304) so a fresh
-    // deploy's index.html — and the bumped ?v= asset references it carries — is
-    // picked up immediately, without waiting on a stale browser/edge HTML cache.
-    // Fingerprinted JS/CSS/data keep their own long cache via the ?v= tokens.
+    // Everything else: serve the static site. NOTE: with run_worker_first unset,
+    // static assets (incl. the HTML documents) are served by the asset system
+    // BEFORE this Worker runs, so HTML cache headers are set in the `_headers`
+    // file (no-cache on the app entry points) — not here. The block below only
+    // affects any HTML that DOES route through the Worker (a fallback), forcing
+    // it to revalidate so a fresh deploy is never masked by a stale HTML cache.
     const res = await env.ASSETS.fetch(request);
     if ((res.headers.get("content-type") || "").includes("text/html")) {
       const headers = new Headers(res.headers);
-      headers.set("cache-control", "public, max-age=0, must-revalidate");
+      headers.set("cache-control", "no-cache");
       return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
     }
     return res;
