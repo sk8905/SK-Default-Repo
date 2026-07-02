@@ -106,6 +106,9 @@ function handleMe(request) {
 // discontinued). Results are edge-cached 30 min (these are daily fixings), but
 // only when fully populated so a transient upstream miss can't stick.
 const RATE_SERIES = [
+  { label: "US 10Y", unit: "%", src: "treasury", col: "10 Yr", href: "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_yield_curve" },
+  { label: "SOFR", unit: "%", src: "nyfed", href: "https://www.newyorkfed.org/markets/reference-rates/sofr" },
+  { label: "SONIA", unit: "%", src: "fred", id: "IUDSOIA", href: "https://fred.stlouisfed.org/series/IUDSOIA" },
   // EURIBOR is published on TARGET business days; ECB's business-daily frequency
   // code is "B" (not "D"). Try business-daily, then daily, then monthly average
   // as a guaranteed fallback so the tile always resolves.
@@ -116,11 +119,11 @@ const RATE_SERIES = [
     "D.U2.EUR.RT.MM.EURIBOR3MD_.HSTA",
     "M.U2.EUR.RT.MM.EURIBOR3MD_.HSTA",
   ] },
-  { label: "SOFR", unit: "%", src: "nyfed", href: "https://www.newyorkfed.org/markets/reference-rates/sofr" },
-  { label: "SONIA", unit: "%", src: "fred", id: "IUDSOIA", href: "https://fred.stlouisfed.org/series/IUDSOIA" },
-  { label: "US 10Y", unit: "%", src: "treasury", col: "10 Yr", href: "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_yield_curve" },
+  // ICE BofA option-adjusted spreads (FRED, via the API key). Reported in % → shown as bp.
   { label: "US IG OAS", unit: "bp", src: "fred", id: "BAMLC0A0CM", href: "https://fred.stlouisfed.org/series/BAMLC0A0CM" },
   { label: "US HY OAS", unit: "bp", src: "fred", id: "BAMLH0A0HYM2", href: "https://fred.stlouisfed.org/series/BAMLH0A0HYM2" },
+  { label: "US CCC OAS", unit: "bp", src: "fred", id: "BAMLH0A3HYC", href: "https://fred.stlouisfed.org/series/BAMLH0A3HYC" },
+  { label: "EURO HY OAS", unit: "bp", src: "fred", id: "BAMLHE00EHYIOAS", href: "https://fred.stlouisfed.org/series/BAMLHE00EHYIOAS" },
 ];
 
 // Browser-like headers: FRED's fredgraph.csv endpoint throttles/blocks obvious
@@ -280,7 +283,7 @@ async function handleRates(request, env, ctx) {
 
   const cache = caches.default;
   // Versioned key so a previously-cached partial response is ignored.
-  const cacheKey = new Request(new URL("/api/rates?v=8", request.url).toString());
+  const cacheKey = new Request(new URL("/api/rates?v=9", request.url).toString());
   const cached = await cache.match(cacheKey);
   if (cached) return cached;
   const data = await Promise.all(RATE_SERIES.map(async (s) => {
