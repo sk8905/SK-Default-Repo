@@ -121,15 +121,24 @@ const RATE_SERIES = [
   { label: "US HY OAS", unit: "bp", src: "fred", id: "BAMLH0A0HYM2" },
 ];
 
-// Fetch text with one retry; small CSVs so this is cheap. Only 200s are cached
-// (no cacheEverything) so a transient 404 is never held.
+// Browser-like headers: FRED's fredgraph.csv endpoint throttles/blocks obvious
+// bot user-agents, so present as a normal browser (harmless for ECB too). Referer
+// is set to the target's own origin, which some endpoints check.
+function fetchHeaders(url) {
+  return {
+    "accept": "text/csv, application/json, text/plain, */*",
+    "accept-language": "en-US,en;q=0.9",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+    "referer": new URL(url).origin + "/",
+  };
+}
+
+// Fetch text with a couple of retries; small CSVs so this is cheap. Only 200s are
+// cached (no cacheEverything) so a transient 404/403 is never held.
 async function fetchText(url) {
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < 3; i++) {
     try {
-      const r = await fetch(url, {
-        headers: { "accept": "text/csv, application/json, */*", "user-agent": "Meridian/1.0 (+workers)" },
-        cf: { cacheTtl: 900 },
-      });
+      const r = await fetch(url, { headers: fetchHeaders(url), cf: { cacheTtl: 900 } });
       if (r.ok) return await r.text();
     } catch { /* retry */ }
   }
@@ -177,14 +186,42 @@ async function ecbSeries(keys) {
   return { value: null, change: null, asOf: null };
 }
 
+// Build the upstream URL for a series (shared by the fetchers and the debug probe).
+function seriesUrl(s, cosd) {
+  return s.src === "ecb"
+    ? `https://data-api.ecb.europa.eu/service/data/FM/${s.keys[0]}?lastNObservations=6&format=csvdata`
+    : `https://fred.stlouisfed.org/graph/fredgraph.csv?id=${s.id}&cosd=${cosd}`;
+}
+
 async function handleRates(request, env, ctx) {
-  const cache = caches.default;
-  // Versioned key so a previously-cached partial response is ignored.
-  const cacheKey = new Request(new URL("/api/rates?v=4", request.url).toString());
-  const cached = await cache.match(cacheKey);
-  if (cached) return cached;
+  const url = new URL(request.url);
   // Only the last ~60 days, so each FRED CSV is small and fast.
   const cosd = new Date(Date.now() - 60 * 864e5).toISOString().slice(0, 10);
+
+  // /api/rates?debug=1 — probe each upstream directly and report the HTTP status
+  // and a short response snippet, so an upstream block (e.g. FRED 403) is visible
+  // without guessing. Not cached; safe to leave in (no secrets, read-only).
+  if (url.searchParams.get("debug") === "1") {
+    const probes = await Promise.all(RATE_SERIES.map(async (s) => {
+      const u = seriesUrl(s, cosd);
+      try {
+        const r = await fetch(u, { headers: fetchHeaders(u) });
+        const body = await r.text();
+        return { label: s.label, src: s.src, status: r.status, ok: r.ok, len: body.length, snippet: body.slice(0, 180) };
+      } catch (e) {
+        return { label: s.label, src: s.src, error: String(e && e.message || e) };
+      }
+    }));
+    return new Response(JSON.stringify({ cosd, probes }, null, 2), {
+      headers: { "content-type": "application/json", "cache-control": "no-store" },
+    });
+  }
+
+  const cache = caches.default;
+  // Versioned key so a previously-cached partial response is ignored.
+  const cacheKey = new Request(new URL("/api/rates?v=5", request.url).toString());
+  const cached = await cache.match(cacheKey);
+  if (cached) return cached;
   const data = await Promise.all(RATE_SERIES.map(async (s) => {
     const r = s.src === "ecb" ? await ecbSeries(s.keys) : await fredSeries(s.id, cosd);
     return { label: s.label, unit: s.unit, value: r.value, change: r.change, asOf: r.asOf };

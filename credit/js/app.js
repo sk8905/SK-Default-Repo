@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260702-3";
+} from "./data.js?v=20260702-4";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260702-3";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260702-4";
 
 const app = document.getElementById("app");
 
@@ -525,7 +525,7 @@ function mountRatesBand() {
   if (ratesCache) { renderRates(el, ratesCache); return; }
   el.innerHTML = '<span class="muted small">Loading market rates…</span>';
   try {
-    fetch("/api/rates?v=4")
+    fetch("/api/rates?v=5")
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((d) => { ratesCache = d.rates || []; const now = document.getElementById("rates-band"); if (now) renderRates(now, ratesCache); })
       .catch(() => { const now = document.getElementById("rates-band"); if (now) now.innerHTML = '<span class="muted small">Market rates unavailable right now.</span>'; });
