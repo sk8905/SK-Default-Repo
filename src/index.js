@@ -114,9 +114,9 @@ const RATE_SERIES = [
     "D.U2.EUR.RT.MM.EURIBOR3MD_.HSTA",
     "M.U2.EUR.RT.MM.EURIBOR3MD_.HSTA",
   ] },
-  { label: "SOFR", unit: "%", src: "fred", id: "SOFR" },
+  { label: "SOFR", unit: "%", src: "nyfed" },
   { label: "SONIA", unit: "%", src: "fred", id: "IUDSOIA" },
-  { label: "US 10Y", unit: "%", src: "fred", id: "DGS10" },
+  { label: "US 10Y", unit: "%", src: "treasury", col: "10 Yr" },
   { label: "US IG OAS", unit: "bp", src: "fred", id: "BAMLC0A0CM" },
   { label: "US HY OAS", unit: "bp", src: "fred", id: "BAMLH0A0HYM2" },
 ];
@@ -158,31 +158,37 @@ function lastTwo(pairs) {
   };
 }
 
-// DBnomics mirrors FRED with a public, no-key JSON API and is NOT behind the
-// Cloudflare edge that 520s FRED's own site for Worker requests. Try both id
-// forms it accepts; parse the observations doc into [period, value] pairs.
-async function dbnomicsSeries(fredId) {
-  const urls = [
-    `https://api.db.nomics.world/v22/series?series_ids=FRED/${fredId}&observations=1`,
-    `https://api.db.nomics.world/v22/series/FRED/${fredId}?observations=1`,
-  ];
-  for (const u of urls) {
-    const txt = await fetchText(u);
-    if (!txt) continue;
-    let j; try { j = JSON.parse(txt); } catch { continue; }
-    const docs = j && j.series && j.series.docs;
-    const doc = Array.isArray(docs) ? docs[0] : null;
-    if (!doc || !Array.isArray(doc.period) || !Array.isArray(doc.value)) continue;
-    const pairs = [];
-    for (let i = 0; i < doc.period.length; i++) {
-      const v = doc.value[i];
-      if (v === null || v === "NA") continue;
-      if (!Number.isFinite(Number(v))) continue;
-      pairs.push([doc.period[i], String(v)]);
-    }
-    if (pairs.length) return pairs;
+// SOFR from the NY Fed's public JSON API (no key; not behind FRED's Cloudflare).
+async function nyfedSofr() {
+  const txt = await fetchText("https://markets.newyorkfed.org/api/rates/secured/sofr/last/5.json");
+  if (!txt) return { value: null, change: null, asOf: null };
+  let j; try { j = JSON.parse(txt); } catch { return { value: null, change: null, asOf: null }; }
+  const pairs = (j.refRates || [])
+    .filter((r) => r.type === "SOFR" && r.percentRate != null)
+    .map((r) => [r.effectiveDate, String(r.percentRate)]);
+  return lastTwo(pairs);
+}
+
+// US 10Y from the Treasury's daily par-yield-curve CSV (no key). The header is
+// quoted ("10 Yr" etc.) and dates are MM/DD/YYYY, newest first.
+async function treasurySeries(col) {
+  const y = new Date().getFullYear();
+  const txt = await fetchText(`https://home.treasury.gov/resource-center/data-chart-center/interest-rates/daily-treasury-rates.csv/${y}/all?type=daily_treasury_yield_curve&_format=csv`);
+  if (!txt) return { value: null, change: null, asOf: null };
+  const lines = txt.trim().split(/\r?\n/);
+  if (lines.length < 2) return { value: null, change: null, asOf: null };
+  const header = lines[0].split(",").map((h) => h.replace(/^"|"$/g, "").trim());
+  const ci = header.indexOf(col), di = header.indexOf("Date");
+  if (ci < 0 || di < 0) return { value: null, change: null, asOf: null };
+  const pairs = [];
+  for (const line of lines.slice(1)) {
+    const c = line.split(",");
+    const m = (c[di] || "").replace(/^"|"$/g, "").trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    const v = (c[ci] || "").trim();
+    if (!m || v === "") continue;
+    pairs.push([`${m[3]}-${m[1]}-${m[2]}`, v]); // normalise to YYYY-MM-DD for sorting
   }
-  return null;
+  return lastTwo(pairs);
 }
 
 // Parse a FRED CSV body (DATE,VALUE header) into [date, value] pairs.
@@ -193,27 +199,24 @@ function parseFredCsv(txt) {
     .map((c) => [c[0], c[1]]);
 }
 
-// Resolve a FRED series id via the first source that works: DBnomics mirror,
-// then the official FRED API (only if FRED_API_KEY is configured), then FRED's
-// CSV (last resort — currently 520s from Workers, but harmless to attempt).
+// FRED-only series (SONIA, ICE BofA OAS spreads) have no working no-key source —
+// FRED's site returns Cloudflare 520 to Workers. Use the official FRED API when a
+// key is configured (api.stlouisfed.org is reachable); fall back to the CSV.
 async function fredSeries(id, cosd, env) {
-  let pairs = await dbnomicsSeries(id);
-  if ((!pairs || !pairs.length) && env && env.FRED_API_KEY) {
+  if (env && env.FRED_API_KEY) {
     const txt = await fetchText(`https://api.stlouisfed.org/fred/series/observations?series_id=${id}&api_key=${env.FRED_API_KEY}&file_type=json&sort_order=desc&limit=8`);
     if (txt) {
       try {
         const obs = (JSON.parse(txt).observations || [])
           .filter((o) => o.value !== "." && o.value !== "")
           .map((o) => [o.date, o.value]);
-        if (obs.length) pairs = obs;
-      } catch { /* fall through */ }
+        if (obs.length) return lastTwo(obs);
+      } catch { /* fall through to CSV */ }
     }
   }
-  if (!pairs || !pairs.length) {
-    const txt = await fetchText(`https://fred.stlouisfed.org/graph/fredgraph.csv?id=${id}&cosd=${cosd}`);
-    if (txt) pairs = parseFredCsv(txt);
-  }
-  return (pairs && pairs.length) ? lastTwo(pairs) : { value: null, change: null, asOf: null };
+  const txt = await fetchText(`https://fred.stlouisfed.org/graph/fredgraph.csv?id=${id}&cosd=${cosd}`);
+  const pairs = txt ? parseFredCsv(txt) : [];
+  return pairs.length ? lastTwo(pairs) : { value: null, change: null, asOf: null };
 }
 
 async function ecbSeries(keys) {
@@ -232,13 +235,6 @@ async function ecbSeries(keys) {
     if (pairs.length) return lastTwo(pairs);
   }
   return { value: null, change: null, asOf: null };
-}
-
-// Build the upstream URL for a series (shared by the fetchers and the debug probe).
-function seriesUrl(s, cosd) {
-  return s.src === "ecb"
-    ? `https://data-api.ecb.europa.eu/service/data/FM/${s.keys[0]}?lastNObservations=6&format=csvdata`
-    : `https://fred.stlouisfed.org/graph/fredgraph.csv?id=${s.id}&cosd=${cosd}`;
 }
 
 async function handleRates(request, env, ctx) {
@@ -282,11 +278,14 @@ async function handleRates(request, env, ctx) {
 
   const cache = caches.default;
   // Versioned key so a previously-cached partial response is ignored.
-  const cacheKey = new Request(new URL("/api/rates?v=6", request.url).toString());
+  const cacheKey = new Request(new URL("/api/rates?v=7", request.url).toString());
   const cached = await cache.match(cacheKey);
   if (cached) return cached;
   const data = await Promise.all(RATE_SERIES.map(async (s) => {
-    const r = s.src === "ecb" ? await ecbSeries(s.keys) : await fredSeries(s.id, cosd, env);
+    const r = s.src === "ecb" ? await ecbSeries(s.keys)
+      : s.src === "nyfed" ? await nyfedSofr()
+      : s.src === "treasury" ? await treasurySeries(s.col)
+      : await fredSeries(s.id, cosd, env);
     return { label: s.label, unit: s.unit, value: r.value, change: r.change, asOf: r.asOf };
   }));
   const resp = new Response(JSON.stringify({ rates: data }), {
