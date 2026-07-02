@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260702-11";
+} from "./data.js?v=20260702-12";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260702-11";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260702-12";
 
 const app = document.getElementById("app");
 
@@ -562,10 +562,6 @@ function viewDashboard() {
     { label: "CLO closes this quarter", value: cloClosesThisQuarter, sub: curQ, jump: 'data-jump="clos"' },
   ];
 
-  // ---- the two charts retained on the dashboard ----
-  const byDealType = [...new Set(dealsNoClo.map((d) => d.type))].map((t) => ({ label: t, value: dealsNoClo.filter((d) => d.type === t).length, nav: { jump: "deals", dtype: t } })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
-  const byStatus = FUND_CATEGORIES.map((s) => ({ label: s, value: creditFunds.filter((f) => fundCategory(f) === s).length, nav: { jump: "funds", status: s } })).filter((d) => d.value > 0);
-
   // ---- latest feeds (headlines + links only; click → item on its feed page) ----
   const dealsByDate = [...dealsNoClo].sort((a, b) => String(b.date).localeCompare(String(a.date)));
   const intelByDate = [...intelNoClo].sort((a, b) => String(b.date).localeCompare(String(a.date)));
@@ -622,11 +618,6 @@ function viewDashboard() {
         ${cloByDate.length ? `<ul class="compact-list">${cloByDate.slice(0, 12).map((c) => compactRow(c, "clos")).join("")}</ul>` : '<p class="muted small">No CLO news yet.</p>'}
         <div class="card-foot">${link("#/clos", "View all CLO activity →")}</div>
       </section>
-    </div>
-
-    <div class="grid-2">
-      <section class="card"><h2>Deals by type</h2>${byDealType.length ? donutChart(byDealType) : '<p class="muted small">No deals tracked.</p>'}</section>
-      <section class="card"><h2>Funds by status</h2>${donutChart(byStatus)}</section>
     </div>`;
   mountRatesBand();
 }
@@ -1308,43 +1299,17 @@ function viewIntel() {
     (!f.year.length || f.year.includes(yearOf(i.date)))
   ).sort((a, b) => String(b.date).localeCompare(String(a.date))); // newest first
 
-  // ---- fundraising charts (moved here from the dashboard) ----
-  const creditFunds = funds;
-  const bnRaised = (list) => Math.round(list.reduce((a, x) => a + (x.raised || 0), 0) / 100) / 10;
-  const byStrategy = STRATEGIES.map((s) => ({ label: s, value: bnRaised(creditFunds.filter((x) => x.strategy === s)), nav: { jump: "funds", strategy: s } })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
-  const seeking = (x) => !x.evergreen && !x.lifecycle && (x.status === "Open" || x.status === "First Close" || x.status === "Pre-marketing");
-  const bnTarget = (list) => Math.round(list.reduce((a, x) => a + (x.targetSize || 0), 0) / 100) / 10;
-  const bySought = STRATEGIES.map((s) => ({ label: s, value: bnTarget(creditFunds.filter((x) => seeking(x) && x.strategy === s)), nav: { jump: "funds", strategy: s, status: "in-market" } })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
-  const byGeo = GEOS.map((g) => ({ label: g, value: bnRaised(creditFunds.filter((x) => x.geoFocus === g)), nav: { jump: "funds", geo: g } })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
-  const qCounts = {};
-  creditFunds.filter(isClose).forEach((x) => { const q = fundQuarter(x); if (q) qCounts[q] = (qCounts[q] || 0) + 1; });
-  const nowD = new Date();
-  let cy = nowD.getFullYear(), cq = Math.floor(nowD.getMonth() / 3) + 1;
-  const quarters = [];
-  for (let i = 0; i < 20; i++) { quarters.unshift(`${cy}-Q${cq}`); cq--; if (cq < 1) { cq = 4; cy--; } }
-  const trend = quarters.map((q) => ({ label: "'" + q.slice(2), value: qCounts[q] || 0, nav: { jump: "funds", period: q } }));
-
   app.innerHTML = `
     <div class="page-head"><h1>Fundraising Intelligence</h1><p class="muted">${rows.length} of ${base.length} items · European private credit capital formation</p></div>
     ${focusToggle()}
-    <div class="split-3070">
-      <div class="split-left">
-        <section class="card"><h2>Capital raised by strategy <span class="muted">(€bn)</span></h2>${byStrategy.length ? barChart(byStrategy, { unit: "€", width: 540 }) : '<p class="muted small">No data.</p>'}</section>
-        <section class="card"><h2>Capital sought by strategy <span class="muted">(€bn · disclosed targets, funds in market)</span></h2>${bySought.length ? barChart(bySought, { unit: "€", width: 540 }) : '<p class="muted small">No disclosed target sizes for funds currently in market.</p>'}</section>
-        <section class="card"><h2>Capital raised by geography <span class="muted">(€bn)</span></h2>${byGeo.length ? barChart(byGeo, { unit: "€", width: 540 }) : '<p class="muted small">No data.</p>'}</section>
-        <section class="card"><h2>Fundraising momentum <span class="muted">(closes / quarter · past 5 years)</span></h2><p class="muted small">Click a quarter to see the funds that reached a first/final close in it.</p>${lineChart(trend, { width: 540, height: 240 })}</section>
-      </div>
-      <div class="split-right">
-        <input type="checkbox" id="filters-toggle" class="ff-cb" ${mfOpen() ? "checked" : ""}><label for="filters-toggle" class="ff-lab">Filters</label><div class="filters">
-          <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Keyword…" value="${esc(f.q)}"></label>
-          ${multiFilter("intel:type", "Type", [...new Set(base.map((i) => i.type))].sort(), f.type)}
-          ${multiFilter("intel:year", "Year", [...new Set(base.map((i) => yearOf(i.date)).filter(Boolean))].sort((a, b) => b.localeCompare(a)), f.year)}
-        </div>
-        <section class="card">
-          ${rows.length ? feedHtml(rows, "intel", intelRow, JSON.stringify(f)) : '<p class="empty">No intelligence items match these filters.</p>'}
-        </section>
-      </div>
+    <input type="checkbox" id="filters-toggle" class="ff-cb" ${mfOpen() ? "checked" : ""}><label for="filters-toggle" class="ff-lab">Filters</label><div class="filters">
+      <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Keyword…" value="${esc(f.q)}"></label>
+      ${multiFilter("intel:type", "Type", [...new Set(base.map((i) => i.type))].sort(), f.type)}
+      ${multiFilter("intel:year", "Year", [...new Set(base.map((i) => yearOf(i.date)).filter(Boolean))].sort((a, b) => b.localeCompare(a)), f.year)}
     </div>
+    <section class="card">
+      ${rows.length ? feedHtml(rows, "intel", intelRow, JSON.stringify(f)) : '<p class="empty">No intelligence items match these filters.</p>'}
+    </section>
     <section class="card">
       <h2>Known LP → manager commitments <span class="muted">(${commitments.length})</span></h2>
       <p class="muted small">Publicly reported LP→manager relationships (moved here from the former Mandates tab) — click either side to explore. LP mandates &amp; RFP / fund-launch items appear in the feed above, filterable by type "Mandate" / "Launch".</p>
@@ -1393,83 +1358,22 @@ function viewDeals() {
     (!f.period || quarterOf(d.date) === f.period)
   ).sort((a, b) => String(b.date).localeCompare(String(a.date))); // newest first
 
-  // ---- deal charts (moved here from the dashboard) ----
-  const dq = {};
-  base.forEach((d) => { const q = quarterOf(d.date); if (q) dq[q] = (dq[q] || 0) + 1; });
-  const nowD = new Date();
-  let dy = nowD.getFullYear(), dqr = Math.floor(nowD.getMonth() / 3) + 1;
-  const dQuarters = [];
-  for (let i = 0; i < 40; i++) { dQuarters.unshift(`${dy}-Q${dqr}`); dqr--; if (dqr < 1) { dqr = 4; dy--; } }
-  const NQ = dQuarters.length;
-  // deals-only quarterly series for the windowed chart (fundraising removed).
-  const buildTrend = (a, b) => {
-    const win = dQuarters.slice(a, b + 1);
-    const lab = win.length <= 16 ? (q) => "'" + q.slice(2) : (q) => (q.endsWith("Q1") ? "'" + q.slice(2, 4) : "");
-    return win.map((q) => ({ label: lab(q), value: dq[q] || 0, nav: { jump: "deals", period: q } }));
-  };
-  const tStart = Math.min(Math.max(0, trendState.start ?? (NQ - 8)), NQ - 1);
-  const tEnd = Math.min(Math.max(tStart, trendState.end ?? (NQ - 1)), NQ - 1);
-  // most active managers by disclosed deal count (top 10).
-  const dealMgrCounts = {};
-  base.forEach((d) => { if (d.managerId) dealMgrCounts[d.managerId] = (dealMgrCounts[d.managerId] || 0) + 1; });
-  const byDealManager = Object.entries(dealMgrCounts)
-    .map(([id, value]) => ({ label: managerById[id] ? managerById[id].name : id, value, nav: { jump: "manager/" + id } }))
-    .sort((a, b) => b.value - a.value).slice(0, 10);
-
   app.innerHTML = `
     <div class="page-head"><h1>Deal Activity</h1><p class="muted">${rows.length} of ${base.length} transactions · investments, exits, refinancings, restructurings &amp; distress${f.period ? ` · <strong>${esc(f.period)}</strong> <button type="button" class="link-btn" id="clear-period">clear quarter ✕</button>` : ""}</p></div>
     ${focusToggle()}
-    <div class="split-3070">
-      <div class="split-left">
-        <section class="card">
-          <h2>Deal activity by quarter</h2>
-          <p class="muted small">Deal transactions per quarter. Drag either handle to set the date range (up to 10 years); click any quarter to filter the feed.</p>
-          <div class="trend-controls">
-            <div class="range-readout"><strong id="trend-start-lbl">${esc(dQuarters[tStart])}</strong> <span class="muted">→</span> <strong id="trend-end-lbl">${esc(dQuarters[tEnd])}</strong></div>
-            <div class="range-slider">
-              <div class="range-track"></div>
-              <div class="range-fill" id="trend-fill" style="left:${(tStart / (NQ - 1)) * 100}%; width:${((tEnd - tStart) / (NQ - 1)) * 100}%"></div>
-              <input type="range" id="trend-start" min="0" max="${NQ - 1}" value="${tStart}" aria-label="Range start quarter">
-              <input type="range" id="trend-end" min="0" max="${NQ - 1}" value="${tEnd}" aria-label="Range end quarter">
-            </div>
-          </div>
-          <div id="trend-chart">${lineChart(buildTrend(tStart, tEnd), { width: 560, height: 300 })}</div>
-        </section>
-        <section class="card"><h2>Most active managers <span class="muted">(by deal count)</span></h2>${byDealManager.length ? barChart(byDealManager, { width: 560 }) : '<p class="muted small">No deals tracked.</p>'}</section>
-      </div>
-      <div class="split-right">
-        <input type="checkbox" id="filters-toggle" class="ff-cb" ${mfOpen() ? "checked" : ""}><label for="filters-toggle" class="ff-lab">Filters</label><div class="filters">
-          <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Company, manager…" value="${esc(f.q)}"></label>
-          ${multiFilter("deals:type", "Type", [...new Set(base.map((d) => d.type))].sort(), f.type)}
-          ${multiFilter("deals:year", "Year", [...new Set(base.map((d) => yearOf(d.date)).filter(Boolean))].sort((a, b) => b.localeCompare(a)), f.year)}
-        </div>
-        <section class="card">
-          ${rows.length ? feedHtml(rows, "deals", dealRow, JSON.stringify(f)) : '<p class="empty">No deal items match these filters.</p>'}
-        </section>
-      </div>
-    </div>`;
+    <input type="checkbox" id="filters-toggle" class="ff-cb" ${mfOpen() ? "checked" : ""}><label for="filters-toggle" class="ff-lab">Filters</label><div class="filters">
+      <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Company, manager…" value="${esc(f.q)}"></label>
+      ${multiFilter("deals:type", "Type", [...new Set(base.map((d) => d.type))].sort(), f.type)}
+      ${multiFilter("deals:year", "Year", [...new Set(base.map((d) => yearOf(d.date)).filter(Boolean))].sort((a, b) => b.localeCompare(a)), f.year)}
+    </div>
+    <section class="card">
+      ${rows.length ? feedHtml(rows, "deals", dealRow, JSON.stringify(f)) : '<p class="empty">No deal items match these filters.</p>'}
+    </section>`;
   wireFilters("deals");
 
-  // Clear the active quarter filter set by clicking a column in the by-quarter chart.
+  // Clear the active quarter filter (set by a quarter click on the Trends page).
   const clearPeriod = document.getElementById("clear-period");
   if (clearPeriod) clearPeriod.addEventListener("click", () => { filterState.deals.period = ""; router(); });
-
-  // Wire the quarterly range sliders (re-render only the chart on drag).
-  const sEl = document.getElementById("trend-start");
-  const eEl = document.getElementById("trend-end");
-  if (sEl && eEl) {
-    const fill = document.getElementById("trend-fill");
-    const rerender = () => {
-      const a = +sEl.value, b = +eEl.value;
-      trendState.start = a; trendState.end = b;
-      document.getElementById("trend-start-lbl").textContent = dQuarters[a];
-      document.getElementById("trend-end-lbl").textContent = dQuarters[b];
-      if (fill) { fill.style.left = (a / (NQ - 1)) * 100 + "%"; fill.style.width = ((b - a) / (NQ - 1)) * 100 + "%"; }
-      document.getElementById("trend-chart").innerHTML = lineChart(buildTrend(a, b), { width: 560, height: 300 });
-    };
-    sEl.addEventListener("input", () => { if (+sEl.value > +eEl.value) sEl.value = eEl.value; sEl.style.zIndex = 5; eEl.style.zIndex = 4; rerender(); });
-    eEl.addEventListener("input", () => { if (+eEl.value < +sEl.value) eEl.value = sEl.value; eEl.style.zIndex = 5; sEl.style.zIndex = 4; rerender(); });
-  }
   applyPendingFocus("deals");
 }
 
@@ -1491,85 +1395,161 @@ function viewClos() {
     (!f.period || quarterOf(x.date) === f.period)
   ).sort((a, b) => String(b.date).localeCompare(String(a.date))); // newest first
 
-  // ---- CLO activity by quarter (draggable 10-year window, like Deal Activity) ----
-  const qc = {};
-  all.forEach((x) => { const q = quarterOf(x.date); if (q) qc[q] = (qc[q] || 0) + 1; });
-  const nowD = new Date();
-  let dy = nowD.getFullYear(), dqr = Math.floor(nowD.getMonth() / 3) + 1;
-  const dQuarters = [];
-  for (let i = 0; i < 40; i++) { dQuarters.unshift(`${dy}-Q${dqr}`); dqr--; if (dqr < 1) { dqr = 4; dy--; } }
-  const NQ = dQuarters.length;
-  const buildTrend = (a, b) => {
-    const win = dQuarters.slice(a, b + 1);
-    const lab = win.length <= 16 ? (q) => "'" + q.slice(2) : (q) => (q.endsWith("Q1") ? "'" + q.slice(2, 4) : "");
-    return win.map((q) => ({ label: lab(q), value: qc[q] || 0, nav: { jump: "clos", period: q } }));
-  };
-  const tStart = Math.min(Math.max(0, cloTrendState.start ?? (NQ - 8)), NQ - 1);
-  const tEnd = Math.min(Math.max(tStart, cloTrendState.end ?? (NQ - 1)), NQ - 1);
-
-  const mc = {};
-  all.forEach((x) => { if (x.managerId) mc[x.managerId] = (mc[x.managerId] || 0) + 1; });
-  const byMgr = Object.entries(mc)
-    .map(([id, value]) => ({ label: managerById[id] ? managerById[id].name : id, value, nav: { jump: "manager/" + id } }))
-    .sort((a, b) => b.value - a.value).slice(0, 10);
-
   const feedRow = (x) => x._kind === "deal" ? dealRow(x) : intelRow(x);
 
   app.innerHTML = `
     <div class="page-head"><h1>CLOs</h1><p class="muted">${rows.length} of ${all.length} items · collateralised loan obligation pricings, platforms, funds, ETFs &amp; personnel${f.period ? ` · <strong>${esc(f.period)}</strong> <button type="button" class="link-btn" id="clear-period">clear quarter ✕</button>` : ""}</p></div>
     ${focusToggle()}
-    <div class="split-3070">
-      <div class="split-left">
-        <section class="card">
-          <h2>CLO activity by quarter</h2>
-          <p class="muted small">CLO pricings &amp; news per quarter. Drag either handle to set the date range (up to 10 years); click any quarter to filter the feed.</p>
-          <div class="trend-controls">
-            <div class="range-readout"><strong id="trend-start-lbl">${esc(dQuarters[tStart])}</strong> <span class="muted">→</span> <strong id="trend-end-lbl">${esc(dQuarters[tEnd])}</strong></div>
-            <div class="range-slider">
-              <div class="range-track"></div>
-              <div class="range-fill" id="trend-fill" style="left:${(tStart / (NQ - 1)) * 100}%; width:${((tEnd - tStart) / (NQ - 1)) * 100}%"></div>
-              <input type="range" id="trend-start" min="0" max="${NQ - 1}" value="${tStart}" aria-label="Range start quarter">
-              <input type="range" id="trend-end" min="0" max="${NQ - 1}" value="${tEnd}" aria-label="Range end quarter">
-            </div>
-          </div>
-          <div id="trend-chart">${lineChart(buildTrend(tStart, tEnd), { width: 560, height: 300 })}</div>
-        </section>
-        ${byMgr.length ? `<section class="card"><h2>Most active CLO managers</h2>${barChart(byMgr, { width: 560 })}</section>` : ""}
-      </div>
-      <div class="split-right">
-        <input type="checkbox" id="filters-toggle" class="ff-cb" ${mfOpen() ? "checked" : ""}><label for="filters-toggle" class="ff-lab">Filters</label><div class="filters">
-          <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Keyword…" value="${esc(f.q)}"></label>
-          ${multiFilter("clos:kind", "Source", ["Deal", "Fundraising"], f.kind)}
-          ${multiFilter("clos:year", "Year", [...new Set(all.map((x) => yearOf(x.date)).filter(Boolean))].sort((a, b) => b.localeCompare(a)), f.year)}
-        </div>
-        <section class="card">
-          ${rows.length ? feedHtml(rows, "clos", feedRow, JSON.stringify(f)) : '<p class="empty">No CLO items match these filters.</p>'}
-        </section>
-      </div>
-    </div>`;
+    <input type="checkbox" id="filters-toggle" class="ff-cb" ${mfOpen() ? "checked" : ""}><label for="filters-toggle" class="ff-lab">Filters</label><div class="filters">
+      <label class="filter search"><span>Search</span><input type="search" data-filter="q" placeholder="Keyword…" value="${esc(f.q)}"></label>
+      ${multiFilter("clos:kind", "Source", ["Deal", "Fundraising"], f.kind)}
+      ${multiFilter("clos:year", "Year", [...new Set(all.map((x) => yearOf(x.date)).filter(Boolean))].sort((a, b) => b.localeCompare(a)), f.year)}
+    </div>
+    <section class="card">
+      ${rows.length ? feedHtml(rows, "clos", feedRow, JSON.stringify(f)) : '<p class="empty">No CLO items match these filters.</p>'}
+    </section>`;
   wireFilters("clos");
 
-  // Clear the active quarter filter set by clicking a column in the by-quarter chart.
+  // Clear the active quarter filter (set by a quarter click on the Trends page).
   const clearPeriod = document.getElementById("clear-period");
   if (clearPeriod) clearPeriod.addEventListener("click", () => { filterState.clos.period = ""; router(); });
+  applyPendingFocus("clos");
+}
 
-  // Wire the quarterly range sliders (re-render only the chart on drag).
-  const sEl = document.getElementById("trend-start");
-  const eEl = document.getElementById("trend-end");
-  if (sEl && eEl) {
-    const fill = document.getElementById("trend-fill");
+// ================================= TRENDS ==================================
+// A dedicated visual-analytics tab gathering every chart from the deal,
+// fundraising and CLO feeds into one page, grouped by category. Clicking any
+// bar, slice or quarter drills into the matching feed (global data-jump handler).
+// The two by-quarter charts keep their draggable 10-year date-range windows.
+
+// Windowed quarterly line chart + dual-handle range slider. `id` namespaces the
+// DOM nodes so several coexist on one page; `state` persists {start,end}; a
+// quarter click drills into the `jump` feed. Returns { html, wire } — call wire()
+// after the html is inserted.
+function quarterTrend(id, title, desc, counts, state, jump) {
+  const nowD = new Date();
+  let y = nowD.getFullYear(), qr = Math.floor(nowD.getMonth() / 3) + 1;
+  const quarters = [];
+  for (let i = 0; i < 40; i++) { quarters.unshift(`${y}-Q${qr}`); qr--; if (qr < 1) { qr = 4; y--; } }
+  const NQ = quarters.length, W = 640, H = 240;
+  const build = (a, b) => {
+    const win = quarters.slice(a, b + 1);
+    const lab = win.length <= 16 ? (q) => "'" + q.slice(2) : (q) => (q.endsWith("Q1") ? "'" + q.slice(2, 4) : "");
+    return win.map((q) => ({ label: lab(q), value: counts[q] || 0, nav: { jump, period: q } }));
+  };
+  const a0 = Math.min(Math.max(0, state.start ?? (NQ - 8)), NQ - 1);
+  const b0 = Math.min(Math.max(a0, state.end ?? (NQ - 1)), NQ - 1);
+  const html = `<section class="card trend-wide">
+    <h2>${title}</h2>
+    <p class="muted small">${desc}</p>
+    <div class="trend-controls">
+      <div class="range-readout"><strong id="${id}-start-lbl">${esc(quarters[a0])}</strong> <span class="muted">→</span> <strong id="${id}-end-lbl">${esc(quarters[b0])}</strong></div>
+      <div class="range-slider">
+        <div class="range-track"></div>
+        <div class="range-fill" id="${id}-fill" style="left:${(a0 / (NQ - 1)) * 100}%; width:${((b0 - a0) / (NQ - 1)) * 100}%"></div>
+        <input type="range" id="${id}-start" min="0" max="${NQ - 1}" value="${a0}" aria-label="Range start quarter">
+        <input type="range" id="${id}-end" min="0" max="${NQ - 1}" value="${b0}" aria-label="Range end quarter">
+      </div>
+    </div>
+    <div id="${id}-chart">${lineChart(build(a0, b0), { width: W, height: H })}</div>
+  </section>`;
+  const wire = () => {
+    const sEl = document.getElementById(id + "-start"), eEl = document.getElementById(id + "-end");
+    if (!sEl || !eEl) return;
+    const fill = document.getElementById(id + "-fill");
     const rerender = () => {
       const a = +sEl.value, b = +eEl.value;
-      cloTrendState.start = a; cloTrendState.end = b;
-      document.getElementById("trend-start-lbl").textContent = dQuarters[a];
-      document.getElementById("trend-end-lbl").textContent = dQuarters[b];
+      state.start = a; state.end = b;
+      document.getElementById(id + "-start-lbl").textContent = quarters[a];
+      document.getElementById(id + "-end-lbl").textContent = quarters[b];
       if (fill) { fill.style.left = (a / (NQ - 1)) * 100 + "%"; fill.style.width = ((b - a) / (NQ - 1)) * 100 + "%"; }
-      document.getElementById("trend-chart").innerHTML = lineChart(buildTrend(a, b), { width: 560, height: 300 });
+      document.getElementById(id + "-chart").innerHTML = lineChart(build(a, b), { width: W, height: H });
     };
     sEl.addEventListener("input", () => { if (+sEl.value > +eEl.value) sEl.value = eEl.value; sEl.style.zIndex = 5; eEl.style.zIndex = 4; rerender(); });
     eEl.addEventListener("input", () => { if (+eEl.value < +sEl.value) eEl.value = sEl.value; eEl.style.zIndex = 5; sEl.style.zIndex = 4; rerender(); });
-  }
-  applyPendingFocus("clos");
+  };
+  return { html, wire };
+}
+
+function viewTrends() {
+  const quarterOf = (d) => { const m = /^(\d{4})-(\d{2})/.exec(d || ""); return m ? `${m[1]}-Q${Math.floor((+m[2] - 1) / 3) + 1}` : null; };
+
+  // ---- Deals ----
+  const dealsBase = deals.filter((d) => !d.clo && (!targetFocus || midInFocus(d.managerId)));
+  const dq = {};
+  dealsBase.forEach((d) => { const q = quarterOf(d.date); if (q) dq[q] = (dq[q] || 0) + 1; });
+  const dealMgrCounts = {};
+  dealsBase.forEach((d) => { if (d.managerId) dealMgrCounts[d.managerId] = (dealMgrCounts[d.managerId] || 0) + 1; });
+  const byDealManager = Object.entries(dealMgrCounts)
+    .map(([id, value]) => ({ label: managerById[id] ? managerById[id].name : id, value, nav: { jump: "manager/" + id } }))
+    .sort((a, b) => b.value - a.value).slice(0, 10);
+  const byDealType = [...new Set(dealsBase.map((d) => d.type))]
+    .map((t) => ({ label: t, value: dealsBase.filter((d) => d.type === t).length, nav: { jump: "deals", dtype: t } }))
+    .filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
+
+  // ---- Fundraising ----
+  const bnRaised = (list) => Math.round(list.reduce((a, x) => a + (x.raised || 0), 0) / 100) / 10;
+  const bnTarget = (list) => Math.round(list.reduce((a, x) => a + (x.targetSize || 0), 0) / 100) / 10;
+  const seeking = (x) => !x.evergreen && !x.lifecycle && (x.status === "Open" || x.status === "First Close" || x.status === "Pre-marketing");
+  const byStrategy = STRATEGIES.map((s) => ({ label: s, value: bnRaised(funds.filter((x) => x.strategy === s)), nav: { jump: "funds", strategy: s } })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
+  const bySought = STRATEGIES.map((s) => ({ label: s, value: bnTarget(funds.filter((x) => seeking(x) && x.strategy === s)), nav: { jump: "funds", strategy: s, status: "in-market" } })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
+  const byGeo = GEOS.map((g) => ({ label: g, value: bnRaised(funds.filter((x) => x.geoFocus === g)), nav: { jump: "funds", geo: g } })).filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
+  const byStatus = FUND_CATEGORIES.map((s) => ({ label: s, value: funds.filter((f) => fundCategory(f) === s).length, nav: { jump: "funds", status: s } })).filter((d) => d.value > 0);
+  const qCounts = {};
+  funds.filter(isClose).forEach((x) => { const q = fundQuarter(x); if (q) qCounts[q] = (qCounts[q] || 0) + 1; });
+  const nowD = new Date();
+  let cy = nowD.getFullYear(), cq = Math.floor(nowD.getMonth() / 3) + 1;
+  const fQuarters = [];
+  for (let i = 0; i < 20; i++) { fQuarters.unshift(`${cy}-Q${cq}`); cq--; if (cq < 1) { cq = 4; cy--; } }
+  const fundTrend = fQuarters.map((q) => ({ label: "'" + q.slice(2), value: qCounts[q] || 0, nav: { jump: "funds", period: q } }));
+
+  // ---- CLOs ----
+  const cloAll = [...deals.filter((d) => d.clo), ...intel.filter((i) => i.clo)].filter((x) => !targetFocus || midInFocus(x.managerId));
+  const qc = {};
+  cloAll.forEach((x) => { const q = quarterOf(x.date); if (q) qc[q] = (qc[q] || 0) + 1; });
+  const cloMgrCounts = {};
+  cloAll.forEach((x) => { if (x.managerId) cloMgrCounts[x.managerId] = (cloMgrCounts[x.managerId] || 0) + 1; });
+  const byCloMgr = Object.entries(cloMgrCounts)
+    .map(([id, value]) => ({ label: managerById[id] ? managerById[id].name : id, value, nav: { jump: "manager/" + id } }))
+    .sort((a, b) => b.value - a.value).slice(0, 10);
+
+  const dealTrend = quarterTrend("dtrend", "Deal activity by quarter", "Deal transactions per quarter. Drag either handle to set the date range (up to 10 years); click any quarter to open the deal feed.", dq, trendState, "deals");
+  const cloTrend = quarterTrend("ctrend", "CLO activity by quarter", "CLO pricings &amp; news per quarter. Drag either handle to set the date range; click any quarter to open the CLO feed.", qc, cloTrendState, "clos");
+
+  app.innerHTML = `
+    <div class="page-head"><h1>Trends</h1><p class="muted">Deal, fundraising &amp; CLO activity across the tracked European private-credit universe. Click any bar, slice or quarter to open the matching feed.</p></div>
+    ${focusToggle()}
+
+    <section class="trend-section">
+      <h2 class="trend-cat">Deals</h2>
+      ${dealTrend.html}
+      <div class="trend-grid">
+        <section class="card"><h2>Most active managers <span class="muted">(by deal count)</span></h2>${byDealManager.length ? barChart(byDealManager, { width: 520 }) : '<p class="muted small">No deals tracked.</p>'}</section>
+        <section class="card"><h2>Deals by type</h2>${byDealType.length ? donutChart(byDealType) : '<p class="muted small">No deals tracked.</p>'}</section>
+      </div>
+    </section>
+
+    <section class="trend-section">
+      <h2 class="trend-cat">Fundraising</h2>
+      <div class="trend-grid">
+        <section class="card"><h2>Capital raised by strategy <span class="muted">(€bn)</span></h2>${byStrategy.length ? barChart(byStrategy, { unit: "€", width: 520 }) : '<p class="muted small">No data.</p>'}</section>
+        <section class="card"><h2>Capital sought by strategy <span class="muted">(€bn · disclosed targets, funds in market)</span></h2>${bySought.length ? barChart(bySought, { unit: "€", width: 520 }) : '<p class="muted small">No disclosed target sizes for funds currently in market.</p>'}</section>
+        <section class="card"><h2>Capital raised by geography <span class="muted">(€bn)</span></h2>${byGeo.length ? barChart(byGeo, { unit: "€", width: 520 }) : '<p class="muted small">No data.</p>'}</section>
+        <section class="card"><h2>Funds by status</h2>${donutChart(byStatus)}</section>
+      </div>
+      <section class="card trend-wide"><h2>Fundraising momentum <span class="muted">(closes / quarter · past 5 years)</span></h2><p class="muted small">Click a quarter to see the funds that reached a first/final close in it.</p>${lineChart(fundTrend, { width: 640, height: 220 })}</section>
+    </section>
+
+    <section class="trend-section">
+      <h2 class="trend-cat">CLOs</h2>
+      ${cloTrend.html}
+      <div class="trend-grid">
+        ${byCloMgr.length ? `<section class="card"><h2>Most active CLO managers</h2>${barChart(byCloMgr, { width: 520 })}</section>` : ""}
+      </div>
+    </section>`;
+
+  dealTrend.wire();
+  cloTrend.wire();
 }
 
 // ================================== NEWS ===================================
@@ -1879,6 +1859,7 @@ function router() {
     case "intel": return viewIntel();
     case "deals": return viewDeals();
     case "clos": return viewClos();
+    case "trends": return viewTrends();
     case "watchlist": return viewWatchlist();
     default: return notFound();
   }
@@ -1889,7 +1870,7 @@ function router() {
 // (wrapping around). Ignored on detail pages and when the gesture starts on an
 // interactive control (slider, input, dropdown, link, chart, table) or a screen
 // edge (reserved for the browser's back/forward gesture).
-const SWIPE_SECTIONS = ["#/", "#/news", "#/deals", "#/intel", "#/clos", "#/managers", "#/funds", "#/lps", "#/watchlist"];
+const SWIPE_SECTIONS = ["#/", "#/news", "#/deals", "#/intel", "#/clos", "#/trends", "#/managers", "#/funds", "#/lps", "#/watchlist"];
 const SWIPE_IGNORE = "input, textarea, select, button, a, .range-slider, .ms, .ms-pop, .table-wrap, .data-table, svg, .donut-wrap, .chart";
 let swX = 0, swY = 0, swT = 0, swSkip = true;
 document.addEventListener("touchstart", (e) => {
