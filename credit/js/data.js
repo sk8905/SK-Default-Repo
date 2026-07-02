@@ -26,7 +26,7 @@ export const LAST_CHECKED = "2026-07-02";
 // label (e.g. "05:22 BST"). Pre-formatted so it renders identically regardless of
 // the viewer's browser timezone. Set every run alongside LAST_CHECKED — there are
 // two runs a day (~06:00 and ~12:00), so the time tells which run is shown.
-export const LAST_CHECKED_TIME = "05:20 BST";
+export const LAST_CHECKED_TIME = "15:26 BST";
 
 export const STRATEGIES = [
   "Senior Direct Lending",
