@@ -158,14 +158,62 @@ function lastTwo(pairs) {
   };
 }
 
-async function fredSeries(id, cosd) {
-  const txt = await fetchText(`https://fred.stlouisfed.org/graph/fredgraph.csv?id=${id}&cosd=${cosd}`);
-  if (!txt) return { value: null, change: null, asOf: null };
-  const pairs = txt.trim().split(/\r?\n/).slice(1)
+// DBnomics mirrors FRED with a public, no-key JSON API and is NOT behind the
+// Cloudflare edge that 520s FRED's own site for Worker requests. Try both id
+// forms it accepts; parse the observations doc into [period, value] pairs.
+async function dbnomicsSeries(fredId) {
+  const urls = [
+    `https://api.db.nomics.world/v22/series?series_ids=FRED/${fredId}&observations=1`,
+    `https://api.db.nomics.world/v22/series/FRED/${fredId}?observations=1`,
+  ];
+  for (const u of urls) {
+    const txt = await fetchText(u);
+    if (!txt) continue;
+    let j; try { j = JSON.parse(txt); } catch { continue; }
+    const docs = j && j.series && j.series.docs;
+    const doc = Array.isArray(docs) ? docs[0] : null;
+    if (!doc || !Array.isArray(doc.period) || !Array.isArray(doc.value)) continue;
+    const pairs = [];
+    for (let i = 0; i < doc.period.length; i++) {
+      const v = doc.value[i];
+      if (v === null || v === "NA") continue;
+      if (!Number.isFinite(Number(v))) continue;
+      pairs.push([doc.period[i], String(v)]);
+    }
+    if (pairs.length) return pairs;
+  }
+  return null;
+}
+
+// Parse a FRED CSV body (DATE,VALUE header) into [date, value] pairs.
+function parseFredCsv(txt) {
+  return txt.trim().split(/\r?\n/).slice(1)
     .map((l) => l.split(","))
     .filter((c) => c.length >= 2 && c[1] !== "" && c[1] !== ".")
     .map((c) => [c[0], c[1]]);
-  return lastTwo(pairs);
+}
+
+// Resolve a FRED series id via the first source that works: DBnomics mirror,
+// then the official FRED API (only if FRED_API_KEY is configured), then FRED's
+// CSV (last resort — currently 520s from Workers, but harmless to attempt).
+async function fredSeries(id, cosd, env) {
+  let pairs = await dbnomicsSeries(id);
+  if ((!pairs || !pairs.length) && env && env.FRED_API_KEY) {
+    const txt = await fetchText(`https://api.stlouisfed.org/fred/series/observations?series_id=${id}&api_key=${env.FRED_API_KEY}&file_type=json&sort_order=desc&limit=8`);
+    if (txt) {
+      try {
+        const obs = (JSON.parse(txt).observations || [])
+          .filter((o) => o.value !== "." && o.value !== "")
+          .map((o) => [o.date, o.value]);
+        if (obs.length) pairs = obs;
+      } catch { /* fall through */ }
+    }
+  }
+  if (!pairs || !pairs.length) {
+    const txt = await fetchText(`https://fred.stlouisfed.org/graph/fredgraph.csv?id=${id}&cosd=${cosd}`);
+    if (txt) pairs = parseFredCsv(txt);
+  }
+  return (pairs && pairs.length) ? lastTwo(pairs) : { value: null, change: null, asOf: null };
 }
 
 async function ecbSeries(keys) {
@@ -234,11 +282,11 @@ async function handleRates(request, env, ctx) {
 
   const cache = caches.default;
   // Versioned key so a previously-cached partial response is ignored.
-  const cacheKey = new Request(new URL("/api/rates?v=5", request.url).toString());
+  const cacheKey = new Request(new URL("/api/rates?v=6", request.url).toString());
   const cached = await cache.match(cacheKey);
   if (cached) return cached;
   const data = await Promise.all(RATE_SERIES.map(async (s) => {
-    const r = s.src === "ecb" ? await ecbSeries(s.keys) : await fredSeries(s.id, cosd);
+    const r = s.src === "ecb" ? await ecbSeries(s.keys) : await fredSeries(s.id, cosd, env);
     return { label: s.label, unit: s.unit, value: r.value, change: r.change, asOf: r.asOf };
   }));
   const resp = new Response(JSON.stringify({ rates: data }), {
