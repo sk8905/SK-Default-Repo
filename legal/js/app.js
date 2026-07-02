@@ -16,8 +16,8 @@
 import {
   items, cases, caseSummaries, practiceAreas, firms, tiers, updateTypes, restructurings,
   firmById, areaById, typeById, tierById, LAST_REVIEWED, LAST_CHECKED, LAST_CHECKED_TIME,
-} from "./data.js?v=20260702-7";
-import { donutChart, columnChart } from "./charts.js?v=20260702-7";
+} from "./data.js?v=20260702-8";
+import { donutChart, columnChart } from "./charts.js?v=20260702-8";
 
 const app = document.getElementById("app");
 
@@ -238,34 +238,26 @@ function itemRow(it) {
 // linking out to bailii.org.
 // Collapsed by default — the CASE NAME (inside <summary>) is the expand/collapse
 // toggle; the Save button sits top-right of that line (always visible; the global
-// handler preventDefaults so it saves without toggling). Expanding reveals the AI
-// summary and the court/citation/BAILII footer.
+// AI summary shown inline (same layout as the alerts rows); the title links out
+// to the BAILII judgment and the Save button sits top-right of the title line.
 function caseRow(c) {
   const summary = caseSummaries[c.id] || c.summary || "";
   const saved = getSaved().has(c.id);
-  const compact = [esc(c.court), c.citation ? `<span class="cite">${esc(c.citation)}</span>` : ""].filter(Boolean).join(" · ");
   return `<div class="feed-row" id="row-${esc(c.id)}">
     <div class="feed-meta">
       <div class="chips">${areaChip(c.area)}</div>
       <span class="feed-date">${fmtDate(c.date)}</span>
     </div>
     <div class="feed-body">
-      <details class="rx-det">
-        <summary class="rx-summary">
-          <span class="rx-title-line">
-            <span class="feed-title rx-name">${esc(c.name)}</span>
-            <button class="save-btn rx-save ${saved ? "is-saved" : ""}" data-save="${esc(c.id)}"
-              aria-pressed="${saved}" title="${saved ? "Remove from saved" : "Save this case"}">${saved ? "★ Saved" : "☆ Save"}</button>
-          </span>
-          ${compact ? `<span class="rx-compact">${compact}</span>` : ""}
-        </summary>
-        <div class="rx-expand">
-          <p class="feed-summary"><span class="ai-tag">✦ AI summary</span> ${esc(summary)}</p>
-          <div class="feed-foot">
-            <a href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">View judgment on BAILII ↗</a>
-          </div>
-        </div>
-      </details>
+      <div class="rx-title-line">
+        <a class="feed-title rx-name" href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">${esc(c.name)} ↗</a>
+        <button class="save-btn rx-save ${saved ? "is-saved" : ""}" data-save="${esc(c.id)}"
+          aria-pressed="${saved}" title="${saved ? "Remove from saved" : "Save this case"}">${saved ? "★ Saved" : "☆ Save"}</button>
+      </div>
+      <p class="feed-summary"><span class="ai-tag">✦ AI summary</span> ${esc(summary)}</p>
+      <div class="feed-foot">
+        <span>${esc(c.court)}</span>${c.citation ? ` · <span class="cite">${esc(c.citation)}</span>` : ""} · <a href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">View judgment on BAILII ↗</a>
+      </div>
     </div>
   </div>`;
 }
@@ -570,10 +562,7 @@ function viewCases() {
           <input id="case-search" type="search" placeholder="Search cases, citations…"
             value="${esc(caseFilter.q)}" aria-label="Search case law" autocomplete="off"/>
         </div>
-        <div class="rx-bar">
-          <div id="case-count" class="result-count" aria-live="polite"></div>
-          <button type="button" class="link-btn" id="case-toggle-all" aria-expanded="false">Expand all</button>
-        </div>
+        <div id="case-count" class="result-count" aria-live="polite"></div>
         <section class="card"><div id="case-results" class="feed"></div></section>
       </section>
     </div>
@@ -596,14 +585,6 @@ function viewCases() {
     renderCaseResults();
   });
 
-  app.querySelector("#case-toggle-all").addEventListener("click", (e) => {
-    const dets = app.querySelectorAll(".rx-det");
-    const anyClosed = [...dets].some((d) => !d.open);
-    dets.forEach((d) => { d.open = anyClosed; });
-    e.currentTarget.textContent = anyClosed ? "Collapse all" : "Expand all";
-    e.currentTarget.setAttribute("aria-expanded", String(anyClosed));
-  });
-
   renderCaseResults();
 
   // Deep-link from the dashboard "Recent cases" list (or a shared URL): scroll to,
@@ -622,8 +603,6 @@ function focusCaseRow(id) {
     el = document.getElementById("row-" + id);
   }
   if (!el) return;
-  const det = el.querySelector(".rx-det");
-  if (det) det.open = true;
   el.scrollIntoView({ behavior: "smooth", block: "center" });
   el.classList.add("flash");
   setTimeout(() => el.classList.remove("flash"), 2200);
@@ -645,8 +624,6 @@ function renderCaseResults() {
   }).sort(byDateDesc);
   countEl.textContent = `${matched.length} case${matched.length === 1 ? "" : "s"}`;
   el.innerHTML = matched.length ? feedHtml(matched, "cases", caseRow, JSON.stringify(caseFilter)) : `<div class="empty">No cases match these filters.</div>`;
-  const allBtn = document.getElementById("case-toggle-all");
-  if (allBtn) { allBtn.textContent = "Expand all"; allBtn.setAttribute("aria-expanded", "false"); allBtn.style.display = matched.length ? "" : "none"; }
 }
 
 // =============================================================================
@@ -790,36 +767,31 @@ function rxRow(r) {
     features,
     r.notes ? `<p class="rx-line muted">${esc(r.notes)}</p>` : "",
   ].join("");
+  // Foot: court / citation / sector metadata + the firm-analysis and judgment links
+  // (mirrors the alerts rows, where the source metadata sits in the footer line).
   const foot = [
+    r.court ? esc(r.court) : "",
+    r.citation ? `<span class="cite">${esc(r.citation)}</span>` : "",
+    r.sector ? esc(r.sector) : "",
     r.articleUrl ? `<a href="${esc(r.articleUrl)}" target="_blank" rel="noopener noreferrer">${esc(firm ? firm.name : "Firm")} analysis ↗</a>` : "",
     r.judgmentUrl ? `<a href="${esc(r.judgmentUrl)}" target="_blank" rel="noopener noreferrer">Judgment ↗</a>` : "",
   ].filter(Boolean).join(" · ");
-  const compact = [r.court ? esc(r.court) : "", r.citation ? `<span class="cite">${esc(r.citation)}</span>` : "", r.sector ? esc(r.sector) : ""].filter(Boolean).join(" · ");
-  // Collapsed by default — the COMPANY NAME (inside <summary>) is the expand/
-  // collapse toggle. The Save button sits on the summary line (always visible);
-  // clicking it saves without toggling (the global handler calls preventDefault).
-  // Expanding reveals debt/creditors/advisers/features and the firm/judgment links.
+  // AI summary + detail shown inline (same layout as the alerts rows); the outcome
+  // chip and Save button sit on the title line.
   return `<div class="feed-row rx-row" id="row-${esc(r.id)}">
     <div class="feed-meta">
       <div class="chips"><span class="chip rx-type rx-${esc(r.type)}" title="${esc(typeFull)}">${r.type === "scheme" ? "Scheme" : "Plan"}</span></div>
       <span class="feed-date">${r.date ? esc(fmtDate(r.date)) : "undated"}</span>
     </div>
     <div class="feed-body">
-      <details class="rx-det">
-        <summary class="rx-summary">
-          <span class="rx-title-line">
-            <span class="feed-title rx-name">${esc(r.company)}</span>
-            <span class="chip rx-out rx-out-${rxOutcomeClass(r.outcome)}" title="${esc(r.outcome)}">${esc(rxOutcomeShort(r.outcome))}</span>
-            <button class="save-btn rx-save ${saved ? "is-saved" : ""}" data-save="${esc(r.id)}"
-              aria-pressed="${saved}" title="${saved ? "Remove from saved" : "Save this matter"}">${saved ? "★ Saved" : "☆ Save"}</button>
-          </span>
-          ${compact ? `<span class="rx-compact">${compact}</span>` : ""}
-        </summary>
-        <div class="rx-expand">
-          ${lines}
-          ${foot ? `<div class="feed-foot">${foot}</div>` : ""}
-        </div>
-      </details>
+      <div class="rx-title-line">
+        <span class="feed-title rx-name">${esc(r.company)}</span>
+        <span class="chip rx-out rx-out-${rxOutcomeClass(r.outcome)}" title="${esc(r.outcome)}">${esc(rxOutcomeShort(r.outcome))}</span>
+        <button class="save-btn rx-save ${saved ? "is-saved" : ""}" data-save="${esc(r.id)}"
+          aria-pressed="${saved}" title="${saved ? "Remove from saved" : "Save this matter"}">${saved ? "★ Saved" : "☆ Save"}</button>
+      </div>
+      ${lines}
+      ${foot ? `<div class="feed-foot">${foot}</div>` : ""}
     </div>
   </div>`;
 }
@@ -854,10 +826,7 @@ function viewRestructurings() {
           <input id="rx-search" type="search" placeholder="Search company, citation, sector, creditor…"
             value="${esc(rxFilter.q)}" aria-label="Search plans and schemes" autocomplete="off"/>
         </div>
-        <div class="rx-bar">
-          <div id="rx-count" class="result-count" aria-live="polite"></div>
-          <button type="button" class="link-btn" id="rx-toggle-all" aria-expanded="false">Expand all</button>
-        </div>
+        <div id="rx-count" class="result-count" aria-live="polite"></div>
         <section class="card"><div id="rx-results" class="feed"></div></section>
       </section>
     </div>`;
@@ -876,18 +845,11 @@ function viewRestructurings() {
     renderRxResults();
   });
   search.addEventListener("input", () => { rxFilter.q = search.value; renderRxResults(); });
-  app.querySelector("#rx-toggle-all").addEventListener("click", (e) => {
-    const dets = app.querySelectorAll(".rx-det");
-    const anyClosed = [...dets].some((d) => !d.open);
-    dets.forEach((d) => { d.open = anyClosed; });
-    e.currentTarget.textContent = anyClosed ? "Collapse all" : "Expand all";
-    e.currentTarget.setAttribute("aria-expanded", String(anyClosed));
-  });
   renderRxResults();
 
-  // Deep-link from the dashboard / a notification: scroll to, expand & flash the
-  // matter. If it's paged out of the first page, reveal all matters and retry so
-  // the jump always lands.
+  // Deep-link from the dashboard / a notification: scroll to & flash the matter.
+  // If it's paged out of the first page, reveal all matters and retry so the jump
+  // always lands.
   if (q.m) focusRxMatter(q.m);
 }
 
@@ -910,12 +872,10 @@ function renderRxResults() {
   const schemes = matched.filter((r) => r.type === "scheme").length;
   countEl.textContent = `${matched.length} matter${matched.length !== 1 ? "s" : ""} · ${plans} plan${plans !== 1 ? "s" : ""}, ${schemes} scheme${schemes !== 1 ? "s" : ""}`;
   el.innerHTML = matched.length ? feedHtml(matched, "rx", rxRow, JSON.stringify(rxFilter)) : '<p class="empty">No matters match these filters.</p>';
-  const allBtn = document.getElementById("rx-toggle-all");
-  if (allBtn) { allBtn.textContent = "Expand all"; allBtn.setAttribute("aria-expanded", "false"); allBtn.style.display = matched.length ? "" : "none"; }
 }
 
-// Jump to a specific matter (from a dashboard link or notification): scroll to it,
-// open it and flash it. If it's beyond the current page, reveal all matters first.
+// Jump to a specific matter (from a dashboard link or notification): scroll to &
+// flash it. If it's beyond the current page, reveal all matters first.
 function focusRxMatter(id) {
   let el = document.getElementById("row-" + id);
   if (!el) {
@@ -924,8 +884,6 @@ function focusRxMatter(id) {
     el = document.getElementById("row-" + id);
   }
   if (!el) return;
-  const det = el.querySelector(".rx-det");
-  if (det) det.open = true;
   el.scrollIntoView({ behavior: "smooth", block: "center" });
   el.classList.add("flash");
   setTimeout(() => el.classList.remove("flash"), 2200);
