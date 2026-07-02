@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260702-1";
+} from "./data.js?v=20260702-2";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260702-1";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260702-2";
 
 const app = document.getElementById("app");
 
@@ -585,7 +585,7 @@ function viewDashboard() {
       <p class="muted">European private credit deal flow &amp; market intelligence, with fundraising as a secondary lens · real data compiled from public sources (mid-2026)</p>
       ${focusToggle()}
     </div>
-    <details class="rk-toggle">
+    <details class="rk-toggle"${window.matchMedia(MOBILE_Q).matches ? "" : " open"}>
       <summary class="rk-toggle-head">Key rates &amp; metrics <span class="rk-caret" aria-hidden="true"></span></summary>
       <div class="rk-toggle-body">
         <div id="rates-band" class="rates-band" aria-label="Key rates &amp; credit spreads"></div>
@@ -1629,14 +1629,8 @@ function viewWatchlist() {
     : x._kind === "intel" ? intelRow(x)
     : `<div class="intel-row"><div class="intel-meta"><span class="chip">News</span><span class="muted small">${fmtDate(x.date)}</span></div><div class="intel-body"><a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer" class="intel-head">${esc(x.title)}</a><div>${link(`#/manager/${x._mid}`, x._mname, "muted small")}${x.outlet ? ` · <span class="muted small">${esc(x.outlet)}</span>` : ""}</div></div></div>`;
 
-  const syncNote = cloudSync
-    ? `☁ Synced to your account across devices${account ? ` · signed in as <strong>${esc(account)}</strong>` : ""} · <a href="/cdn-cgi/access/logout">Sign out</a>`
-    : "Saved on this device only";
-  const accountBar = `<div class="account-bar muted small">${syncNote}</div>`;
-
   if (fm.length + ff.length + fl.length === 0) {
     app.innerHTML = `<div class="page-head"><h1>My Watchlist</h1></div>
-      ${accountBar}
       <section class="card"><p class="muted">You're not following anything yet. Click the ☆ star on any manager, fund or investor to add it here — your watchlist builds a personalised intelligence feed${cloudSync ? " and syncs across your devices" : ""}.</p></section>`;
     return;
   }
@@ -1647,7 +1641,6 @@ function viewWatchlist() {
       : '<p class="muted small">None followed.</p>'}</div></details>`;
   app.innerHTML = `
     <div class="page-head"><h1>My Watchlist</h1><p class="muted">${fm.length + ff.length + fl.length} followed · ${cloudSync ? "synced across devices" : "saved on this device"}</p></div>
-    ${accountBar}
     <div class="wl-cats">
       ${listCard("Managers", fm, "manager", (m) => link(`#/manager/${m.id}`, m.name))}
       ${listCard("Funds", ff, "fund", (f) => `${link(`#/fund/${f.id}`, f.name)} <span class="muted small">${esc(managerById[f.managerId].name)}</span>`)}

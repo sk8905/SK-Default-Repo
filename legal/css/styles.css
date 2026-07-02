@@ -77,14 +77,19 @@ img, svg { max-width: 100%; }
 @media (min-width: 1101px) {
   .topbar-inner { padding-left: max(11rem, calc((100% - min(100%, var(--maxw))) / 2 + 2rem)); padding-right: calc((100% - min(100%, var(--maxw))) / 2 + 2rem); }
   .topbar-inner .brand { position: absolute; left: 1.5rem; top: 50%; transform: translateY(-50%); }
-  /* Let the nav fill the row so the Saved tab can sit at the right margin. */
-  .mainnav { flex: 1 1 auto; }
+  /* Let the nav fill the row so the Saved tab can sit at the right margin.
+     The bell is pinned out of flow (below); reserve its old footprint (34px
+     button + the 2rem row gap) here so pulling it out doesn't let the nav grow
+     and nudge the Saved tab — only the bell moves, everything else stays. */
+  .mainnav { flex: 1 1 auto; margin-right: calc(2rem + 34px); }
   .nav-link.nav-right { margin-left: auto; }
   /* Pin the signed-in identity, refresh status and bell to the far-right corner
      (out of flow, mirroring the logo on the left) so the Saved tab can align
      with the content's right margin without them trailing behind it. */
-  .topbar-right { position: absolute; right: 4rem; top: 50%; transform: translateY(-50%); }
-  .notif { position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%); }
+  .topbar-inner .topbar-right { position: absolute; right: 4rem; top: 50%; transform: translateY(-50%); }
+  /* Two-class selector so it beats the later ".notif { position: relative }"
+     base rule and the bell actually pins to the far-right corner. */
+  .topbar-inner .notif { position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%); }
 }
 .nav-link { color: #cbd5e1; padding: .5rem .85rem; border-radius: 6px; font-weight: 500; white-space: nowrap; }
 .nav-link:hover, .nav-link:focus-visible { color: #fff; text-decoration: none; background: rgba(255,255,255,.08); }
