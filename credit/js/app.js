@@ -8,12 +8,12 @@ import {
   managers, funds, lps, intel, commitments, deals,
   managerById, fundById, lpById,
   fundsByManager, intelForManager, intelForFund, dealsForManager, dealsForFund,
-} from "./data.js?v=20260702-7";
+} from "./data.js?v=20260702-8";
 // NOTE: these internal module imports carry the same ?v= cache-buster as the
 // <script>/<link> tags in index.html. Bump ALL of them together on every release
 // — otherwise the browser/CDN can serve a stale data.js/charts.js against a fresh
 // app.js and the app fails to load (blank page).
-import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260702-7";
+import { barChart, donutChart, lineChart, multiLineChart } from "./charts.js?v=20260702-8";
 
 const app = document.getElementById("app");
 
@@ -512,8 +512,11 @@ function ratesTile(x) {
     const mag = x.unit === "bp" ? `${Math.abs(c)} bp` : Math.abs(c).toFixed(2);
     chg = `<span class="rate-chg ${dir}">${arrow} ${mag}</span>`;
   }
-  const asOf = x.asOf ? ` title="as of ${esc(x.asOf)}"` : "";
-  return `<div class="rate-tile"${asOf}><span class="rate-label muted small">${esc(x.label)}</span><span class="rate-val">${val}</span>${chg}</div>`;
+  const asOf = x.asOf ? ` as of ${esc(x.asOf)}` : "";
+  const title = ` title="${esc(x.label)}${asOf} — open source ↗"`;
+  const tag = x.href ? "a" : "div";
+  const attrs = x.href ? ` href="${esc(x.href)}" target="_blank" rel="noopener noreferrer"` : "";
+  return `<${tag} class="rate-tile"${attrs}${title}><span class="rate-label muted small">${esc(x.label)}</span><span class="rate-val">${val}</span>${chg}</${tag}>`;
 }
 function renderRates(el, rows) {
   el.innerHTML = rows.map(ratesTile).join("") +
@@ -525,7 +528,7 @@ function mountRatesBand() {
   if (ratesCache) { renderRates(el, ratesCache); return; }
   el.innerHTML = '<span class="muted small">Loading market rates…</span>';
   try {
-    fetch("/api/rates?v=7")
+    fetch("/api/rates?v=8")
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((d) => { ratesCache = d.rates || []; const now = document.getElementById("rates-band"); if (now) renderRates(now, ratesCache); })
       .catch(() => { const now = document.getElementById("rates-band"); if (now) now.innerHTML = '<span class="muted small">Market rates unavailable right now.</span>'; });

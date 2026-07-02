@@ -109,16 +109,18 @@ const RATE_SERIES = [
   // EURIBOR is published on TARGET business days; ECB's business-daily frequency
   // code is "B" (not "D"). Try business-daily, then daily, then monthly average
   // as a guaranteed fallback so the tile always resolves.
-  { label: "3M EURIBOR", unit: "%", src: "ecb", keys: [
+  { label: "3M EURIBOR", unit: "%", src: "ecb",
+    href: "https://data.ecb.europa.eu/data/datasets/FM/FM.M.U2.EUR.RT.MM.EURIBOR3MD_.HSTA",
+    keys: [
     "B.U2.EUR.RT.MM.EURIBOR3MD_.HSTA",
     "D.U2.EUR.RT.MM.EURIBOR3MD_.HSTA",
     "M.U2.EUR.RT.MM.EURIBOR3MD_.HSTA",
   ] },
-  { label: "SOFR", unit: "%", src: "nyfed" },
-  { label: "SONIA", unit: "%", src: "fred", id: "IUDSOIA" },
-  { label: "US 10Y", unit: "%", src: "treasury", col: "10 Yr" },
-  { label: "US IG OAS", unit: "bp", src: "fred", id: "BAMLC0A0CM" },
-  { label: "US HY OAS", unit: "bp", src: "fred", id: "BAMLH0A0HYM2" },
+  { label: "SOFR", unit: "%", src: "nyfed", href: "https://www.newyorkfed.org/markets/reference-rates/sofr" },
+  { label: "SONIA", unit: "%", src: "fred", id: "IUDSOIA", href: "https://fred.stlouisfed.org/series/IUDSOIA" },
+  { label: "US 10Y", unit: "%", src: "treasury", col: "10 Yr", href: "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_yield_curve" },
+  { label: "US IG OAS", unit: "bp", src: "fred", id: "BAMLC0A0CM", href: "https://fred.stlouisfed.org/series/BAMLC0A0CM" },
+  { label: "US HY OAS", unit: "bp", src: "fred", id: "BAMLH0A0HYM2", href: "https://fred.stlouisfed.org/series/BAMLH0A0HYM2" },
 ];
 
 // Browser-like headers: FRED's fredgraph.csv endpoint throttles/blocks obvious
@@ -278,7 +280,7 @@ async function handleRates(request, env, ctx) {
 
   const cache = caches.default;
   // Versioned key so a previously-cached partial response is ignored.
-  const cacheKey = new Request(new URL("/api/rates?v=7", request.url).toString());
+  const cacheKey = new Request(new URL("/api/rates?v=8", request.url).toString());
   const cached = await cache.match(cacheKey);
   if (cached) return cached;
   const data = await Promise.all(RATE_SERIES.map(async (s) => {
@@ -286,7 +288,7 @@ async function handleRates(request, env, ctx) {
       : s.src === "nyfed" ? await nyfedSofr()
       : s.src === "treasury" ? await treasurySeries(s.col)
       : await fredSeries(s.id, cosd, env);
-    return { label: s.label, unit: s.unit, value: r.value, change: r.change, asOf: r.asOf };
+    return { label: s.label, unit: s.unit, value: r.value, change: r.change, asOf: r.asOf, href: s.href };
   }));
   const resp = new Response(JSON.stringify({ rates: data }), {
     // Short browser cache (band also caches in-module per load); edge does the heavy lifting.
