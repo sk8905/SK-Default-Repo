@@ -16,8 +16,8 @@
 import {
   items, cases, caseSummaries, practiceAreas, firms, tiers, updateTypes, restructurings,
   firmById, areaById, typeById, tierById, LAST_REVIEWED, LAST_CHECKED, LAST_CHECKED_TIME,
-} from "./data.js?v=20260702-5";
-import { donutChart, columnChart } from "./charts.js?v=20260702-5";
+} from "./data.js?v=20260702-6";
+import { donutChart, columnChart } from "./charts.js?v=20260702-6";
 
 const app = document.getElementById("app");
 
@@ -221,12 +221,14 @@ function itemRow(it) {
       <span class="feed-date">${itemDate(it)}</span>
     </div>
     <div class="feed-body">
-      <a class="feed-title" href="#/item/${esc(it.id)}">${esc(it.title)}</a>
+      <div class="rx-title-line">
+        <a class="feed-title" href="#/item/${esc(it.id)}">${esc(it.title)}</a>
+        <button class="save-btn rx-save ${saved ? "is-saved" : ""}" data-save="${esc(it.id)}"
+          aria-pressed="${saved}" title="${saved ? "Remove from saved" : "Save this update"}">${saved ? "★ Saved" : "☆ Save"}</button>
+      </div>
       <p class="feed-summary">${esc(it.summary)}</p>
       <div class="feed-foot">
         <span>${esc(type)}</span> · <span class="firm">${esc(firm.name)}</span>${tierTxt ? ` · ${esc(tierTxt)}` : ""}${it.citation ? ` · <span class="cite">${esc(it.citation)}</span>` : ""}${src ? ` · <a href="${esc(src)}" target="_blank" rel="noopener noreferrer">source ↗</a>` : ""}${isNew(it) ? ' · <span class="chip new">New</span>' : ""}
-        <button class="save-btn ${saved ? "is-saved" : ""}" data-save="${esc(it.id)}"
-          aria-pressed="${saved}" title="${saved ? "Remove from saved" : "Save this update"}">${saved ? "★ Saved" : "☆ Save"}</button>
       </div>
     </div>
   </div>`;
