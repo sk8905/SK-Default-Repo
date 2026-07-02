@@ -16,8 +16,8 @@
 import {
   items, cases, caseSummaries, practiceAreas, firms, tiers, updateTypes, restructurings,
   firmById, areaById, typeById, tierById, LAST_REVIEWED, LAST_CHECKED, LAST_CHECKED_TIME,
-} from "./data.js?v=20260702-6";
-import { donutChart, columnChart } from "./charts.js?v=20260702-6";
+} from "./data.js?v=20260702-7";
+import { donutChart, columnChart } from "./charts.js?v=20260702-7";
 
 const app = document.getElementById("app");
 
@@ -727,7 +727,7 @@ function viewItem(id) {
 // distressed Part 26 schemes of arrangement since 2020, with an All / Plans /
 // Schemes type filter (plus search, outcome and year).
 // =============================================================================
-const rxFilter = { type: "all", q: "", years: [], outcomes: [] };
+const rxFilter = { types: [], q: "", years: [], outcomes: [] };
 
 function rxTypeLabel(t) { return t === "scheme" ? "Scheme (Pt 26)" : "Plan (Pt 26A)"; }
 function rxOutcomeClass(o) {
@@ -826,13 +826,12 @@ function rxRow(r) {
 
 function viewRestructurings() {
   const q = parseHashQuery();
-  rxFilter.type = ["plan", "scheme"].includes(q.type) ? q.type : "all";
+  rxFilter.types = ["plan", "scheme"].includes(q.type) ? [q.type] : [];
   rxFilter.q = q.q || "";
   rxFilter.years = [];
   rxFilter.outcomes = [];
   const years = [...new Set(restructurings.map((r) => (r.date || "").slice(0, 4)).filter(Boolean))].sort((a, b) => b.localeCompare(a));
   const outcomes = [...new Set(restructurings.map((r) => r.outcome))].sort();
-  const seg = (val, label) => `<button type="button" class="seg-btn${rxFilter.type === val ? " active" : ""}" data-rxtype="${val}">${label}</button>`;
 
   app.innerHTML = `
     <div class="list-head">
@@ -843,9 +842,10 @@ function viewRestructurings() {
     </div>
     <div class="list-layout">
       <input type="checkbox" id="filters-toggle" class="ff-cb" ${mfOpen() ? "checked" : ""}><label for="filters-toggle" class="ff-lab">Filters</label><aside class="filters" aria-label="Filters">
-        <div class="seg" role="group" aria-label="Type filter">
-          ${seg("all", "All")}${seg("plan", "Plans")}${seg("scheme", "Schemes")}
+        <div class="filters-top">
+          <button id="clear-filters" class="link-btn" type="button">Clear all</button>
         </div>
+        ${foldGroup("Type", "types", [{ id: "plan", name: "Plan (Part 26A)" }, { id: "scheme", name: "Scheme (Part 26)" }], rxFilter.types)}
         ${foldGroup("Outcome", "outcomes", outcomes.map((o) => ({ id: o, name: o })), rxFilter.outcomes)}
         ${foldGroup("Year", "years", years.map((y) => ({ id: y, name: y })), rxFilter.years)}
       </aside>
@@ -862,17 +862,19 @@ function viewRestructurings() {
       </section>
     </div>`;
 
-  app.querySelectorAll("[data-rxtype]").forEach((b) => b.addEventListener("click", () => {
-    rxFilter.type = b.getAttribute("data-rxtype");
-    app.querySelectorAll("[data-rxtype]").forEach((x) => x.classList.toggle("active", x === b));
-    renderRxResults();
-  }));
   app.querySelectorAll('input[type="checkbox"][name]').forEach((cb) => cb.addEventListener("change", () => {
     rxFilter[cb.name] = [...app.querySelectorAll(`input[name="${cb.name}"]:checked`)].map((x) => x.value);
     refreshFoldBadge(cb);
     renderRxResults();
   }));
   const search = app.querySelector("#rx-search");
+  app.querySelector("#clear-filters").addEventListener("click", () => {
+    rxFilter.types = []; rxFilter.outcomes = []; rxFilter.years = []; rxFilter.q = "";
+    app.querySelectorAll('input[type="checkbox"][name]').forEach((c) => (c.checked = false));
+    app.querySelectorAll(".fg-badge").forEach((b) => b.remove());
+    search.value = "";
+    renderRxResults();
+  });
   search.addEventListener("input", () => { rxFilter.q = search.value; renderRxResults(); });
   app.querySelector("#rx-toggle-all").addEventListener("click", (e) => {
     const dets = app.querySelectorAll(".rx-det");
@@ -894,7 +896,7 @@ function renderRxResults() {
   const countEl = document.getElementById("rx-count");
   if (!el) return;
   const matched = restructurings.filter((r) => {
-    if (rxFilter.type !== "all" && r.type !== rxFilter.type) return false;
+    if (rxFilter.types.length && !rxFilter.types.includes(r.type)) return false;
     if (rxFilter.years.length && !rxFilter.years.includes((r.date || "").slice(0, 4))) return false;
     if (rxFilter.outcomes.length && !rxFilter.outcomes.includes(r.outcome)) return false;
     if (rxFilter.q.trim()) {
