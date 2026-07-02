@@ -21,6 +21,12 @@ the source of truth for the prompt.
 
 - **Sync first.** Always start from the latest `main`: `git fetch origin`, then
   `git checkout -B claude/affectionate-einstein-9hhzga origin/main`.
+- **Preflight staleness check.** After syncing, read the current `LAST_CHECKED` /
+  `LAST_CHECKED_TIME` in both `data.js` files. If the previous run looks MISSING —
+  the last stamp is roughly a full cadence stale (>~8h given the 6h cadence), or a
+  prior same-day run that should exist is absent — call it out at the top of the run
+  summary. This turns a silently-dropped earlier run (e.g. one that lost the publish
+  race) into something visible instead of letting it hide behind the next run.
 - **Window.** Add items published since the last run. The two runs are ~6h
   (06:00→12:00) and ~18h (12:00→06:00) apart, so look back ~24 hours to be safe —
   dedup removes any overlap. Verify each item's EXACT publication date from the
@@ -128,15 +134,43 @@ the source of truth for the prompt.
     blank — header/footer only.)
 - **Publish on every run.** Because `LAST_CHECKED` is bumped each run, every run
   produces a commit (even a "nothing new" run, which just advances `LAST_CHECKED`
-  + cache-busters). Commit (message trailers below), then push to `main` AND the
+  + cache-busters). Commit (message trailers below), then publish to `main` AND the
   development branch — pushing to `main` triggers the live redeploy.
-- **If the push to `main` fails (`HTTP 503` / "remote end hung up") — API
-  fallback.** The static site only redeploys when `main` advances, so a failed
-  `main` push means the run did not go live. Pushes to the dev branch can succeed
-  while `main` fails (seen after the repo was renamed mid-session, when a session's
-  proxy allowlist went stale). Do NOT retry indefinitely — after ~2 attempts with
-  backoff, publish to `main` through the **GitHub API** instead (it bypasses the
-  git proxy):
+- **Publishing to a MOVING `main` — rebase, don't fast-forward-merge.** `main` has
+  more than one writer: these routines AND interactive dev sessions both push to it.
+  So by the time a run is ready to publish, `main` may have advanced, and a plain
+  fast-forward merge/push is REJECTED (`non-fast-forward` / "fetch first") — which
+  is exactly how a run silently fails to go live (**real incident 2026-07-02**: the
+  midday run produced no commit at all because dev-session pushes were landing on
+  `main` throughout its window). Do NOT treat a rejection as fatal — rebase and
+  retry:
+  1. `git fetch origin main`.
+  2. Rebase this run's commit onto it (from the dev branch): `git rebase origin/main`.
+     A refresh only touches `*/js/data.js`, `*/index.html`, `*/js/app.js`, so this is
+     virtually always a clean rebase against dev work on other files. If it DOES
+     conflict (a dev session also edited a `data.js` or bumped the same cache token),
+     resolve by **keeping BOTH data changes and taking the HIGHER cache token**, then
+     `git rebase --continue`.
+  3. Push: `git push origin HEAD:main` and update the dev branch.
+  4. On another `non-fast-forward` rejection (someone landed again mid-rebase), loop
+     back to step 1. Retry up to ~5× with short backoff — `main` settles quickly.
+     Only if it is still failing after that do you fall back to the API path below.
+- **If sources are unreachable this session (network policy) — still publish, and
+  SAY SO.** If outbound fetches to the source hosts return `403` / CONNECT denials
+  (so publication dates and URLs cannot be verified against live pages), do NOT
+  fabricate items. Still advance `LAST_CHECKED` / `LAST_CHECKED_TIME` + cache tokens
+  and publish (so the run is visible), and state plainly in the run summary that
+  **no items could be verified because egress was blocked** — a stale allowlist is
+  an environment fault to fix, not a quiet news day to hide.
+- **If the push to `main` fails with a TRANSPORT error (`HTTP 503` / "remote end
+  hung up") — API fallback.** This is distinct from the `non-fast-forward` rejection
+  handled above (there the transport is fine and `main` is merely ahead; here the
+  transport itself is down). The static site only redeploys when `main` advances, so
+  a failed `main` push means the run did not go live. Pushes to the dev branch can
+  succeed while `main` fails (seen after the repo was renamed mid-session, when a
+  session's proxy allowlist went stale). Do NOT retry indefinitely — after ~2
+  attempts with backoff, publish to `main` through the **GitHub API** instead (it
+  bypasses the git proxy):
   - Push the commit to the dev branch first (that path keeps working).
   - For each file changed this run, call the GitHub MCP `create_or_update_file`
     tool on branch `main` (owner `sk8905`, repo `sk-default-repo` — the API
@@ -288,20 +322,27 @@ the source of truth for the prompt.
 >    advance every run so a run is visible even when nothing was added). Then bump
 >    BOTH apps' four cache-buster tokens to today's date with the next sequence.
 >
-> 5. VALIDATE: `node --check credit/js/data.js` and `node --check legal/js/data.js`.
+> 5. VALIDATE as an ES module (plain `node --check` misses module-only errors and
+>    array holes — see the "Validate" invariant):
+>    `node --input-type=module -e "import('./credit/js/data.js').then(m=>console.log(m.deals.length))"`
+>    and the legal equivalent.
 >
 > 6. PUBLISH (every run, even if nothing new): commit — message ending with the two
->    required trailers — then fast-forward-merge
->    `claude/affectionate-einstein-9hhzga` into `main` and push BOTH branches.
->    Pushing to `main` triggers the live redeploy. **If the `main` push fails with
->    `HTTP 503` / "remote end hung up" after ~2 backoff retries, fall back to the
->    GitHub API** (push the dev branch as normal, then use the `create_or_update_file`
->    MCP tool to commit each changed file to `main` — see "API fallback" in the
->    invariants above) and say so in the summary.
+>    required trailers — then publish to `main` AND the dev branch. `main` has other
+>    writers (dev sessions), so publish by **rebasing onto the latest `main` and
+>    retrying**, NOT a bare fast-forward: `git fetch origin main` → `git rebase
+>    origin/main` → `git push origin HEAD:main` (+ push the dev branch); on a
+>    `non-fast-forward` rejection, refetch/rebase and retry up to ~5× (see the
+>    "Publishing to a MOVING `main`" invariant). Pushing to `main` triggers the live
+>    redeploy. Only if `main` pushes keep failing with a **transport** error
+>    (`HTTP 503` / "remote end hung up") after ~2 tries do you fall back to the
+>    **GitHub API** (`create_or_update_file` per changed file — see "API fallback")
+>    and say so in the summary.
 >
 > 7. Reply with a short summary: counts of new Credit deals / intel / webNews and
 >    Legal alerts / cases / schemes & plans (or "no new items — refresh timestamp
->    updated").
+>    updated"). If the preflight staleness check flagged a missing prior run, or
+>    egress was blocked so nothing could be verified, say so at the top.
 
 ---
 
