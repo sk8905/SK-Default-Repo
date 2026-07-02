@@ -130,8 +130,8 @@ img, svg { max-width: 100%; }
   }
   .ff-lab::after { content: "▾"; color: var(--muted); font-size: .8rem; }
   .ff-cb:checked ~ .ff-lab::after { content: "▴"; }
-  .list-layout .filters { display: none; }
-  .ff-cb:checked ~ .filters { display: block; }
+  .filters { display: none; }
+  .ff-cb:checked ~ .filters { display: flex; }
 }
 
 /* ---- Notifications bell ---- */
@@ -348,13 +348,42 @@ a.compact-head:hover { color: var(--primary); }
 .list-head { margin-bottom: 1.1rem; }
 .list-head h1 { margin: 0 0 .25rem; }
 .list-layout { display: grid; grid-template-columns: 240px 1fr; gap: 1.5rem; align-items: start; }
-.filters {
-  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
-  padding: 1rem 1.1rem; box-shadow: var(--shadow);
-  /* Sticky sleeve that scrolls on its own, independently of the results column. */
-  position: sticky; top: 76px;
-  max-height: calc(100vh - 92px); overflow-y: auto; overscroll-behavior: contain;
+/* Horizontal filter bar (Meridian Credit style): an uppercase label above each
+   control, a search box, and plain-text multi-select dropdowns — the feed below
+   spans the full width. */
+.filters { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 1rem; align-items: flex-end; }
+.filter { display: flex; flex-direction: column; gap: .25rem; flex: 1 1 auto; min-width: 0; font-size: .75rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+.filter.search { flex: 2 1 auto; }
+.filter > input {
+  font-size: .85rem; padding: .45rem .6rem; border: 1px solid var(--line);
+  border-radius: 7px; background: #fff; color: var(--ink); width: 100%; min-width: 0; font-weight: 400; text-transform: none; letter-spacing: 0;
 }
+.filter > input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: var(--accent); }
+.ms { position: relative; }
+.ms-btn {
+  font: inherit; font-size: .85rem; text-transform: none; letter-spacing: 0;
+  background: transparent; border: none; border-radius: 0;
+  padding: .1rem 0; min-width: 0; width: fit-content; max-width: 100%; cursor: pointer;
+  color: var(--muted); font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: flex-start; gap: .35rem;
+}
+.ms-btn:hover, .ms-btn[aria-expanded="true"] { color: var(--ink); }
+.ms-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+.ms-caret { color: var(--muted); font-size: .7rem; }
+.ms-pop {
+  position: absolute; z-index: 30; top: calc(100% + 4px); left: 0;
+  width: max-content; min-width: 100%; max-width: 320px;
+  max-height: 300px; overflow-y: auto; background: #fff; border: 1px solid var(--line);
+  border-radius: 8px; box-shadow: var(--shadow-lg); padding: 4px;
+}
+.ms-opt {
+  display: flex; align-items: center; justify-content: flex-start; gap: .5rem;
+  padding: .4rem .55rem; margin: 0; font-size: .82rem; text-transform: none;
+  letter-spacing: 0; color: var(--ink); font-weight: 500; white-space: nowrap;
+  border-radius: 5px; cursor: pointer;
+}
+.ms-opt:hover { background: #f1f5f9; }
+.ms-opt input { flex: 0 0 auto; width: 15px; height: 15px; min-width: 0; margin: 0; padding: 0; accent-color: var(--accent); cursor: pointer; }
 .filters-top { display: flex; justify-content: flex-end; margin-bottom: .3rem; }
 .link-btn { background: none; border: 0; color: var(--primary); cursor: pointer; font-size: .82rem; font-weight: 600; padding: 0; }
 .filter-group { border: 0; border-top: 1px solid var(--line); margin: 0; padding: .8rem 0 .2rem; }

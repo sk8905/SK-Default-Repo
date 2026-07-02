@@ -16,8 +16,8 @@
 import {
   items, cases, caseSummaries, practiceAreas, firms, tiers, updateTypes, restructurings,
   firmById, areaById, typeById, tierById, LAST_REVIEWED, LAST_CHECKED, LAST_CHECKED_TIME,
-} from "./data.js?v=20260702-8";
-import { donutChart, columnChart } from "./charts.js?v=20260702-8";
+} from "./data.js?v=20260702-9";
+import { donutChart, columnChart } from "./charts.js?v=20260702-9";
 
 const app = document.getElementById("app");
 
@@ -175,36 +175,73 @@ function areaChip(areaId) {
 }
 function tierLabel(tierId) { return (tierById[tierId] || {}).name || tierId; }
 
-// Collapsible (folded) multi-select filter group — a disclosure dropdown with the
-// same checkboxes inside, to save sidebar space. `selected` is the array of
-// currently-selected ids; the group auto-opens when something is selected and
-// shows a live count badge. Used by both the alerts and case-law sidebars.
-function foldGroup(legend, name, opts, selected) {
+// Horizontal multi-select dropdown (Meridian Credit style): an uppercase label,
+// a plain-text "All ▾" toggle and a popover of checkboxes. `viewKey` is
+// "view:key" (e.g. "list:areas", "cases:courts", "rx:types") — the view routes
+// the change to the right filter store + feed re-render. `options` are strings or
+// {value,label} objects; `selected` is the array of selected values.
+function multiFilter(viewKey, label, options, selected) {
+  const opts = options.map((o) => (typeof o === "string" ? { value: o, label: o } : o));
   const sel = selected || [];
-  return `
-    <details class="filter-group filter-fold"${sel.length ? " open" : ""}>
-      <summary>${esc(legend)}${sel.length ? ` <span class="fg-badge">${sel.length}</span>` : ""}</summary>
-      <div class="fold-body">
-        ${opts.map((o) => `
-          <label class="check">
-            <input type="checkbox" name="${name}" value="${esc(o.id)}" ${sel.includes(o.id) ? "checked" : ""}/>
-            <span>${esc(o.name)}</span>
-          </label>`).join("")}
-      </div>
-    </details>`;
+  const n = sel.length;
+  const summary = n === 0 ? "All" : (n === 1 ? (opts.find((o) => o.value === sel[0]) || { label: sel[0] }).label : `${n} selected`);
+  return `<div class="filter ms" data-ms="${esc(viewKey)}">
+    <span>${esc(label)}</span>
+    <button type="button" class="ms-btn" aria-haspopup="true" aria-expanded="false">${esc(summary)} <span class="ms-caret" aria-hidden="true">▾</span></button>
+    <div class="ms-pop" hidden>
+      ${opts.map((o) => `<label class="ms-opt"><input type="checkbox" value="${esc(o.value)}" ${sel.includes(o.value) ? "checked" : ""}> ${esc(o.label)}</label>`).join("")}
+    </div>
+  </div>`;
 }
-// Keep a folded group's summary count badge in sync with its checkboxes.
-function refreshFoldBadge(cb) {
-  const details = cb.closest("details.filter-fold");
-  if (!details) return;
-  const summary = details.querySelector("summary");
-  const count = details.querySelectorAll('input[type="checkbox"]:checked').length;
-  let badge = summary.querySelector(".fg-badge");
-  if (count) {
-    if (!badge) { badge = document.createElement("span"); badge.className = "fg-badge"; summary.appendChild(badge); }
-    badge.textContent = count;
-  } else if (badge) { badge.remove(); }
-}
+
+// Multi-select plumbing. The filter bar is rendered once per view and only the
+// feed re-renders on a filter change, so the popover DOM (and its open state)
+// persists — no reopen dance needed. `openMs` tracks the currently-open dropdown.
+let openMs = null;
+const FILTER_STORES = () => ({ list: filterState, cases: caseFilter, rx: rxFilter });
+const FILTER_RENDER = { list: () => renderResults(), cases: () => renderCaseResults(), rx: () => renderRxResults() };
+
+// Toggle a dropdown's popover open/closed.
+document.addEventListener("click", (e) => {
+  const msBtn = e.target.closest(".ms-btn");
+  if (msBtn) {
+    e.stopPropagation();
+    const ms = msBtn.closest(".ms");
+    const pop = ms.querySelector(".ms-pop");
+    const willOpen = pop.hasAttribute("hidden");
+    document.querySelectorAll(".ms-pop").forEach((p) => p.setAttribute("hidden", ""));
+    document.querySelectorAll(".ms-btn").forEach((b) => b.setAttribute("aria-expanded", "false"));
+    if (willOpen) { pop.removeAttribute("hidden"); msBtn.setAttribute("aria-expanded", "true"); openMs = ms.getAttribute("data-ms"); }
+    else { openMs = null; }
+    return;
+  }
+  // Clicks inside an open popover shouldn't bubble to close it or hit row handlers.
+  if (e.target.closest(".ms-pop")) { e.stopPropagation(); return; }
+  // Click anywhere else closes any open popover.
+  if (openMs) {
+    document.querySelectorAll(".ms-pop").forEach((p) => p.setAttribute("hidden", ""));
+    document.querySelectorAll(".ms-btn").forEach((b) => b.setAttribute("aria-expanded", "false"));
+    openMs = null;
+  }
+});
+
+// A checkbox toggle updates the right filter store, refreshes the toggle summary
+// and re-renders that view's feed (leaving the popover open).
+document.addEventListener("change", (e) => {
+  const cb = e.target.closest(".ms-pop input[type=checkbox]");
+  if (!cb) return;
+  const ms = cb.closest(".ms");
+  const [view, key] = ms.getAttribute("data-ms").split(":");
+  const checked = [...ms.querySelectorAll("input[type=checkbox]:checked")];
+  const vals = checked.map((i) => i.value);
+  const store = FILTER_STORES()[view];
+  if (store) store[key] = vals;
+  const btn = ms.querySelector(".ms-btn");
+  const n = vals.length;
+  const summary = n === 0 ? "All" : (n === 1 ? checked[0].parentElement.textContent.trim() : `${n} selected`);
+  btn.innerHTML = `${esc(summary)} <span class="ms-caret" aria-hidden="true">▾</span>`;
+  FILTER_RENDER[view] && FILTER_RENDER[view]();
+});
 
 // A firm-alert as a list row — Meridian Credit style: colored chip + date in the
 // meta column, bold headline, full muted summary, then a single muted footer line.
@@ -404,50 +441,27 @@ function viewList() {
       <h1>${filterState.saved ? "Saved items" : "Legal alerts"}</h1>
       <p class="muted">Filter by practice area, source tier, type or firm, or search the full text.</p>
     </div>
-    <div class="list-layout">
-      <input type="checkbox" id="filters-toggle" class="ff-cb" ${mfOpen() ? "checked" : ""}><label for="filters-toggle" class="ff-lab">Filters</label><aside class="filters" aria-label="Filters">
-        <div class="filters-top">
-          <button id="clear-filters" class="link-btn" type="button">Clear all</button>
-        </div>
-        ${foldGroup("Practice area", "areas", practiceAreas.map((a) => ({ id: a.id, name: a.name })), filterState.areas)}
-        ${foldGroup("Year", "years", years.map((y) => ({ id: y, name: y })), filterState.years)}
-        ${foldGroup("Month", "months", monthOpts, filterState.months)}
-        ${foldGroup("Source tier", "tiers", tiers, filterState.tiers)}
-        ${foldGroup("Type", "types", updateTypes, filterState.types)}
-        ${foldGroup("Firm", "firms", firms.map((f) => ({ id: f.id, name: f.name })), filterState.firms)}
-      </aside>
-      <section class="results-wrap">
-        <div class="searchbar">
-          <input id="search" type="search" placeholder="Search updates, cases, tags…"
-            value="${esc(filterState.q)}" aria-label="Search updates" autocomplete="off"/>
-        </div>
-        <div id="result-count" class="result-count" aria-live="polite"></div>
-        <section class="card"><div id="results" class="feed"></div></section>
-      </section>
+    <input type="checkbox" id="filters-toggle" class="ff-cb" ${mfOpen() ? "checked" : ""}><label for="filters-toggle" class="ff-lab">Filters</label>
+    <div class="filters" aria-label="Filters">
+      <label class="filter search"><span>Search</span>
+        <input id="search" type="search" placeholder="Search updates, cases, tags…"
+          value="${esc(filterState.q)}" aria-label="Search updates" autocomplete="off"/>
+      </label>
+      ${multiFilter("list:areas", "Practice area", practiceAreas.map((a) => ({ value: a.id, label: a.name })), filterState.areas)}
+      ${multiFilter("list:years", "Year", years.map((y) => ({ value: y, label: y })), filterState.years)}
+      ${multiFilter("list:months", "Month", monthOpts.map((m) => ({ value: m.id, label: m.name })), filterState.months)}
+      ${multiFilter("list:tiers", "Source tier", tiers.map((t) => ({ value: t.id, label: t.name })), filterState.tiers)}
+      ${multiFilter("list:types", "Type", updateTypes.map((t) => ({ value: t.id, label: t.name })), filterState.types)}
+      ${multiFilter("list:firms", "Firm", firms.map((f) => ({ value: f.id, label: f.name })), filterState.firms)}
     </div>
+    <div id="result-count" class="result-count" aria-live="polite"></div>
+    <section class="card"><div id="results" class="feed"></div></section>
   `;
 
-  // Wire up listeners (panel rendered once; only #results re-renders).
-  app.querySelectorAll('input[type="checkbox"][name]').forEach((cb) => {
-    cb.addEventListener("change", () => {
-      const name = cb.name;
-      filterState[name] = [...app.querySelectorAll(`input[name="${name}"]:checked`)].map((x) => x.value);
-      refreshFoldBadge(cb);
-      renderResults();
-    });
-  });
+  // Search input re-renders the feed in place; the multi-selects are wired
+  // globally (data-ms delegation).
   const search = app.querySelector("#search");
   search.addEventListener("input", () => { filterState.q = search.value; renderResults(); });
-  app.querySelector("#clear-filters").addEventListener("click", () => {
-    // Clear the facet filters only — keep the "Saved" scope so Clear all doesn't
-    // bounce the user out of the saved list back to all alerts.
-    filterState.areas = []; filterState.tiers = []; filterState.types = []; filterState.firms = [];
-    filterState.years = []; filterState.months = []; filterState.q = "";
-    app.querySelectorAll('input[type="checkbox"]').forEach((c) => (c.checked = false));
-    app.querySelectorAll(".fg-badge").forEach((b) => b.remove());
-    search.value = "";
-    renderResults();
-  });
 
   renderResults();
 }
@@ -548,42 +562,22 @@ function viewCases() {
       <p class="muted">English-law judgments from the Supreme Court, Court of Appeal (Civil Division) and the
         High Court (Chancery, Commercial &amp; King's/Queen's Bench).</p>
     </div>
-    <div class="list-layout">
-      <input type="checkbox" id="filters-toggle" class="ff-cb" ${mfOpen() ? "checked" : ""}><label for="filters-toggle" class="ff-lab">Filters</label><aside class="filters" aria-label="Filters">
-        <div class="filters-top">
-          <button id="clear-filters" class="link-btn" type="button">Clear all</button>
-        </div>
-        ${foldGroup("Practice area", "areas", practiceAreas.map((a) => ({ id: a.id, name: a.name })), caseFilter.areas)}
-        ${foldGroup("Year", "years", years.map((y) => ({ id: y, name: y })), caseFilter.years)}
-        ${foldGroup("Court", "courts", courts.map((ct) => ({ id: ct, name: ct })), caseFilter.courts)}
-      </aside>
-      <section class="results-wrap">
-        <div class="searchbar">
-          <input id="case-search" type="search" placeholder="Search cases, citations…"
-            value="${esc(caseFilter.q)}" aria-label="Search case law" autocomplete="off"/>
-        </div>
-        <div id="case-count" class="result-count" aria-live="polite"></div>
-        <section class="card"><div id="case-results" class="feed"></div></section>
-      </section>
+    <input type="checkbox" id="filters-toggle" class="ff-cb" ${mfOpen() ? "checked" : ""}><label for="filters-toggle" class="ff-lab">Filters</label>
+    <div class="filters" aria-label="Filters">
+      <label class="filter search"><span>Search</span>
+        <input id="case-search" type="search" placeholder="Search cases, citations…"
+          value="${esc(caseFilter.q)}" aria-label="Search case law" autocomplete="off"/>
+      </label>
+      ${multiFilter("cases:areas", "Practice area", practiceAreas.map((a) => ({ value: a.id, label: a.name })), caseFilter.areas)}
+      ${multiFilter("cases:years", "Year", years.map((y) => ({ value: y, label: y })), caseFilter.years)}
+      ${multiFilter("cases:courts", "Court", courts.map((ct) => ({ value: ct, label: ct })), caseFilter.courts)}
     </div>
+    <div id="case-count" class="result-count" aria-live="polite"></div>
+    <section class="card"><div id="case-results" class="feed"></div></section>
   `;
 
-  app.querySelectorAll('input[type="checkbox"][name]').forEach((cb) => {
-    cb.addEventListener("change", () => {
-      caseFilter[cb.name] = [...app.querySelectorAll(`input[name="${cb.name}"]:checked`)].map((x) => x.value);
-      refreshFoldBadge(cb);
-      renderCaseResults();
-    });
-  });
   const search = app.querySelector("#case-search");
   search.addEventListener("input", () => { caseFilter.q = search.value; renderCaseResults(); });
-  app.querySelector("#clear-filters").addEventListener("click", () => {
-    caseFilter.areas = []; caseFilter.courts = []; caseFilter.years = []; caseFilter.q = "";
-    app.querySelectorAll('input[type="checkbox"]').forEach((c) => (c.checked = false));
-    app.querySelectorAll(".fg-badge").forEach((b) => b.remove());
-    search.value = "";
-    renderCaseResults();
-  });
 
   renderCaseResults();
 
@@ -812,38 +806,20 @@ function viewRestructurings() {
         distressed schemes of arrangement (<strong>Part 26</strong>) before the court since 2020 — company,
         debt, largest creditors, key features, the company's advisers, a tracked-firm analysis and the judgment.</p>
     </div>
-    <div class="list-layout">
-      <input type="checkbox" id="filters-toggle" class="ff-cb" ${mfOpen() ? "checked" : ""}><label for="filters-toggle" class="ff-lab">Filters</label><aside class="filters" aria-label="Filters">
-        <div class="filters-top">
-          <button id="clear-filters" class="link-btn" type="button">Clear all</button>
-        </div>
-        ${foldGroup("Type", "types", [{ id: "plan", name: "Plan (Part 26A)" }, { id: "scheme", name: "Scheme (Part 26)" }], rxFilter.types)}
-        ${foldGroup("Outcome", "outcomes", outcomes.map((o) => ({ id: o, name: o })), rxFilter.outcomes)}
-        ${foldGroup("Year", "years", years.map((y) => ({ id: y, name: y })), rxFilter.years)}
-      </aside>
-      <section class="results-wrap">
-        <div class="searchbar">
-          <input id="rx-search" type="search" placeholder="Search company, citation, sector, creditor…"
-            value="${esc(rxFilter.q)}" aria-label="Search plans and schemes" autocomplete="off"/>
-        </div>
-        <div id="rx-count" class="result-count" aria-live="polite"></div>
-        <section class="card"><div id="rx-results" class="feed"></div></section>
-      </section>
-    </div>`;
+    <input type="checkbox" id="filters-toggle" class="ff-cb" ${mfOpen() ? "checked" : ""}><label for="filters-toggle" class="ff-lab">Filters</label>
+    <div class="filters" aria-label="Filters">
+      <label class="filter search"><span>Search</span>
+        <input id="rx-search" type="search" placeholder="Search company, citation, sector, creditor…"
+          value="${esc(rxFilter.q)}" aria-label="Search plans and schemes" autocomplete="off"/>
+      </label>
+      ${multiFilter("rx:types", "Type", [{ value: "plan", label: "Plan (Part 26A)" }, { value: "scheme", label: "Scheme (Part 26)" }], rxFilter.types)}
+      ${multiFilter("rx:outcomes", "Outcome", outcomes.map((o) => ({ value: o, label: o })), rxFilter.outcomes)}
+      ${multiFilter("rx:years", "Year", years.map((y) => ({ value: y, label: y })), rxFilter.years)}
+    </div>
+    <div id="rx-count" class="result-count" aria-live="polite"></div>
+    <section class="card"><div id="rx-results" class="feed"></div></section>`;
 
-  app.querySelectorAll('input[type="checkbox"][name]').forEach((cb) => cb.addEventListener("change", () => {
-    rxFilter[cb.name] = [...app.querySelectorAll(`input[name="${cb.name}"]:checked`)].map((x) => x.value);
-    refreshFoldBadge(cb);
-    renderRxResults();
-  }));
   const search = app.querySelector("#rx-search");
-  app.querySelector("#clear-filters").addEventListener("click", () => {
-    rxFilter.types = []; rxFilter.outcomes = []; rxFilter.years = []; rxFilter.q = "";
-    app.querySelectorAll('input[type="checkbox"][name]').forEach((c) => (c.checked = false));
-    app.querySelectorAll(".fg-badge").forEach((b) => b.remove());
-    search.value = "";
-    renderRxResults();
-  });
   search.addEventListener("input", () => { rxFilter.q = search.value; renderRxResults(); });
   renderRxResults();
 
